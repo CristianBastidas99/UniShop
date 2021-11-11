@@ -1,37 +1,28 @@
 package co.edu.uniquindio.proyecto.entidades;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("JpaAttributeTypeInspection")
 @Entity
-public class Usuario implements Serializable{
+@DiscriminatorValue("Usuario")
+@NoArgsConstructor
+@Getter
+@Setter
+public class Usuario extends Persona implements Serializable{
 
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    private String nombreCompleto;
-
-    private String email;
-
-    private String contraseña;
+    @OneToMany(mappedBy="id_usuario")
+    protected List<Chat> misChats;
 
     @ElementCollection
+    @CollectionTable(name = "telefono")
     private List<String> numeroTelefono;
 
-    @ElementCollection
-    private Map<String, String> ubicacion;
-
-
-    public Usuario( String nombreCompleto, String email, String contraseña) {
-        this.id = id;
-        this.nombreCompleto = nombreCompleto;
-        this.email = email;
-        this.contraseña = contraseña;
-        this.numeroTelefono = null;
-        this.ubicacion = null;
-    }
 }
