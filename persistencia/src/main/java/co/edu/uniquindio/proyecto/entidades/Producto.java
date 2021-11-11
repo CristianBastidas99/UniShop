@@ -23,7 +23,7 @@ public class Producto implements Serializable{
     @EqualsAndHashCode.Include
     private Long id;
 
-
+    @Column
     private String nombre;
 
     private int unidades;
