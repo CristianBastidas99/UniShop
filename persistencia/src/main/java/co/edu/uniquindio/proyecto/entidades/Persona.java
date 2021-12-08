@@ -18,16 +18,16 @@ public class Persona implements Serializable {
     @Id
     @GeneratedValue
     @EqualsAndHashCode.Include
-    @Column(name = "id", nullable = false, unique = true)
+    @Column(name = "id", nullable = false)
     protected Long id;
 
-    @Column(name = "nombre")
+    @Column(name = "nombre", nullable = false)
     protected String nombre;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true, nullable = false)
     protected String email;
 
-    @Column(name = "password")
+    @Column(name = "password",nullable = false)
     protected String password;
 
 }
