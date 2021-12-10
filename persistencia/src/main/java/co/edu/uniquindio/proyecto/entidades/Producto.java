@@ -11,12 +11,14 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor
 @ToString
 public class Producto implements Serializable {
 
     @Id
     @GeneratedValue
     @EqualsAndHashCode.Include
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "nombre")

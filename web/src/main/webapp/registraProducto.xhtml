@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+>
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Registrar Productos</title>
+</h:head>
+<h:body>
+    <p:panel header="Registrar producto">
+        <h:form>
+            <h:panelGrid columns="2" cellpadding="5">
+                <p:outputLabel for="nombre_producto" value="Nombre:"/>
+                <p:inputText id="nombre_producto" value="#{productoBean.producto.nombre}"/>
+
+                <p:outputLabel for="cantidad_producto" value="Unidades:"/>
+                <p:inputText id="cantidad_producto" value="#{productoBean.producto.unidades}"/>
+
+                <p:outputLabel for="descripcion_producto" value="Descripcion:"/>
+                <p:inputText id="descripcion_producto" value="#{productoBean.producto.descripcion}"/>
+
+                <p:outputLabel for="precio_producto" value="Precio:"/>
+                <p:inputText id="precio_producto" value="#{productoBean.producto.precio}"/>
+
+                <p:outputLabel for="descuento_producto" value="Descuento:"/>
+                <p:inputText type="number" converter="javax.faces.Double" id="descuento_producto"
+                             value="#{productoBean.producto.descuento}"/>
+
+                <p:outputLabel for="fecha_limite_producto" value="Fecha limite:"/>
+                <p:inputText type="date" id="fecha_limite_producto" value="#{productoBean.fecha}"/>
+
+                <p:outputLabel for="imagenes_producto" value="Imágenes: "/>
+                <p:fileUpload id="imagenes_producto"
+                              listener="#{productoBean.subirImagenes}" mode="advanced"
+                              multiple="true" sizeLimit="1000000" fileLimit="5"
+                              allowTypes="/(\.|\/)(gif|jpe?g|png)$/" required="true"/>
+
+                <p:growl showDetail="true"/>
+            </h:panelGrid>
+            <h:panelGrid columns="2" cellpadding="5">
+                <p:commandButton action="#{productoBean.registrarProducto}" value="Registrar"
+                                 update="@form"/>
+                <p:commandButton action="index" value="volver"
+                                 update="@form"/>
+            </h:panelGrid>
+        </h:form>
+    </p:panel>
+</h:body>
+</html>
