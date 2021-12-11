@@ -13,6 +13,9 @@ public interface ProductoRepo extends JpaRepository<Producto, Long> {
     @Query("select p from Producto p inner join Categoria c where c.nombre = :nombreCategoria")
     public List<Producto> FindAllWithDescriptionQuery(String nombreCategoria);
 
+    @Query("select p from Producto p  where p.nombre like :busqueda")
+    public List<Producto> FindAllWithDescriptionQuerylike(String busqueda);
+
     @Query("select p from Producto p inner join Usuario u where u.email = :email")
     public List<Producto> FindAllWithDescriptionQueryFavoritos(String email);
 

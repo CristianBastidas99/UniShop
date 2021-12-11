@@ -65,6 +65,11 @@ public class ProductoServicioImpl implements ProductoServicio{
     }
 
     @Override
+    public List<Producto> listarProductoBusqueda(String busqueda) {
+        return productoRepo.FindAllWithDescriptionQuerylike(busqueda);
+    }
+
+    @Override
     public List<Producto> listarProductoFavoritos(String email) {
         return productoRepo.FindAllWithDescriptionQueryFavoritos(email);
     }

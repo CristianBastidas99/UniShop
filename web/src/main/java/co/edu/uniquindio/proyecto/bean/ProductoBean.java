@@ -2,6 +2,7 @@ package co.edu.uniquindio.proyecto.bean;
 
 import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
+import org.apache.commons.io.IOUtils;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
-import java.io.Serializable;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,13 +50,24 @@ public class ProductoBean implements Serializable {
 
     public void registrarProducto() {
         try {
-            producto.setFecha_limite(convertir(fecha));
-            List<Producto> lista = productoServicio.listarProducto();
-            producto.setId((long) (1 + lista.size()));
-            productoServicio.registrarProducto(producto);
-            FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Alerta",
-                    "Se ha guardado correctamente");
-            FacesContext.getCurrentInstance().addMessage(null, facesMsg);
+            if(!imagenes.isEmpty()){
+                producto.setFecha_limite(convertir(fecha));
+                List<Producto> lista = productoServicio.listarProducto();
+                producto.setId((long) (1 + lista.size()));
+                producto.setMisImagenes(imagenes);
+                productoServicio.registrarProducto(producto);
+                this.imagenes = new ArrayList<>();
+
+                FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Alerta",
+                        "Se ha guardado correctamente");
+                FacesContext.getCurrentInstance().addMessage(null, facesMsg);
+            }else{
+                FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Alerta",
+                        "AL menos debe subir una imagen");
+                FacesContext.getCurrentInstance().addMessage(null, facesMsg);
+            }
+
+
 
         } catch (Exception e) {
             FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Alerta",
@@ -79,7 +91,14 @@ public class ProductoBean implements Serializable {
     }
 
     private String subirImagen(UploadedFile imagen) {
-        return "";
+        try {
+            File archivo = new File(urlImagenes + "/" + imagen.getFileName());
+            OutputStream outputStream = new FileOutputStream(archivo);
+            IOUtils.copy(imagen.getInputStream(), outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "uploads/" + imagen.getFileName();
     }
 
     public Producto getProducto() {

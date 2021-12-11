@@ -20,7 +20,9 @@
                 <p:outputLabel for="email_usuario" value="Email:"/>
                 <p:inputText type="email" id="email_usuario" value="#{usuarioBean.usuario.email}"/>
                 <p:outputLabel for="password_usuario" value="Contraseña:"/>
-                <p:inputText type="password" id="password_usuario" value="#{usuarioBean.usuario.password}"/>
+                <p:password id="password_usuario" value="#{usuarioBean.usuario.password}" feedback="true"
+                            promptLabel="Ingresa tu contraseña" weakLabel="Débil"
+                            goodLabel="Buena" strongLabel="Fuerte"/>
                 <p:growl showDetail="true"/>
             </h:panelGrid>
             <h:panelGrid columns="2" cellpadding="5">
