@@ -61,6 +61,6 @@ public class MensajeServicioImpl implements MensajeServicio{
 
     @Override
     public List<Mensaje> listarMensajeChat(Long idChat) {
-        return mensajeRepo.FindAllWithDescriptionQueryChat(idChat);
+        return mensajeRepo.listarPorChat(idChat);
     }
 }

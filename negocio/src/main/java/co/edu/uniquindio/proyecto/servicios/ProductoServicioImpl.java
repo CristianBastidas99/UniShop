@@ -5,6 +5,7 @@ import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,17 +61,17 @@ public class ProductoServicioImpl implements ProductoServicio{
     }
 
     @Override
-    public List<Producto> listarProductoCategoria(String nombreCategoria) {
-        return productoRepo.FindAllWithDescriptionQuery(nombreCategoria);
+    public List<Producto> listarProductoCategoria(Long idCategoria) {
+        return productoRepo.listarVigentesPorCategoria(idCategoria, new Date());
     }
 
     @Override
     public List<Producto> listarProductoBusqueda(String busqueda) {
-        return productoRepo.FindAllWithDescriptionQuerylike(busqueda);
+        return productoRepo.buscar(busqueda, null, null, null, null, null, new Date());
     }
 
     @Override
     public List<Producto> listarProductoFavoritos(String email) {
-        return productoRepo.FindAllWithDescriptionQueryFavoritos(email);
+        return productoRepo.listarFavoritos(email);
     }
 }

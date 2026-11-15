@@ -12,7 +12,7 @@ public interface ProductoServicio {
     Producto obtenerProducto(Long id) throws Exception;
     void eliminarProducto(Long id) throws Exception;
     List<Producto> listarProducto();
-    List<Producto> listarProductoCategoria(String nombreCategoria);
+    List<Producto> listarProductoCategoria(Long idCategoria);
     List<Producto> listarProductoBusqueda(String busqueda);
     List<Producto> listarProductoFavoritos(String email);
 

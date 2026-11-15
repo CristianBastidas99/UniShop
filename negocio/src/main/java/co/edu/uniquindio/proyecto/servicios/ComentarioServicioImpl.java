@@ -61,11 +61,11 @@ public class ComentarioServicioImpl implements  ComentarioServicio{
 
     @Override
     public List<Comentario> listarComentarioProducto(Long idProducto) {
-        return comentarioRepo.FindAllWithDescriptionQueryProducto(idProducto);
+        return comentarioRepo.listarPorProducto(idProducto);
     }
 
     @Override
     public List<Comentario> listarComentarioUsuario(Long idUsuario) {
-        return comentarioRepo.FindAllWithDescriptionQueryUsuario(idUsuario);
+        return comentarioRepo.listarPorUsuario(idUsuario);
     }
 }

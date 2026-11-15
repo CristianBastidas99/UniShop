@@ -62,6 +62,6 @@ public class ChatServicioImpl implements ChatServicio{
 
     @Override
     public List<Chat> listarChatPersona(Long id) {
-        return chatRepo.FindAllWithDescriptionQuery(id);
+        return chatRepo.listarPorUsuario(id);
     }
 }
