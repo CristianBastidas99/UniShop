@@ -1,2 +1,0 @@
-INSERT INTO Producto (id, nombre, unidades, descripcion, precio, fecha_limite, descuento, id_usuario, id_ciudad)
-VALUES (1, "Cepillo Electrico", 20, "El mejor producto", 30000, "2008-7-04", 0.3, 1, 1);
