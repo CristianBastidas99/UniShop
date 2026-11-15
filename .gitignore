@@ -40,3 +40,7 @@ out/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ===== Imagenes subidas por los usuarios =====
+web/src/main/webapp/uploads/*
+!web/src/main/webapp/uploads/.gitkeep
