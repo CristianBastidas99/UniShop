@@ -24,13 +24,13 @@ public class DetalleCompra implements Serializable {
     private int unidades;
 
     @Column(name = "precio_producto")
-    private int precio_producto;
+    private int precioProducto;
 
     @ManyToOne
     @JoinColumn(name = "id_compra")
-    private Compra id_compra;
+    private Compra compra;
 
     @ManyToOne
     @JoinColumn(name = "id_producto")
-    private Producto id_producto;
+    private Producto producto;
 }

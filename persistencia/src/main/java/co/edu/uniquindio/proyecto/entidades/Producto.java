@@ -35,18 +35,18 @@ public class Producto implements Serializable {
 
     @Column(name = "fecha_limite")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha_limite;
+    private Date fechaLimite;
 
     @Column(name = "descuento")
     private Double descuento;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario id_usuario;
+    private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_ciudad")
-    private Ciudad id_ciudad;
+    private Ciudad ciudad;
 
     @ElementCollection
     @CollectionTable(name = "imagen", joinColumns = @JoinColumn(name = "id_producto", nullable = false))
@@ -54,19 +54,19 @@ public class Producto implements Serializable {
     private List<String> misImagenes;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_producto")
+    @OneToMany(mappedBy = "producto")
     private List<Chat> misChats;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_producto")
+    @OneToMany(mappedBy = "producto")
     private List<DetalleCompra> misDetalleCompras;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_producto")
+    @OneToMany(mappedBy = "producto")
     private List<Comentario> misComentarios;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_producto")
+    @OneToMany(mappedBy = "producto")
     private List<Subasta> misSubastas;
 
     @ToString.Exclude

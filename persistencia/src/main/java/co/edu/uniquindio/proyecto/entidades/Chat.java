@@ -22,14 +22,14 @@ public class Chat implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario id_usuario;
+    private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_producto")
-    private Producto id_producto;
+    private Producto producto;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_chat")
+    @OneToMany(mappedBy = "chat")
     private List<Mensaje> misMensajes;
 
 }

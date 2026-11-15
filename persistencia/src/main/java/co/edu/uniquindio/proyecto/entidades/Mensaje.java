@@ -28,6 +28,6 @@ public class Mensaje implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_chat")
-    private Chat id_chat;
+    private Chat chat;
 
 }

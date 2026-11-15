@@ -27,14 +27,14 @@ public class SubastaUsuario implements Serializable {
 
     @Column(name = "fecha_subasta")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date fecha_subasta;
+    private Date fechaSubasta;
 
     @ManyToOne
     @JoinColumn(name = "id_subasta")
-    private Subasta id_subasta;
+    private Subasta subasta;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario id_usuario;
+    private Usuario usuario;
 
 }

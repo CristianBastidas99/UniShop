@@ -25,7 +25,7 @@ public class ProductoTest {
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
@@ -40,7 +40,7 @@ public class ProductoTest {
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
@@ -59,7 +59,7 @@ public class ProductoTest {
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);

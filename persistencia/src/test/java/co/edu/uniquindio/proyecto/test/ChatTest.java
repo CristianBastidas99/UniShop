@@ -30,21 +30,21 @@ public class ChatTest {
         u.setNombre("Juanita");
         u.setEmail("juana@mail.com");
         u.setPassword("12345");
-        u.setId_ciudad(cd);
+        u.setCiudad(cd);
 
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
-        p.setId_ciudad(cd);
-        p.setId_usuario(u);
+        p.setCiudad(cd);
+        p.setUsuario(u);
 
         Chat c = new Chat();
-        c.setId_producto(p);
-        c.setId_usuario(u);
+        c.setProducto(p);
+        c.setUsuario(u);
 
         //Guardamos el registro
         Chat guardado = chatRepo.save(c);
@@ -62,21 +62,21 @@ public class ChatTest {
         u.setNombre("Juanita");
         u.setEmail("juana@mail.com");
         u.setPassword("12345");
-        u.setId_ciudad(cd);
+        u.setCiudad(cd);
 
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
-        p.setId_ciudad(cd);
-        p.setId_usuario(u);
+        p.setCiudad(cd);
+        p.setUsuario(u);
 
         Chat c = new Chat();
-        c.setId_producto(p);
-        c.setId_usuario(u);
+        c.setProducto(p);
+        c.setUsuario(u);
 
         //Primero lo guardamos
         Chat registrado = chatRepo.save(c);
@@ -97,32 +97,32 @@ public class ChatTest {
         u.setNombre("Juanita");
         u.setEmail("juana@mail.com");
         u.setPassword("12345");
-        u.setId_ciudad(cd);
+        u.setCiudad(cd);
 
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
-        p.setId_ciudad(cd);
-        p.setId_usuario(u);
+        p.setCiudad(cd);
+        p.setUsuario(u);
 
         Chat c = new Chat();
-        c.setId_producto(p);
-        c.setId_usuario(u);
+        c.setProducto(p);
+        c.setUsuario(u);
 
         //Primero lo guardamos
         Chat registrado = chatRepo.save(c);
         //Modificamos el nombre
         u.setNombre("Pedro");
-        registrado.setId_usuario(u);
+        registrado.setUsuario(u);
         //Con save guardamos el registro modificado
         chatRepo.save(registrado);
         //Por último, verificamos que si haya quedado actualizado
         Chat buscado = chatRepo.findById(1L).orElse(null);
-        Assertions.assertEquals(u, buscado.getId_usuario());
+        Assertions.assertEquals(u, buscado.getUsuario());
     }
 
     @Test

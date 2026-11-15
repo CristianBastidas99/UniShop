@@ -27,11 +27,11 @@ public class Ciudad implements Serializable {
     private String nombre;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_ciudad")
+    @OneToMany(mappedBy = "ciudad")
     private List<Producto> misProductos;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_ciudad")
+    @OneToMany(mappedBy = "ciudad")
     private List<Usuario> misUsuarios;
 
 }

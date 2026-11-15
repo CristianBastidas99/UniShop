@@ -24,16 +24,16 @@ public class Compra implements Serializable {
     private Long id;
 
     @Column(name = "fecha_compra")
-    private Date fecha_compra;
+    private Date fechaCompra;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "medio_pago")
-    private MedioPago medio_pago;
+    private MedioPago medioPago;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario id_usuario;
+    private Usuario usuario;
 
-    @OneToMany(mappedBy = "id_compra")
+    @OneToMany(mappedBy = "compra")
     private List<DetalleCompra> misDetalleCompras;
 }

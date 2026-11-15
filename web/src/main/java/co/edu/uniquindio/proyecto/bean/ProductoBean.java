@@ -51,7 +51,7 @@ public class ProductoBean implements Serializable {
     public void registrarProducto() {
         try {
             if(!imagenes.isEmpty()){
-                producto.setFecha_limite(convertir(fecha));
+                producto.setFechaLimite(convertir(fecha));
                 List<Producto> lista = productoServicio.listarProducto();
                 producto.setId((long) (1 + lista.size()));
                 producto.setMisImagenes(imagenes);

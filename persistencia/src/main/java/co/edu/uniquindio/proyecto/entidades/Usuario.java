@@ -22,10 +22,10 @@ public class Usuario extends Persona implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_ciudad")
     @JsonIgnore
-    private Ciudad id_ciudad;
+    private Ciudad ciudad;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_usuario")
+    @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private List<Chat> misChats;
 
@@ -35,29 +35,29 @@ public class Usuario extends Persona implements Serializable {
     private List<String> numeroTelefono;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_usuario")
+    @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private List<Producto> misProductos;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_usuario")
+    @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private List<Compra> misCompras;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_usuario")
+    @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private List<Comentario> misComentarios;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "id_usuario")
+    @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private List<SubastaUsuario> misSubastaUsuarios;
 
     @ToString.Exclude
     @ManyToMany
-    @JoinTable(name = "favorito", joinColumns = @JoinColumn(name = "id_producto", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "id_usuario", nullable = false))
+    @JoinTable(name = "favorito", joinColumns = @JoinColumn(name = "id_usuario", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "id_producto", nullable = false))
     @JsonIgnore
     private List<Producto> misProductosFavoritos;
 

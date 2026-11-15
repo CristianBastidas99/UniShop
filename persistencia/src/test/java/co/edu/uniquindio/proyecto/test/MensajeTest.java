@@ -30,26 +30,26 @@ public class MensajeTest {
         u.setNombre("Juanita");
         u.setEmail("juana@mail.com");
         u.setPassword("12345");
-        u.setId_ciudad(cd);
+        u.setCiudad(cd);
 
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
-        p.setId_ciudad(cd);
-        p.setId_usuario(u);
+        p.setCiudad(cd);
+        p.setUsuario(u);
 
         Chat c = new Chat();
-        c.setId_producto(p);
-        c.setId_usuario(u);
+        c.setProducto(p);
+        c.setUsuario(u);
 
         Mensaje m = new Mensaje();
         m.setMensaje("Disponible?");
         m.setFecha(new Date(115, 6, 36));
-        m.setId_chat(c);
+        m.setChat(c);
 
         //Guardamos el registro
         Mensaje guardado = mensajeRepo.save(m);
@@ -67,26 +67,26 @@ public class MensajeTest {
         u.setNombre("Juanita");
         u.setEmail("juana@mail.com");
         u.setPassword("12345");
-        u.setId_ciudad(cd);
+        u.setCiudad(cd);
 
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
-        p.setId_ciudad(cd);
-        p.setId_usuario(u);
+        p.setCiudad(cd);
+        p.setUsuario(u);
 
         Chat c = new Chat();
-        c.setId_producto(p);
-        c.setId_usuario(u);
+        c.setProducto(p);
+        c.setUsuario(u);
 
         Mensaje m = new Mensaje();
         m.setMensaje("Disponible?");
         m.setFecha(new Date(115, 6, 36));
-        m.setId_chat(c);
+        m.setChat(c);
 
         //Primero lo guardamos
         Mensaje registrado = mensajeRepo.save(m);
@@ -107,26 +107,26 @@ public class MensajeTest {
         u.setNombre("Juanita");
         u.setEmail("juana@mail.com");
         u.setPassword("12345");
-        u.setId_ciudad(cd);
+        u.setCiudad(cd);
 
         Producto p = new Producto();
         p.setDescripcion("Es el mejor producto que veras");
         p.setDescuento(0.0);
-        p.setFecha_limite(new Date(112, 6, 36));
+        p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
         p.setPrecio(30000);
         p.setUnidades(20);
-        p.setId_ciudad(cd);
-        p.setId_usuario(u);
+        p.setCiudad(cd);
+        p.setUsuario(u);
 
         Chat c = new Chat();
-        c.setId_producto(p);
-        c.setId_usuario(u);
+        c.setProducto(p);
+        c.setUsuario(u);
 
         Mensaje m = new Mensaje();
         m.setMensaje("Disponible?");
         m.setFecha(new Date(115, 6, 36));
-        m.setId_chat(c);
+        m.setChat(c);
 
         //Primero lo guardamos
         Mensaje registrado = mensajeRepo.save(m);

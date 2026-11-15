@@ -25,8 +25,8 @@ public class Categoria implements Serializable {
     private String nombre;
 
     @ManyToMany
-    @JoinTable(name = "producto_categoria", joinColumns = @JoinColumn(name = "id_producto", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "id_categoria", nullable = false))
+    @JoinTable(name = "producto_categoria", joinColumns = @JoinColumn(name = "id_categoria", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "id_producto", nullable = false))
     @ToString.Exclude
     private List<Producto> misProductos;
 

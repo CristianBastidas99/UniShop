@@ -36,10 +36,10 @@ public class Comentario implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario id_usuario;
+    private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_producto")
-    private Producto id_producto;
+    private Producto producto;
 
 }
