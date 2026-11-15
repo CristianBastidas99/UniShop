@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -21,25 +22,32 @@ public class Comentario implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "calificacion")
+    @Min(0)
+    @Max(5)
+    @Column(name = "calificacion", nullable = false)
     private int calificacion;
 
-    @Column(name = "mensaje")
+    @NotBlank
+    @Size(max = 1000)
+    @Column(name = "mensaje", nullable = false, length = 1000)
     private String mensaje;
 
     @Column(name = "respuesta")
     private String respuesta;
 
-    @Column(name = "fecha")
+    @NotNull
+    @Column(name = "fecha", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fecha;
 
     @ManyToOne
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario", nullable = false)
+    @NotNull
     private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "id_producto")
+    @JoinColumn(name = "id_producto", nullable = false)
+    @NotNull
     private Producto producto;
 
 }

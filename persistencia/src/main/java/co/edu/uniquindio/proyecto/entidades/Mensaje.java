@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyecto.entidades;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -20,14 +21,18 @@ public class Mensaje implements Serializable {
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "mensaje", nullable = false)
+    @NotBlank
+    @Size(max = 1000)
+    @Column(name = "mensaje", nullable = false, length = 1000)
     private String mensaje;
 
+    @NotNull
     @Column(name = "fecha", nullable = false)
     private Date fecha;
 
     @ManyToOne
-    @JoinColumn(name = "id_chat")
+    @JoinColumn(name = "id_chat", nullable = false)
+    @NotNull
     private Chat chat;
 
 }

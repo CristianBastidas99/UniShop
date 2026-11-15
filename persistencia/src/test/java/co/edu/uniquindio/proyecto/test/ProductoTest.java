@@ -27,7 +27,7 @@ public class ProductoTest {
         p.setDescuento(0.0);
         p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
-        p.setPrecio(30000);
+        p.setPrecio(30000.0);
         p.setUnidades(20);
         //Guardamos el registro
         Producto guardado = productoRepo.save(p);
@@ -42,7 +42,7 @@ public class ProductoTest {
         p.setDescuento(0.0);
         p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
-        p.setPrecio(30000);
+        p.setPrecio(30000.0);
         p.setUnidades(20);
         //Primero lo guardamos
         Producto registrado = productoRepo.save(p);
@@ -61,7 +61,7 @@ public class ProductoTest {
         p.setDescuento(0.0);
         p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
-        p.setPrecio(30000);
+        p.setPrecio(30000.0);
         p.setUnidades(20);
         //Primero lo guardamos
         Producto registrado = productoRepo.save(p);

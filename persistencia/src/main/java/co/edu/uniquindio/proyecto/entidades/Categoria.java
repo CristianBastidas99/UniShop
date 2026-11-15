@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,7 +22,9 @@ public class Categoria implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "nombre")
+    @NotBlank
+    @Size(max = 50)
+    @Column(name = "nombre", nullable = false, unique = true, length = 50)
     private String nombre;
 
     @ManyToMany

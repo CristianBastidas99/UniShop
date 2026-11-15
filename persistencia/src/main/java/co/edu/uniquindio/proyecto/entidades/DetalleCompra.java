@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 
 @Entity
@@ -20,17 +21,22 @@ public class DetalleCompra implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "unidades")
+    @Positive
+    @Column(name = "unidades", nullable = false)
     private int unidades;
 
-    @Column(name = "precio_producto")
-    private int precioProducto;
+    @NotNull
+    @Positive
+    @Column(name = "precio_producto", nullable = false)
+    private Double precioProducto;
 
     @ManyToOne
-    @JoinColumn(name = "id_compra")
+    @JoinColumn(name = "id_compra", nullable = false)
+    @NotNull
     private Compra compra;
 
     @ManyToOne
-    @JoinColumn(name = "id_producto")
+    @JoinColumn(name = "id_producto", nullable = false)
+    @NotNull
     private Producto producto;
 }

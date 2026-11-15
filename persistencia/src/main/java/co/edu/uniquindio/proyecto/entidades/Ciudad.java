@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,7 +23,9 @@ public class Ciudad implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "nombre")
+    @NotBlank
+    @Size(max = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     @EqualsAndHashCode.Include
     private String nombre;
 

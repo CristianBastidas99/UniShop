@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyecto.entidades;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -21,33 +22,44 @@ public class Producto implements Serializable {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "nombre")
+    @NotBlank
+    @Size(max = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "unidades")
+    @PositiveOrZero
+    @Column(name = "unidades", nullable = false)
     private int unidades;
 
-    @Column(name = "descripcion")
+    @Size(max = 2000)
+    @Column(name = "descripcion", length = 2000)
     private String descripcion;
 
-    @Column(name = "precio")
-    private int precio;
+    @NotNull
+    @Positive
+    @Column(name = "precio", nullable = false)
+    private Double precio;
 
-    @Column(name = "fecha_limite")
+    @NotNull
+    @Column(name = "fecha_limite", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaLimite;
 
+    @DecimalMin("0.0")
+    @DecimalMax("1.0")
     @Column(name = "descuento")
     private Double descuento;
 
     @ManyToOne
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario", nullable = false)
+    @NotNull
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_ciudad")
     private Ciudad ciudad;
 
+    @NotEmpty
     @ElementCollection
     @CollectionTable(name = "imagen", joinColumns = @JoinColumn(name = "id_producto", nullable = false))
     @Column(name = "ruta")

@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -22,12 +23,14 @@ public class Subasta implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "fecha_limite")
+    @NotNull
+    @Column(name = "fecha_limite", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaLimite;
 
     @ManyToOne
-    @JoinColumn(name = "id_producto")
+    @JoinColumn(name = "id_producto", nullable = false)
+    @NotNull
     private Producto producto;
 
     @OneToMany(mappedBy = "subasta")

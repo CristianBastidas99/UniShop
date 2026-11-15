@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyecto.entidades;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 
 //drop database unishop;create database unishop;use unishop;
@@ -21,13 +22,19 @@ public class Persona implements Serializable {
     @Column(name = "id", nullable = false)
     protected Long id;
 
-    @Column(name = "nombre", nullable = false)
+    @NotBlank
+    @Size(max = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     protected String nombre;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @NotBlank
+    @Email
+    @Size(max = 100)
+    @Column(name = "email", unique = true, nullable = false, length = 100)
     protected String email;
 
-    @Column(name = "password",nullable = false)
+    @NotBlank
+    @Column(name = "password", nullable = false)
     protected String password;
 
 }

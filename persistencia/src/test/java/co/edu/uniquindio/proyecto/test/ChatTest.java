@@ -3,6 +3,9 @@ package co.edu.uniquindio.proyecto.test;
 import co.edu.uniquindio.proyecto.entidades.*;
 import co.edu.uniquindio.proyecto.repositorios.AdministradorRepo;
 import co.edu.uniquindio.proyecto.repositorios.ChatRepo;
+import co.edu.uniquindio.proyecto.repositorios.CiudadRepo;
+import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
+import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,15 @@ import java.util.List;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class ChatTest {
+
+    @Autowired
+    private CiudadRepo ciudadRepo;
+
+    @Autowired
+    private UsuarioRepo usuarioRepo;
+
+    @Autowired
+    private ProductoRepo productoRepo;
 
     @Autowired
     private ChatRepo chatRepo;
@@ -37,10 +49,16 @@ public class ChatTest {
         p.setDescuento(0.0);
         p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
-        p.setPrecio(30000);
+        p.setPrecio(30000.0);
         p.setUnidades(20);
         p.setCiudad(cd);
         p.setUsuario(u);
+
+        // Las entidades relacionadas deben existir en la base antes de usarlas
+        ciudadRepo.save(cd);
+        usuarioRepo.save(u);
+        p.setMisImagenes(List.of("uploads/cepillo.png"));
+        productoRepo.save(p);
 
         Chat c = new Chat();
         c.setProducto(p);
@@ -69,10 +87,16 @@ public class ChatTest {
         p.setDescuento(0.0);
         p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
-        p.setPrecio(30000);
+        p.setPrecio(30000.0);
         p.setUnidades(20);
         p.setCiudad(cd);
         p.setUsuario(u);
+
+        // Las entidades relacionadas deben existir en la base antes de usarlas
+        ciudadRepo.save(cd);
+        usuarioRepo.save(u);
+        p.setMisImagenes(List.of("uploads/cepillo.png"));
+        productoRepo.save(p);
 
         Chat c = new Chat();
         c.setProducto(p);
@@ -104,10 +128,16 @@ public class ChatTest {
         p.setDescuento(0.0);
         p.setFechaLimite(new Date(112, 6, 36));
         p.setNombre("Cepillo Electrico");
-        p.setPrecio(30000);
+        p.setPrecio(30000.0);
         p.setUnidades(20);
         p.setCiudad(cd);
         p.setUsuario(u);
+
+        // Las entidades relacionadas deben existir en la base antes de usarlas
+        ciudadRepo.save(cd);
+        usuarioRepo.save(u);
+        p.setMisImagenes(List.of("uploads/cepillo.png"));
+        productoRepo.save(p);
 
         Chat c = new Chat();
         c.setProducto(p);
