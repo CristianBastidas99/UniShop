@@ -59,7 +59,7 @@ public class CiudadTest {
     }
 
     @Test
-    @Sql("classpath:ciudades.sql")
+    @Sql("classpath:unishop.sql")
     public void listarCiudadTest() {
         //Obtenemos la lista de todos los usuarios
         List<Ciudad> lista = ciudadRepo.findAll();

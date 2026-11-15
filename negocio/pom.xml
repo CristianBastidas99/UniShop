@@ -29,4 +29,20 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <!-- Los datos de prueba (unishop.sql) son los mismos de persistencia: se toman de ahí
+                 para no tener dos copias del archivo -->
+            <testResource>
+                <directory>../persistencia/src/test/resources</directory>
+                <includes>
+                    <include>unishop.sql</include>
+                </includes>
+            </testResource>
+        </testResources>
+    </build>
 </project>

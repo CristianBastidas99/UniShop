@@ -6,7 +6,10 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 
-//drop database unishop;create database unishop;use unishop;
+/**
+ * Datos comunes de Usuario y Administrador. Es abstracta: no tiene tabla propia (herencia TABLE_PER_CLASS),
+ * así que los ids de usuario y administrador salen de la misma secuencia y no se repiten entre las dos tablas.
+ */
 @Entity
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Getter
@@ -14,7 +17,7 @@ import java.io.Serializable;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @ToString
-public class Persona implements Serializable {
+public abstract class Persona implements Serializable {
 
     @Id
     @GeneratedValue
