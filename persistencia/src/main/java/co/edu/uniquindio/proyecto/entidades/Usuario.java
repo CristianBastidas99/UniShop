@@ -61,4 +61,9 @@ public class Usuario extends Persona implements Serializable {
     @JsonIgnore
     private List<Producto> misProductosFavoritos;
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
+    private List<ReporteProducto> misReportes;
+
 }

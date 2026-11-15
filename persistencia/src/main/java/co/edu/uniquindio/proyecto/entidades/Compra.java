@@ -38,6 +38,11 @@ public class Compra implements Serializable {
     @NotNull
     private Usuario usuario;
 
+    /** Cupón de descuento usado en la compra (opcional). */
+    @ManyToOne
+    @JoinColumn(name = "id_cupon")
+    private Cupon cupon;
+
     @OneToMany(mappedBy = "compra")
     private List<DetalleCompra> misDetalleCompras;
 }

@@ -1,17 +1,14 @@
 package co.edu.uniquindio.proyecto.test;
 
-import co.edu.uniquindio.proyecto.entidades.Comentario;
-import co.edu.uniquindio.proyecto.entidades.Producto;
-import co.edu.uniquindio.proyecto.entidades.Usuario;
-import co.edu.uniquindio.proyecto.repositorios.ComentarioRepo;
-import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
-import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
+import co.edu.uniquindio.proyecto.entidades.*;
+import co.edu.uniquindio.proyecto.repositorios.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -38,6 +35,18 @@ public class ValidacionTest {
 
     @Autowired
     private ComentarioRepo comentarioRepo;
+
+    @Autowired
+    private HistorialPrecioRepo historialPrecioRepo;
+
+    @Autowired
+    private ReporteProductoRepo reporteProductoRepo;
+
+    @Autowired
+    private CuponRepo cuponRepo;
+
+    @Autowired
+    private CompraRepo compraRepo;
 
     private Usuario vendedor;
 
@@ -144,5 +153,119 @@ public class ValidacionTest {
         ConstraintViolationException e = Assertions.assertThrows(ConstraintViolationException.class,
                 () -> usuarioRepo.saveAndFlush(u));
         Assertions.assertEquals(Set.of("email"), atributosInvalidos(e));
+    }
+
+    // ===== Necesidades extra (Paso 1.3) =====
+
+    private HistorialPrecio historialValido(Producto producto) {
+        HistorialPrecio h = new HistorialPrecio();
+        h.setPrecioAnterior(30000.0);
+        h.setPrecioNuevo(25000.0);
+        h.setDescuentoAnterior(0.0);
+        h.setDescuentoNuevo(0.1);
+        h.setFecha(new Date());
+        h.setProducto(producto);
+        return h;
+    }
+
+    private ReporteProducto reporteValido(Producto producto) {
+        ReporteProducto r = new ReporteProducto();
+        r.setMotivo(MotivoReporte.FRAUDE);
+        r.setDescripcion("El vendedor pide el pago por fuera de la plataforma");
+        r.setFecha(new Date());
+        r.setUsuario(vendedor);
+        r.setProducto(producto);
+        return r;
+    }
+
+    private Cupon cuponValido() {
+        Cupon c = new Cupon();
+        c.setCodigo("BIENVENIDA10");
+        c.setPorcentaje(0.1);
+        c.setFechaVencimiento(new Date(System.currentTimeMillis() + 30 * UN_DIA));
+        c.setUsosMaximos(100);
+        c.setUsosRealizados(0);
+        return c;
+    }
+
+    @Test
+    public void historialPrecioValidoSeGuardaTest() {
+        Producto producto = productoRepo.saveAndFlush(productoValido());
+        HistorialPrecio guardado = historialPrecioRepo.saveAndFlush(historialValido(producto));
+        Assertions.assertNotNull(guardado.getId());
+    }
+
+    @Test
+    public void historialPrecioConPrecioNegativoTest() {
+        Producto producto = productoRepo.saveAndFlush(productoValido());
+        HistorialPrecio h = historialValido(producto);
+        h.setPrecioNuevo(-1.0);
+        h.setProducto(null);
+
+        ConstraintViolationException e = Assertions.assertThrows(ConstraintViolationException.class,
+                () -> historialPrecioRepo.saveAndFlush(h));
+        Assertions.assertEquals(Set.of("precioNuevo", "producto"), atributosInvalidos(e));
+    }
+
+    @Test
+    public void reporteProductoValidoQuedaPendienteTest() {
+        Producto producto = productoRepo.saveAndFlush(productoValido());
+        ReporteProducto guardado = reporteProductoRepo.saveAndFlush(reporteValido(producto));
+        Assertions.assertNotNull(guardado.getId());
+        Assertions.assertEquals(EstadoReporte.PENDIENTE, guardado.getEstado());
+        Assertions.assertNull(guardado.getAdministrador());
+    }
+
+    @Test
+    public void reporteProductoSinMotivoTest() {
+        Producto producto = productoRepo.saveAndFlush(productoValido());
+        ReporteProducto r = reporteValido(producto);
+        r.setMotivo(null);
+
+        ConstraintViolationException e = Assertions.assertThrows(ConstraintViolationException.class,
+                () -> reporteProductoRepo.saveAndFlush(r));
+        Assertions.assertEquals(Set.of("motivo"), atributosInvalidos(e));
+    }
+
+    @Test
+    public void reporteProductoRepetidoTest() {
+        Producto producto = productoRepo.saveAndFlush(productoValido());
+        reporteProductoRepo.saveAndFlush(reporteValido(producto));
+
+        Assertions.assertThrows(DataIntegrityViolationException.class,
+                () -> reporteProductoRepo.saveAndFlush(reporteValido(producto)));
+    }
+
+    @Test
+    public void cuponValidoSeUsaEnCompraTest() {
+        Cupon cupon = cuponRepo.saveAndFlush(cuponValido());
+
+        Compra compra = new Compra();
+        compra.setFechaCompra(new Date());
+        compra.setMedioPago(MedioPago.PSE);
+        compra.setUsuario(vendedor);
+        compra.setCupon(cupon);
+        Compra guardada = compraRepo.saveAndFlush(compra);
+
+        Assertions.assertEquals(cupon.getId(), guardada.getCupon().getId());
+    }
+
+    @Test
+    public void cuponConPorcentajeCeroYSinCodigoTest() {
+        Cupon c = cuponValido();
+        c.setPorcentaje(0.0);
+        c.setCodigo("");
+
+        ConstraintViolationException e = Assertions.assertThrows(ConstraintViolationException.class,
+                () -> cuponRepo.saveAndFlush(c));
+        Assertions.assertEquals(Set.of("porcentaje", "codigo"), atributosInvalidos(e));
+    }
+
+    @Test
+    public void cuponConCodigoRepetidoTest() {
+        cuponRepo.saveAndFlush(cuponValido());
+
+        Assertions.assertThrows(DataIntegrityViolationException.class,
+                () -> cuponRepo.saveAndFlush(cuponValido()));
     }
 }
