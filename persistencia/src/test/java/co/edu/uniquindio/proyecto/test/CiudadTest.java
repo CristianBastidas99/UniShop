@@ -5,66 +5,53 @@ import co.edu.uniquindio.proyecto.repositorios.CiudadRepo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class CiudadTest {
+public class CiudadTest extends CrudTestBase {
 
     @Autowired
     private CiudadRepo ciudadRepo;
 
+    private Ciudad nuevaCiudad(String nombre) {
+        Ciudad c = new Ciudad();
+        c.setNombre(nombre);
+        return c;
+    }
+
     @Test
     public void registrarCiudadTest() {
+        Ciudad guardada = ciudadRepo.saveAndFlush(nuevaCiudad("Pereira"));
+        sincronizar();
 
-        Ciudad c = new Ciudad();
-        c.setNombre("Armenia");
-        //Guardamos el registro
-        Ciudad guardado = ciudadRepo.save(c);
-        //Comprobamos que si haya quedado
-        Assertions.assertNotNull(guardado);
+        Assertions.assertEquals("Pereira", ciudadRepo.findById(guardada.getId()).orElseThrow().getNombre());
     }
 
     @Test
     public void eliminarCiudadTest() {
-        Ciudad c = new Ciudad();
-        c.setNombre("Armenia");
-        //Primero lo guardamos
-        Ciudad registrado = ciudadRepo.save(c);
-        //Luego lo eliminamos
-        ciudadRepo.delete(registrado);
-        //Por último, verificamos que si haya quedado borrado
-        Ciudad buscado = ciudadRepo.findById(1L).orElse(null);
-        Assertions.assertNull(buscado);
-    }
+        // Todas las ciudades del SQL tienen usuarios o productos, así que se elimina una nueva
+        Ciudad guardada = ciudadRepo.saveAndFlush(nuevaCiudad("Manizales"));
+        ciudadRepo.delete(guardada);
+        sincronizar();
 
-
-    @Test
-    public void actualizarCuidadTest() {
-        Ciudad c = new Ciudad();
-        c.setNombre("Armenia");
-        //Primero lo guardamos
-        Ciudad registrado = ciudadRepo.save(c);
-        //Modificamos el nombre
-        registrado.setNombre("Calarca");
-        //Con save guardamos el registro modificado
-        ciudadRepo.save(registrado);
-        //Por último, verificamos que si haya quedado actualizado
-        Ciudad buscado = ciudadRepo.findById(1L).orElse(null);
-        Assertions.assertEquals("Calarca", buscado.getNombre());
+        Assertions.assertTrue(ciudadRepo.findById(guardada.getId()).isEmpty());
+        Assertions.assertEquals(4, ciudadRepo.count());
     }
 
     @Test
-    @Sql("classpath:unishop.sql")
+    public void actualizarCiudadTest() {
+        Ciudad c = ciudadRepo.findById(3L).orElseThrow();
+        c.setNombre("Bogota D.C.");
+        ciudadRepo.saveAndFlush(c);
+        sincronizar();
+
+        Assertions.assertEquals("Bogota D.C.", ciudadRepo.findById(3L).orElseThrow().getNombre());
+    }
+
+    @Test
     public void listarCiudadTest() {
-        //Obtenemos la lista de todos los usuarios
-        List<Ciudad> lista = ciudadRepo.findAll();
-        //Imprimimos la lista
-        System.out.println(lista);
+        Set<String> nombres = ciudadRepo.findAll().stream().map(Ciudad::getNombre).collect(Collectors.toSet());
+        Assertions.assertEquals(Set.of("Armenia", "Medellin", "Bogota", "Cartagena"), nombres);
     }
-
 }
