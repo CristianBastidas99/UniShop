@@ -101,6 +101,32 @@ public interface ProductoServicio {
     List<Producto> listarFavoritos(String email);
 
     /**
+     * Lista los favoritos de un usuario (por su id). Incluye los productos vencidos para que el
+     * usuario pueda quitarlos de su lista.
+     *
+     * @throws NegocioException si el usuario no existe
+     */
+    List<Producto> listarFavoritos(Long idUsuario) throws NegocioException;
+
+    /**
+     * Agrega un producto a los favoritos del usuario. Si ya era favorito no hace nada.
+     *
+     * @throws NegocioException si el usuario o el producto no existen, el producto es del mismo usuario
+     *                          o ya está vencido
+     */
+    void agregarFavorito(Long idProducto, Long idUsuario) throws NegocioException;
+
+    /**
+     * Quita un producto de los favoritos del usuario. Si no era favorito no hace nada.
+     *
+     * @throws NegocioException si el usuario o el producto no existen
+     */
+    void quitarFavorito(Long idProducto, Long idUsuario) throws NegocioException;
+
+    /** Indica si el producto es favorito del usuario; devuelve false si algún id es null o no existe. */
+    boolean esFavorito(Long idProducto, Long idUsuario);
+
+    /**
      * Obtiene el producto por su id.
      *
      * @throws NegocioException si el id es nulo o el producto no existe

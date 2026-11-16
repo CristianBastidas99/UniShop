@@ -238,6 +238,58 @@ public class ProductoServicioImpl implements ProductoServicio {
     }
 
     @Override
+    public List<Producto> listarFavoritos(Long idUsuario) throws NegocioException {
+        cargarUsuario(idUsuario);
+        return productoRepo.listarFavoritosPorUsuario(idUsuario);
+    }
+
+    @Override
+    @Transactional
+    public void agregarFavorito(Long idProducto, Long idUsuario) throws NegocioException {
+        Usuario usuario = cargarUsuario(idUsuario);
+        Producto producto = obtenerProducto(idProducto);
+        if (idUsuario.equals(producto.getUsuario().getId())) {
+            throw new NegocioException("No puede agregar su propio producto a favoritos");
+        }
+        if (producto.getFechaLimite() == null || !producto.getFechaLimite().after(new Date())) {
+            throw new NegocioException("El producto no está disponible");
+        }
+        if (usuario.getMisProductosFavoritos() == null) {
+            usuario.setMisProductosFavoritos(new ArrayList<>());
+        }
+        if (usuario.getMisProductosFavoritos().contains(producto)) {
+            return;
+        }
+        usuario.getMisProductosFavoritos().add(producto);
+        usuarioRepo.save(usuario);
+    }
+
+    @Override
+    @Transactional
+    public void quitarFavorito(Long idProducto, Long idUsuario) throws NegocioException {
+        Usuario usuario = cargarUsuario(idUsuario);
+        Producto producto = obtenerProducto(idProducto);
+        if (usuario.getMisProductosFavoritos() != null && usuario.getMisProductosFavoritos().remove(producto)) {
+            usuarioRepo.save(usuario);
+        }
+    }
+
+    @Override
+    public boolean esFavorito(Long idProducto, Long idUsuario) {
+        if (idProducto == null || idUsuario == null) {
+            return false;
+        }
+        return productoRepo.esFavorito(idProducto, idUsuario);
+    }
+
+    private Usuario cargarUsuario(Long idUsuario) throws NegocioException {
+        if (idUsuario == null) {
+            throw new NegocioException("El usuario no existe");
+        }
+        return usuarioRepo.findById(idUsuario).orElseThrow(() -> new NegocioException("El usuario no existe"));
+    }
+
+    @Override
     public Producto obtenerProducto(Long id) throws NegocioException {
         if (id == null) {
             throw new NegocioException("El producto no existe");

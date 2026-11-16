@@ -63,8 +63,10 @@ public class Usuario extends Persona implements Serializable {
 
     @ToString.Exclude
     @ManyToMany
+    // La restricción única impide a nivel de BD que un producto aparezca dos veces como favorito del mismo usuario
     @JoinTable(name = "favorito", joinColumns = @JoinColumn(name = "id_usuario", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "id_producto", nullable = false))
+            inverseJoinColumns = @JoinColumn(name = "id_producto", nullable = false),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"id_usuario", "id_producto"}))
     @JsonIgnore
     private List<Producto> misProductosFavoritos;
 

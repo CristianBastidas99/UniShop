@@ -52,6 +52,15 @@ public interface ProductoRepo extends JpaRepository<Producto, Long> {
     @Query("select f from Usuario u join u.misProductosFavoritos f where u.email = :email")
     List<Producto> listarFavoritos(@Param("email") String email);
 
+    /** Productos favoritos del usuario con ese id (incluye los vencidos). */
+    @Query("select f from Usuario u join u.misProductosFavoritos f where u.id = :idUsuario order by f.id")
+    List<Producto> listarFavoritosPorUsuario(@Param("idUsuario") Long idUsuario);
+
+    /** Indica si el producto está en los favoritos del usuario. */
+    @Query("select count(f) > 0 from Usuario u join u.misProductosFavoritos f "
+            + "where u.id = :idUsuario and f.id = :idProducto")
+    boolean esFavorito(@Param("idProducto") Long idProducto, @Param("idUsuario") Long idUsuario);
+
     /** Productos publicados por un vendedor (vigentes o no). */
     @Query("select p from Producto p where p.usuario.id = :idUsuario")
     List<Producto> listarPorVendedor(@Param("idUsuario") Long idUsuario);
