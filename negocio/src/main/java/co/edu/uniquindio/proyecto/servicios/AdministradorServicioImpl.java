@@ -7,6 +7,7 @@ import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class AdministradorServicioImpl implements AdministradorServicio {
@@ -20,7 +21,21 @@ public class AdministradorServicioImpl implements AdministradorServicio {
     }
 
     @Override
+    public Administrador iniciarSesion(String email, String password) throws NegocioException {
+        if (email == null || email.trim().isEmpty() || password == null || password.isEmpty()) {
+            throw new NegocioException("El correo y la contraseña son obligatorios");
+        }
+        return administradorRepo.buscarPorEmailYPassword(normalizarEmail(email), password)
+                .orElseThrow(() -> new NegocioException("Correo o contraseña incorrectos"));
+    }
+
+    private static String normalizarEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    @Override
     public Administrador registrarAdministrador(Administrador a) throws NegocioException {
+        a.setEmail(normalizarEmail(a.getEmail()));
         if (a.getId() != null && administradorRepo.existsById(a.getId())) {
             throw new NegocioException("El administrador ya existe");
         }
@@ -33,6 +48,7 @@ public class AdministradorServicioImpl implements AdministradorServicio {
 
     @Override
     public Administrador actualizarAdministrador(Administrador a) throws NegocioException {
+        a.setEmail(normalizarEmail(a.getEmail()));
         Administrador buscado = obtenerAdministrador(a.getEmail());
         a.setId(buscado.getId());
         return administradorRepo.save(a);

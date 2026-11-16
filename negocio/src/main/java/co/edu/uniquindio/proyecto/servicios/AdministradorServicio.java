@@ -11,6 +11,16 @@ import java.util.List;
 public interface AdministradorServicio {
 
     /**
+     * Inicia sesión: busca por correo (sin espacios en los extremos y en minúsculas) y contraseña.
+     * Si el correo no existe o la contraseña es errónea se lanza el mismo mensaje, para no revelar
+     * si el correo está registrado.
+     *
+     * @throws NegocioException si el correo o la contraseña vienen nulos o vacíos, o si las credenciales
+     *                          son incorrectas
+     */
+    Administrador iniciarSesion(String email, String password) throws NegocioException;
+
+    /**
      * Registra un administrador nuevo.
      *
      * @throws NegocioException si el id viene informado y ya existe, o si el correo ya está
