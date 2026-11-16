@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><ui:insert name="titulo">UniShop</ui:insert></title>
+    <h:outputStylesheet library="css" name="estilos.css"/>
+</h:head>
+<h:body>
+    <!-- Mensajes globales: se actualizan solos en cada petición ajax -->
+    <p:growl id="mensajes" showDetail="true" autoUpdate="true"/>
+
+    <div class="encabezado">
+        <div class="encabezado-fila">
+            <h:link outcome="index" value="UniShop" styleClass="logo"/>
+
+            <!-- Buscador: su propio formulario (nunca anidado en otro) -->
+            <h:form id="formBusqueda" styleClass="buscador">
+                <div class="ui-inputgroup">
+                    <p:inputText id="busqueda" placeholder="¿Qué producto está buscando?"
+                                 required="true" value="#{busquedaBean.busqueda}"/>
+                    <p:commandButton update="@form" icon="pi pi-search"
+                                     action="#{busquedaBean.buscar}" styleClass="ui-button-warning"/>
+                </div>
+            </h:form>
+        </div>
+
+        <div class="barra-menu">
+            <!-- Paso 3.2: aquí se añadirá rendered por rol/sesión (SeguridadBean), p. ej.
+                 rendered="#{seguridadBean.autenticado}" en Publicar producto y Carrito, y
+                 rendered="#{!seguridadBean.autenticado}" en Iniciar sesión / Registrarse. -->
+            <p:menubar>
+                <p:menuitem value="Inicio" icon="pi pi-fw pi-home" outcome="index"/>
+                <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="registraProducto"/>
+                <f:facet name="options">
+                    <p:button value="Carrito" icon="pi pi-fw pi-shopping-cart" href="#" disabled="true"
+                              styleClass="ui-button-flat"/>
+                    <p:button value="Iniciar sesión" icon="pi pi-fw pi-sign-in" href="#" disabled="true"
+                              styleClass="ui-button-flat"/>
+                    <p:button value="Registrarse" icon="pi pi-fw pi-user-plus" outcome="registraUsuario"
+                              styleClass="ui-button-info"/>
+                </f:facet>
+            </p:menubar>
+        </div>
+    </div>
+
+    <div class="contenido">
+        <ui:insert name="contenido"/>
+    </div>
+
+    <div class="pie">UniShop © 2026 — Universidad del Quindío</div>
+</h:body>
+</html>
