@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Iniciar sesión</ui:define>
+    <ui:define name="contenido">
+        <!-- Si ya hay sesión iniciada, se va al inicio -->
+        <f:metadata>
+            <f:viewAction action="#{seguridadBean.redirigirSiAutenticado}"/>
+        </f:metadata>
+
+        <div class="login-caja">
+            <p:panel header="Iniciar sesión">
+                <h:form id="formLogin">
+                    <div class="login-campo">
+                        <p:outputLabel for="email" value="Correo electrónico"/>
+                        <p:inputText id="email" type="email" value="#{seguridadBean.email}"
+                                     required="true" requiredMessage="El correo es obligatorio"/>
+                        <p:message for="email"/>
+                    </div>
+                    <div class="login-campo">
+                        <p:outputLabel for="password" value="Contraseña"/>
+                        <p:password id="password" value="#{seguridadBean.password}" feedback="false"
+                                    required="true" requiredMessage="La contraseña es obligatoria"/>
+                        <p:message for="password"/>
+                    </div>
+                    <p:commandButton value="Iniciar sesión" icon="pi pi-fw pi-sign-in"
+                                     action="#{seguridadBean.iniciarSesion}" update="@form :mensajes"
+                                     styleClass="login-boton"/>
+                    <p class="login-enlace">
+                        ¿No tienes cuenta? <h:link outcome="registraUsuario" value="Regístrate"/>
+                    </p>
+                </h:form>
+            </p:panel>
+        </div>
+    </ui:define>
+</ui:composition>

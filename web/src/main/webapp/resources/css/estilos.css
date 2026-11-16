@@ -12,5 +12,16 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .pie { text-align: center; padding: 16px; color: #667; font-size: .9rem;
     border-top: 1px solid #dde2e7; background: #ffffff; }
 
+/* Página de inicio de sesión */
+.login-caja { max-width: 420px; margin: 40px auto; }
+.login-campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.login-campo .ui-inputtext { width: 100%; box-sizing: border-box; }
+.login-boton { width: 100%; }
+.login-enlace { text-align: center; margin: 16px 0 0; }
+
+/* Menú: nombre en sesión y formulario de cerrar sesión */
+.menu-sesion { display: inline-flex; align-items: center; gap: 8px; }
+.menu-nombre { font-weight: 600; color: #1565c0; }
+
 /* Listado de productos del inicio (se rehace en el Paso 4.3) */
 .trElementEmulation li { list-style: none; float: left; padding: 5px 10px; border: 1px solid #eee; }

@@ -1,0 +1,111 @@
+package co.edu.uniquindio.proyecto.bean;
+
+import co.edu.uniquindio.proyecto.entidades.Persona;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
+import co.edu.uniquindio.proyecto.servicios.AdministradorServicio;
+import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
+
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+
+/**
+ * Maneja la sesión de la persona que usa la aplicación: inicio y cierre de sesión
+ * y consultas (autenticado, rol, nombre) para las vistas.
+ */
+@Component
+@SessionScope
+public class SeguridadBean implements Serializable {
+
+    /** Rol de la persona autenticada. */
+    public enum Rol { USUARIO, ADMINISTRADOR }
+
+    private final UsuarioServicio usuarioServicio;
+    private final AdministradorServicio administradorServicio;
+
+    // Campos del formulario de login
+    @Getter
+    @Setter
+    private String email;
+
+    @Getter
+    @Setter
+    private String password;
+
+    // Persona en sesión y su rol (null si no hay sesión). Sin getters: las vistas usan los métodos de consulta.
+    private Persona persona;
+    private Rol rol;
+
+    public SeguridadBean(UsuarioServicio usuarioServicio, AdministradorServicio administradorServicio) {
+        this.usuarioServicio = usuarioServicio;
+        this.administradorServicio = administradorServicio;
+    }
+
+    public String iniciarSesion() {
+        FacesContext contexto = FacesContext.getCurrentInstance();
+        ExternalContext externo = contexto.getExternalContext();
+
+        // Evita la fijación de sesión: cambia el id conservando los atributos (y este bean) de la sesión
+        ((HttpServletRequest) externo.getRequest()).changeSessionId();
+
+        Persona encontrada;
+        Rol rolEncontrado;
+        try {
+            encontrada = usuarioServicio.iniciarSesion(email, password);
+            rolEncontrado = Rol.USUARIO;
+        } catch (NegocioException e) {
+            try {
+                encontrada = administradorServicio.iniciarSesion(email, password);
+                rolEncontrado = Rol.ADMINISTRADOR;
+            } catch (NegocioException e2) {
+                // Mismo mensaje del servicio: no revela si el correo existe como usuario o administrador
+                contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, e2.getMessage(), null));
+                password = null;
+                return null;
+            }
+        }
+
+        persona = encontrada;
+        rol = rolEncontrado;
+        password = null;
+        email = null;
+
+        contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
+                "Bienvenido(a), " + persona.getNombre(), null));
+        externo.getFlash().setKeepMessages(true);
+        // El administrador también va al inicio por ahora (su panel llega en el Paso 5.2)
+        return "index?faces-redirect=true";
+    }
+
+    public String cerrarSesion() {
+        FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
+        return "index?faces-redirect=true";
+    }
+
+    /** Si ya hay sesión, quien entra al login va al inicio (se usa desde f:viewAction). */
+    public String redirigirSiAutenticado() {
+        return isAutenticado() ? "index?faces-redirect=true" : null;
+    }
+
+    public boolean isAutenticado() {
+        return persona != null;
+    }
+
+    public boolean isUsuario() {
+        return rol == Rol.USUARIO;
+    }
+
+    public boolean isAdministrador() {
+        return rol == Rol.ADMINISTRADOR;
+    }
+
+    public String getNombre() {
+        return persona != null ? persona.getNombre() : null;
+    }
+}

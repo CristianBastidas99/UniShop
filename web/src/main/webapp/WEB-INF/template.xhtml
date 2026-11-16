@@ -31,19 +31,27 @@
         </div>
 
         <div class="barra-menu">
-            <!-- Paso 3.2: aquí se añadirá rendered por rol/sesión (SeguridadBean), p. ej.
-                 rendered="#{seguridadBean.autenticado}" en Publicar producto y Carrito, y
-                 rendered="#{!seguridadBean.autenticado}" en Iniciar sesión / Registrarse. -->
+            <ui:remove>Las opciones del administrador llegan en la Fase 5. En el facet options van botones
+                 porque PrimeFaces 10 no pinta p:menuitem allí; y no se ponen comentarios XML
+                 dentro del p:menubar (PrimeFaces 10 falla al pintarlos).</ui:remove>
             <p:menubar>
                 <p:menuitem value="Inicio" icon="pi pi-fw pi-home" outcome="index"/>
-                <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="registraProducto"/>
+                <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="registraProducto"
+                            rendered="#{seguridadBean.usuario}"/>
                 <f:facet name="options">
                     <p:button value="Carrito" icon="pi pi-fw pi-shopping-cart" href="#" disabled="true"
-                              styleClass="ui-button-flat"/>
-                    <p:button value="Iniciar sesión" icon="pi pi-fw pi-sign-in" href="#" disabled="true"
-                              styleClass="ui-button-flat"/>
+                              styleClass="ui-button-flat" rendered="#{seguridadBean.usuario}"/>
+                    <p:button value="Iniciar sesión" icon="pi pi-fw pi-sign-in" outcome="login"
+                              styleClass="ui-button-flat" rendered="#{!seguridadBean.autenticado}"/>
                     <p:button value="Registrarse" icon="pi pi-fw pi-user-plus" outcome="registraUsuario"
-                              styleClass="ui-button-info"/>
+                              styleClass="ui-button-info" rendered="#{!seguridadBean.autenticado}"/>
+                    <!-- Formulario propio: el menú no está dentro de otro formulario -->
+                    <h:form id="formSesion" styleClass="menu-sesion" rendered="#{seguridadBean.autenticado}">
+                        <span class="menu-nombre"><i class="pi pi-fw pi-user"></i> #{seguridadBean.nombre}</span>
+                        <p:commandButton value="Cerrar sesión" icon="pi pi-fw pi-sign-out" ajax="false"
+                                         action="#{seguridadBean.cerrarSesion}" immediate="true"
+                                         styleClass="ui-button-secondary"/>
+                    </h:form>
                 </f:facet>
             </p:menubar>
         </div>
