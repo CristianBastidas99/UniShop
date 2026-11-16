@@ -4,8 +4,13 @@ import co.edu.uniquindio.proyecto.entidades.SubastaUsuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.SubastaRepo;
 import co.edu.uniquindio.proyecto.repositorios.SubastaUsuarioRepo;
+import co.edu.uniquindio.proyecto.entidades.Subasta;
+import co.edu.uniquindio.proyecto.entidades.Usuario;
+import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -14,9 +19,46 @@ public class SubastaUsuarioServicioImpl implements SubastaUsuarioServicio {
     private final SubastaUsuarioRepo subastaUsuarioRepo;
     private final SubastaRepo subastaRepo;
 
-    public SubastaUsuarioServicioImpl(SubastaUsuarioRepo subastaUsuarioRepo, SubastaRepo subastaRepo) {
+    private final UsuarioRepo usuarioRepo;
+
+    public SubastaUsuarioServicioImpl(SubastaUsuarioRepo subastaUsuarioRepo, SubastaRepo subastaRepo,
+                                      UsuarioRepo usuarioRepo) {
         this.subastaUsuarioRepo = subastaUsuarioRepo;
         this.subastaRepo = subastaRepo;
+        this.usuarioRepo = usuarioRepo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = NegocioException.class)
+    public SubastaUsuario pujar(Long idSubasta, Long idUsuario, double valor) throws NegocioException {
+        if (idSubasta == null) {
+            throw new NegocioException("La subasta no existe");
+        }
+        Subasta subasta = subastaRepo.findById(idSubasta)
+                .orElseThrow(() -> new NegocioException("La subasta no existe"));
+        Date ahora = new Date();
+        if (subasta.isCerrada() || !subasta.getFechaLimite().after(ahora)) {
+            throw new NegocioException("La subasta no está activa");
+        }
+        if (idUsuario == null) {
+            throw new NegocioException("El usuario no existe");
+        }
+        Usuario usuario = usuarioRepo.findById(idUsuario)
+                .orElseThrow(() -> new NegocioException("El usuario no existe"));
+        if (idUsuario.equals(subasta.getProducto().getUsuario().getId())) {
+            throw new NegocioException("El vendedor no puede pujar en su propia subasta");
+        }
+        Double maxima = subastaUsuarioRepo.pujaMasAlta(idSubasta);
+        double minima = maxima == null ? 0.0 : maxima;
+        if (valor <= minima) {
+            throw new NegocioException("La puja debe ser mayor a $" + (long) minima);
+        }
+        SubastaUsuario puja = new SubastaUsuario();
+        puja.setSubasta(subasta);
+        puja.setUsuario(usuario);
+        puja.setValor(valor);
+        puja.setFechaSubasta(ahora);
+        return subastaUsuarioRepo.save(puja);
     }
 
     @Override

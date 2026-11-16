@@ -12,6 +12,15 @@ import java.util.List;
 public interface SubastaUsuarioServicio {
 
     /**
+     * Registra una puja validando las reglas de la subasta: debe estar activa, el vendedor no puede pujar y el
+     * valor debe superar la puja más alta (o ser mayor a cero si aún no hay pujas).
+     *
+     * @throws NegocioException si la subasta o el usuario no existen, la subasta no está activa, el usuario es
+     *                          el vendedor o el valor no supera la puja más alta
+     */
+    SubastaUsuario pujar(Long idSubasta, Long idUsuario, double valor) throws NegocioException;
+
+    /**
      * Registra una puja nueva.
      *
      * @throws NegocioException si el id viene informado y ya existe

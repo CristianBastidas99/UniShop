@@ -127,9 +127,9 @@ INSERT INTO mensaje (id, mensaje, fecha, id_chat) VALUES (3, 'Cual es el precio 
 INSERT INTO mensaje (id, mensaje, fecha, id_chat) VALUES (4, 'Hace envios a Cartagena?', '2026-01-10 11:10:00', 3);
 
 -- ===== Subastas y pujas (el vendedor no puja en sus propios productos) =====
-INSERT INTO subasta (id, fecha_limite, id_producto) VALUES (1, '2030-06-30 18:00:00', 5);
-INSERT INTO subasta (id, fecha_limite, id_producto) VALUES (2, '2030-02-28 18:00:00', 2);
-INSERT INTO subasta (id, fecha_limite, id_producto) VALUES (3, '2024-01-01 00:00:00', 6);
+INSERT INTO subasta (id, fecha_limite, id_producto, cerrada, id_compra) VALUES (1, '2030-06-30 18:00:00', 5, 0, NULL);
+INSERT INTO subasta (id, fecha_limite, id_producto, cerrada, id_compra) VALUES (2, '2030-02-28 18:00:00', 2, 0, NULL);
+INSERT INTO subasta (id, fecha_limite, id_producto, cerrada, id_compra) VALUES (3, '2024-01-01 00:00:00', 6, 0, NULL);
 
 INSERT INTO subasta_usuario (id, valor, fecha_subasta, id_subasta, id_usuario) VALUES (1, 2000000, '2026-04-01 10:00:00', 1, 5);
 INSERT INTO subasta_usuario (id, valor, fecha_subasta, id_subasta, id_usuario) VALUES (2, 2100000, '2026-04-02 12:30:00', 1, 6);

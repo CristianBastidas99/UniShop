@@ -12,7 +12,7 @@ import javax.persistence.PersistenceContext;
  * Base común de las pruebas de los servicios: levanta Spring, carga los datos de prueba (unishop.sql)
  * y deshace los cambios al terminar cada prueba.
  */
-@SpringBootTest(classes = NegocioApplication.class)
+@SpringBootTest(classes = NegocioApplication.class, properties = "unishop.tareas.habilitadas=false")
 @Transactional
 @Sql("classpath:unishop.sql")
 public abstract class BaseServicioTest {

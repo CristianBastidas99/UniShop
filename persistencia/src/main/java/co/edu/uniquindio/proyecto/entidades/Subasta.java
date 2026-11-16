@@ -37,6 +37,15 @@ public class Subasta implements Serializable {
     @NotNull
     private Producto producto;
 
+    /** Indica si la subasta ya se cerró (se procesó el resultado al vencer la fecha límite). */
+    @Column(name = "cerrada", nullable = false)
+    private boolean cerrada;
+
+    /** Compra generada para el ganador al cerrar la subasta; es nula si no hubo pujas o no había unidades. */
+    @OneToOne
+    @JoinColumn(name = "id_compra")
+    private Compra compra;
+
     @OneToMany(mappedBy = "subasta")
     private List<SubastaUsuario> misSubastaUsuarios;
 

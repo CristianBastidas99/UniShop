@@ -154,6 +154,40 @@ public class CompraServicioImpl implements CompraServicio {
     }
 
     @Override
+    @Transactional(rollbackFor = NegocioException.class)
+    public Compra comprarEnSubasta(Long idUsuario, Long idProducto, double valor) throws NegocioException {
+        Usuario usuario = cargarUsuario(idUsuario);
+        if (idProducto == null) {
+            throw new NegocioException("El producto no existe");
+        }
+        Producto producto = productoRepo.findById(idProducto)
+                .orElseThrow(() -> new NegocioException("El producto no existe"));
+        if (producto.getUnidades() < 1) {
+            throw new NegocioException("No hay suficientes unidades de " + producto.getNombre()
+                    + " (disponibles: " + producto.getUnidades() + ")");
+        }
+
+        Compra compra = new Compra();
+        compra.setFechaCompra(new Date());
+        compra.setMedioPago(MedioPago.TARJETA);
+        compra.setUsuario(usuario);
+        compra = compraRepo.save(compra);
+
+        DetalleCompra detalle = new DetalleCompra();
+        detalle.setCompra(compra);
+        detalle.setProducto(producto);
+        detalle.setUnidades(1);
+        detalle.setPrecioProducto(BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP).doubleValue());
+        List<DetalleCompra> detalles = new ArrayList<>();
+        detalles.add(detalleCompraRepo.save(detalle));
+        compra.setMisDetalleCompras(detalles);
+
+        producto.setUnidades(producto.getUnidades() - 1);
+        productoRepo.save(producto);
+        return compra;
+    }
+
+    @Override
     public List<Compra> listarComprasUsuario(Long idUsuario) throws NegocioException {
         cargarUsuario(idUsuario);
         return compraRepo.listarPorUsuario(idUsuario);

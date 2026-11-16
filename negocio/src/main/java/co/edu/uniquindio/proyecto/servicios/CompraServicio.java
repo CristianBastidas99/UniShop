@@ -60,6 +60,16 @@ public interface CompraServicio {
             throws NegocioException;
 
     /**
+     * Genera la compra del ganador de una subasta: un detalle de 1 unidad con el valor de la puja como precio
+     * (sin descuentos ni cupón) y resta 1 unidad al producto. No valida la vigencia del producto porque la
+     * subasta ya lo hizo. El medio de pago queda en {@link MedioPago#TARJETA} por defecto, pues el ganador
+     * confirma el pago después.
+     *
+     * @throws NegocioException si el usuario o el producto no existen, o el producto no tiene unidades
+     */
+    Compra comprarEnSubasta(Long idUsuario, Long idProducto, double valor) throws NegocioException;
+
+    /**
      * Lista las compras del usuario, la más reciente primero.
      *
      * @throws NegocioException si el usuario no existe

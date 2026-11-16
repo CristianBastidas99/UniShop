@@ -19,6 +19,14 @@ public interface SubastaRepo extends JpaRepository<Subasta, Long> {
     boolean existsByProductoId(Long idProducto);
 
     /** Subastas activas (fecha límite posterior a {@code hoy}), las que terminan primero van primero. */
-    @Query("select s from Subasta s where s.fechaLimite > :hoy order by s.fechaLimite asc")
+    @Query("select s from Subasta s where s.fechaLimite > :hoy and s.cerrada = false order by s.fechaLimite asc")
     List<Subasta> listarActivas(@Param("hoy") Date hoy);
+
+    /** Subastas cuya fecha límite ya pasó ({@code <= ahora}) y que todavía no se han cerrado. */
+    @Query("select s from Subasta s where s.fechaLimite <= :ahora and s.cerrada = false order by s.fechaLimite asc")
+    List<Subasta> listarVencidasSinCerrar(@Param("ahora") Date ahora);
+
+    /** Indica si el producto tiene una subasta activa (sin cerrar y con fecha límite posterior a {@code ahora}). */
+    @Query("select count(s) > 0 from Subasta s where s.producto.id = :idProducto and s.cerrada = false and s.fechaLimite > :ahora")
+    boolean existeActivaPorProducto(@Param("idProducto") Long idProducto, @Param("ahora") Date ahora);
 }
