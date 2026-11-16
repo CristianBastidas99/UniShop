@@ -26,7 +26,7 @@ public interface DetalleCompraRepo extends JpaRepository<DetalleCompra, Long> {
 
     /**
      * Reporte 2: dinero vendido por mes (unidades x precio guardado en cada detalle), en orden cronológico.
-     * No descuenta los cupones; eso se ajusta cuando exista la lógica de compras (Paso 2.7).
+     * El precio de cada detalle ya incluye el descuento del cupón (se prorratea al comprar).
      */
     @Query("select new co.edu.uniquindio.proyecto.dto.VentaMesDTO(year(c.fechaCompra), month(c.fechaCompra), " +
             "sum(d.unidades * d.precioProducto)) " +
