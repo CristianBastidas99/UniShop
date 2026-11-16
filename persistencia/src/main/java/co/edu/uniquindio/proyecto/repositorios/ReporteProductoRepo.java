@@ -22,6 +22,9 @@ public interface ReporteProductoRepo extends JpaRepository<ReporteProducto, Long
     /** Indica si un usuario ya reportó un producto (un usuario solo puede reportar una vez el mismo producto). */
     boolean existsByUsuarioIdAndProductoId(Long idUsuario, Long idProducto);
 
+    /** Indica si el producto tiene al menos un reporte. */
+    boolean existsByProductoId(Long idProducto);
+
     /** Reportes recibidos por un producto. */
     @Query("select r from ReporteProducto r where r.producto.id = :idProducto order by r.fecha desc")
     List<ReporteProducto> listarPorProducto(@Param("idProducto") Long idProducto);

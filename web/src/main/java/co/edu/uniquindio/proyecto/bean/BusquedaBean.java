@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyecto.bean;
 
 import co.edu.uniquindio.proyecto.entidades.Producto;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +39,11 @@ public class BusquedaBean implements Serializable {
     @PostConstruct
     public void inicializar() {
         if( busquedaParam!=null ) {
-            productos = productoServicio.listarProductoBusqueda(busquedaParam);
+            try {
+                productos = productoServicio.buscar(busquedaParam, null, null, null, null, null);
+            } catch (NegocioException e) {
+                productos = new java.util.ArrayList<>();
+            }
         }
     }
 

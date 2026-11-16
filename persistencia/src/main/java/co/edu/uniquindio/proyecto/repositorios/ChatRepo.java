@@ -15,6 +15,9 @@ import java.util.Optional;
 @Repository
 public interface ChatRepo extends JpaRepository<Chat, Long> {
 
+    /** Indica si el producto tiene al menos un chat. */
+    boolean existsByProductoId(Long idProducto);
+
     /** Chats abiertos sobre un producto. */
     @Query("select c from Chat c where c.producto.id = :idProducto")
     List<Chat> listarPorProducto(@Param("idProducto") Long idProducto);

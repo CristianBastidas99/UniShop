@@ -14,6 +14,9 @@ import java.util.List;
 @Repository
 public interface ComentarioRepo extends JpaRepository<Comentario, Long> {
 
+    /** Indica si el producto tiene al menos un comentario. */
+    boolean existsByProductoId(Long idProducto);
+
     /** Comentarios de un producto, del más reciente al más antiguo. */
     @Query("select c from Comentario c where c.producto.id = :idProducto order by c.fecha desc")
     List<Comentario> listarPorProducto(@Param("idProducto") Long idProducto);

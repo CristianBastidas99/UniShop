@@ -17,6 +17,9 @@ import java.util.List;
 @Repository
 public interface DetalleCompraRepo extends JpaRepository<DetalleCompra, Long> {
 
+    /** Indica si el producto aparece en algún detalle de compra. */
+    boolean existsByProductoId(Long idProducto);
+
     /** Detalles (productos comprados) de una compra. */
     @Query("select d from DetalleCompra d where d.compra.id = :idCompra")
     List<DetalleCompra> listarPorCompra(@Param("idCompra") Long idCompra);

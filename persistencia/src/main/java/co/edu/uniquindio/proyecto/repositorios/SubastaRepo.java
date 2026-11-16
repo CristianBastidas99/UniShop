@@ -15,6 +15,9 @@ import java.util.List;
 @Repository
 public interface SubastaRepo extends JpaRepository<Subasta, Long> {
 
+    /** Indica si el producto tiene al menos una subasta (activa o terminada). */
+    boolean existsByProductoId(Long idProducto);
+
     /** Subastas activas (fecha límite posterior a {@code hoy}), las que terminan primero van primero. */
     @Query("select s from Subasta s where s.fechaLimite > :hoy order by s.fechaLimite asc")
     List<Subasta> listarActivas(@Param("hoy") Date hoy);

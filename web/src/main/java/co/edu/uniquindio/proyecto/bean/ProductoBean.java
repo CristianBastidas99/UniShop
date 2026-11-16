@@ -44,7 +44,7 @@ public class ProductoBean implements Serializable {
     public void inicializar() {
         this.producto = new Producto();
         this.fecha = " ";
-        this.listaProductos = productoServicio.listarProducto();
+        this.listaProductos = productoServicio.listarVigentes();
         this.imagenes = new ArrayList<>();
     }
 
@@ -53,7 +53,7 @@ public class ProductoBean implements Serializable {
             if(!imagenes.isEmpty()){
                 producto.setFechaLimite(convertir(fecha));
                 producto.setMisImagenes(imagenes);
-                productoServicio.registrarProducto(producto);
+                productoServicio.publicarProducto(producto, new ArrayList<>());
                 this.imagenes = new ArrayList<>();
 
                 FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Alerta",
