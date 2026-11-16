@@ -43,4 +43,19 @@ public interface MensajeServicio {
 
     /** Lista los mensajes de un chat. */
     List<Mensaje> listarMensajeChat(Long idChat);
+
+    /**
+     * Envía un mensaje al chat: guarda el texto sin espacios sobrantes, la fecha actual y el remitente.
+     *
+     * @throws NegocioException si el chat o el remitente no existen, si el remitente no es el comprador
+     *                          ni el vendedor, o si el texto está vacío o supera los 1000 caracteres
+     */
+    Mensaje enviarMensaje(Long idChat, Long idRemitente, String texto) throws NegocioException;
+
+    /**
+     * Lista los mensajes del chat, del más antiguo al más reciente, para un participante.
+     *
+     * @throws NegocioException si el chat no existe o el usuario no es el comprador ni el vendedor
+     */
+    List<Mensaje> listarMensajes(Long idChat, Long idUsuario) throws NegocioException;
 }

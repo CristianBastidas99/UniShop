@@ -432,6 +432,7 @@ public class ConsultaTest {
     private void mensaje(Chat chat, String texto, Date fecha) {
         Mensaje m = new Mensaje();
         m.setChat(chat);
+        m.setRemitente(chat.getUsuario());
         m.setMensaje(texto);
         m.setFecha(fecha);
         mensajeRepo.saveAndFlush(m);

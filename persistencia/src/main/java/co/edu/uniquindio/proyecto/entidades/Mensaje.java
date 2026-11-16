@@ -8,7 +8,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Mensaje enviado dentro de un {@link Chat}, con su fecha.
+ * Mensaje enviado dentro de un {@link Chat}, con su fecha y el {@link Usuario} que lo envía
+ * (el comprador del chat o el vendedor del producto).
  */
 @Entity
 @Getter
@@ -37,5 +38,13 @@ public class Mensaje implements Serializable {
     @JoinColumn(name = "id_chat", nullable = false)
     @NotNull
     private Chat chat;
+
+    /**
+     * Usuario que envía el mensaje: el comprador del chat o el vendedor del producto.
+     */
+    @ManyToOne
+    @JoinColumn(name = "id_remitente", nullable = false)
+    @NotNull
+    private Usuario remitente;
 
 }
