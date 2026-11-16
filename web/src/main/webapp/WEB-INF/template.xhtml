@@ -17,7 +17,7 @@
 
     <div class="encabezado">
         <div class="encabezado-fila">
-            <h:link outcome="index" value="UniShop" styleClass="logo"/>
+            <h:link outcome="/index" value="UniShop" styleClass="logo"/>
 
             <!-- Buscador: su propio formulario (nunca anidado en otro) -->
             <h:form id="formBusqueda" styleClass="buscador">
@@ -35,15 +35,17 @@
                  porque PrimeFaces 10 no pinta p:menuitem allí; y no se ponen comentarios XML
                  dentro del p:menubar (PrimeFaces 10 falla al pintarlos).</ui:remove>
             <p:menubar>
-                <p:menuitem value="Inicio" icon="pi pi-fw pi-home" outcome="index"/>
-                <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="registraProducto"
+                <p:menuitem value="Inicio" icon="pi pi-fw pi-home" outcome="/index"/>
+                <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="/usuario/registraProducto"
                             rendered="#{seguridadBean.usuario}"/>
+                <p:menuitem value="Panel" icon="pi pi-fw pi-cog" outcome="/admin/inicio"
+                            rendered="#{seguridadBean.administrador}"/>
                 <f:facet name="options">
                     <p:button value="Carrito" icon="pi pi-fw pi-shopping-cart" href="#" disabled="true"
                               styleClass="ui-button-flat" rendered="#{seguridadBean.usuario}"/>
-                    <p:button value="Iniciar sesión" icon="pi pi-fw pi-sign-in" outcome="login"
+                    <p:button value="Iniciar sesión" icon="pi pi-fw pi-sign-in" outcome="/login"
                               styleClass="ui-button-flat" rendered="#{!seguridadBean.autenticado}"/>
-                    <p:button value="Registrarse" icon="pi pi-fw pi-user-plus" outcome="registraUsuario"
+                    <p:button value="Registrarse" icon="pi pi-fw pi-user-plus" outcome="/registraUsuario"
                               styleClass="ui-button-info" rendered="#{!seguridadBean.autenticado}"/>
                     <!-- Formulario propio: el menú no está dentro de otro formulario -->
                     <h:form id="formSesion" styleClass="menu-sesion" rendered="#{seguridadBean.autenticado}">

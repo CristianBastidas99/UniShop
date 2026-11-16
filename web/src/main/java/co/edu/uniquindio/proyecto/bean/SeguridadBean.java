@@ -38,6 +38,11 @@ public class SeguridadBean implements Serializable {
     @Setter
     private String password;
 
+    // Página privada pedida antes del login (se valida antes de usarla)
+    @Getter
+    @Setter
+    private String destino;
+
     // Persona en sesión y su rol (null si no hay sesión). Sin getters: las vistas usan los métodos de consulta.
     private Persona persona;
     private Rol rol;
@@ -79,18 +84,31 @@ public class SeguridadBean implements Serializable {
         contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                 "Bienvenido(a), " + persona.getNombre(), null));
         externo.getFlash().setKeepMessages(true);
-        // El administrador también va al inicio por ahora (su panel llega en el Paso 5.2)
-        return "index?faces-redirect=true";
+        // Vuelve a la página privada pedida si es válida para el rol; si no, al inicio
+        String volver = destinoValido();
+        destino = null;
+        return (volver != null ? volver : "/index") + "?faces-redirect=true";
+    }
+
+    /** Devuelve el destino solo si es una ruta interna privada permitida para el rol; si no, null. */
+    private String destinoValido() {
+        if (destino == null || !destino.matches("/(usuario|admin)/[A-Za-z0-9_-]+(/[A-Za-z0-9_-]+)*\\.xhtml")) {
+            return null;
+        }
+        if (destino.startsWith("/admin/") ? isAdministrador() : isUsuario()) {
+            return destino;
+        }
+        return null;
     }
 
     public String cerrarSesion() {
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-        return "index?faces-redirect=true";
+        return "/index?faces-redirect=true";
     }
 
     /** Si ya hay sesión, quien entra al login va al inicio (se usa desde f:viewAction). */
     public String redirigirSiAutenticado() {
-        return isAutenticado() ? "index?faces-redirect=true" : null;
+        return isAutenticado() ? "/index?faces-redirect=true" : null;
     }
 
     public boolean isAutenticado() {
