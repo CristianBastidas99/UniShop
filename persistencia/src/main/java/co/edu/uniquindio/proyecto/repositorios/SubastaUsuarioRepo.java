@@ -14,6 +14,9 @@ import java.util.List;
 @Repository
 public interface SubastaUsuarioRepo extends JpaRepository<SubastaUsuario, Long> {
 
+    /** Indica si la subasta tiene al menos una puja. */
+    boolean existsBySubastaId(Long idSubasta);
+
     /** Valor de la puja más alta de una subasta, o {@code null} si nadie ha pujado. */
     @Query("select max(s.valor) from SubastaUsuario s where s.subasta.id = :idSubasta")
     Double pujaMasAlta(@Param("idSubasta") Long idSubasta);

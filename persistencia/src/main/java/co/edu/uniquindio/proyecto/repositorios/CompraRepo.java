@@ -19,6 +19,9 @@ public interface CompraRepo extends JpaRepository<Compra, Long> {
     @Query("select c from Compra c where c.usuario.id = :idUsuario order by c.fechaCompra desc")
     List<Compra> listarPorUsuario(@Param("idUsuario") Long idUsuario);
 
+    /** Indica si existe alguna compra que usó el cupón indicado. */
+    boolean existsByCuponId(Long idCupon);
+
     /** Reporte 5: cantidad de compras por medio de pago. */
     @Query("select new co.edu.uniquindio.proyecto.dto.MedioPagoDTO(c.medioPago, count(c)) " +
             "from Compra c group by c.medioPago order by count(c) desc")

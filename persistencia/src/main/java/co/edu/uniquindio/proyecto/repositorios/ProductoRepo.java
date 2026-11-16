@@ -56,6 +56,9 @@ public interface ProductoRepo extends JpaRepository<Producto, Long> {
     @Query("select p from Producto p where p.usuario.id = :idUsuario")
     List<Producto> listarPorVendedor(@Param("idUsuario") Long idUsuario);
 
+    /** Indica si hay al menos un producto ubicado en esa ciudad. */
+    boolean existsByCiudadId(Long idCiudad);
+
     // ===== Reportes del administrador (Fase 9) =====
 
     /** Reporte 1: cantidad de productos publicados por categoría (incluye categorías sin productos). */

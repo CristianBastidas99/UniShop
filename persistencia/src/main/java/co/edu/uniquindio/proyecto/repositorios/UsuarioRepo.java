@@ -16,6 +16,9 @@ public interface UsuarioRepo extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByEmail(String email);
 
+    /** Indica si hay al menos un usuario que vive en esa ciudad. */
+    boolean existsByCiudadId(Long idCiudad);
+
     /** Usuario con ese email y contraseña (login). */
     @Query("select u from Usuario u where u.email = :email and u.password = :password")
     Optional<Usuario> buscarPorEmailYPassword(@Param("email") String email, @Param("password") String password);
