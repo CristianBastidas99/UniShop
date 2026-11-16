@@ -19,6 +19,14 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .login-boton { width: 100%; }
 .login-enlace { text-align: center; margin: 16px 0 0; }
 
+/* Formularios: cada campo en su bloque (etiqueta, campo y mensaje de error) */
+.formulario { max-width: 640px; }
+.form-campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-campo > .ui-inputtext, .form-campo > .ui-datepicker, .form-campo > .ui-password { width: 100%; box-sizing: border-box; }
+.form-campo .ui-password input, .form-campo .ui-datepicker input { width: 100%; box-sizing: border-box; }
+.form-campo small { color: #667; }
+.form-acciones { display: flex; gap: 8px; margin-top: 8px; }
+
 /* Menú: nombre en sesión y formulario de cerrar sesión */
 .menu-sesion { display: inline-flex; align-items: center; gap: 8px; }
 .menu-nombre { font-weight: 600; color: #1565c0; }

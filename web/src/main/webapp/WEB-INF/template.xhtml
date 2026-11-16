@@ -23,8 +23,9 @@
             <h:form id="formBusqueda" styleClass="buscador">
                 <div class="ui-inputgroup">
                     <p:inputText id="busqueda" placeholder="¿Qué producto está buscando?"
-                                 required="true" value="#{busquedaBean.busqueda}"/>
-                    <p:commandButton update="@form" icon="pi pi-search"
+                                 required="true" requiredMessage="Escribe qué producto buscas"
+                                 label="Búsqueda" value="#{busquedaBean.busqueda}"/>
+                    <p:commandButton icon="pi pi-search" update="@form :mensajes"
                                      action="#{busquedaBean.buscar}" styleClass="ui-button-warning"/>
                 </div>
             </h:form>

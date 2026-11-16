@@ -1,7 +1,10 @@
 package co.edu.uniquindio.proyecto.bean;
 
 import co.edu.uniquindio.proyecto.entidades.Usuario;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +16,8 @@ import java.io.Serializable;
 @Component
 @ViewScoped
 public class UsuarioBean implements Serializable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UsuarioBean.class);
 
     private final UsuarioServicio usuarioServicio;
     private Usuario usuario;
@@ -27,17 +32,20 @@ public class UsuarioBean implements Serializable {
     }
 
     public void registrarUsuario() {
+        FacesContext contexto = FacesContext.getCurrentInstance();
         try {
             usuarioServicio.registrarUsuario(usuario);
-            FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Alerta",
-                    usuario.toString());
-            FacesContext.getCurrentInstance().addMessage(null, facesMsg);
-
+            contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
+                    "Registro exitoso", "Tu cuenta fue creada, ya puedes iniciar sesión."));
+            // Deja el formulario limpio
+            usuario = new Usuario();
+        } catch (NegocioException e) {
+            contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "No se pudo completar el registro", e.getMessage()));
         } catch (Exception e) {
-            FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Alerta",
-                    e.getMessage());
-            FacesContext.getCurrentInstance().addMessage(null, facesMsg);
-
+            LOG.error("Error inesperado al registrar el usuario", e);
+            contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "No se pudo completar el registro", "Ocurrió un error inesperado. Inténtalo de nuevo más tarde."));
         }
     }
 
@@ -48,6 +56,5 @@ public class UsuarioBean implements Serializable {
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
-
 
 }

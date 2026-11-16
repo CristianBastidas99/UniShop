@@ -7,23 +7,34 @@
                 template="/WEB-INF/template.xhtml">
     <ui:define name="titulo">UniShop - Registrarse</ui:define>
     <ui:define name="contenido">
-        <p:panel header="Registrar usuario">
-            <h:form>
-                <h:panelGrid columns="2" cellpadding="5">
-                    <p:outputLabel for="nombre_usuario" value="Nombre:"/>
-                    <p:inputText id="nombre_usuario" value="#{usuarioBean.usuario.nombre}"/>
-                    <p:outputLabel for="email_usuario" value="Email:"/>
-                    <p:inputText type="email" id="email_usuario" value="#{usuarioBean.usuario.email}"/>
-                    <p:outputLabel for="password_usuario" value="Contraseña:"/>
+        <p:panel header="Registrar usuario" styleClass="formulario">
+            <h:form id="formUsuario">
+                <div class="form-campo">
+                    <p:outputLabel for="nombre_usuario" value="Nombre"/>
+                    <p:inputText id="nombre_usuario" value="#{usuarioBean.usuario.nombre}" label="Nombre"
+                                 maxlength="100" required="true" requiredMessage="El nombre es obligatorio"/>
+                    <p:message for="nombre_usuario"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="email_usuario" value="Correo electrónico"/>
+                    <p:inputText type="email" id="email_usuario" value="#{usuarioBean.usuario.email}"
+                                 label="Correo electrónico" maxlength="100"
+                                 required="true" requiredMessage="El correo electrónico es obligatorio"/>
+                    <p:message for="email_usuario"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="password_usuario" value="Contraseña"/>
                     <p:password id="password_usuario" value="#{usuarioBean.usuario.password}" feedback="true"
+                                label="Contraseña" required="true" requiredMessage="La contraseña es obligatoria"
                                 promptLabel="Ingresa tu contraseña" weakLabel="Débil"
                                 goodLabel="Buena" strongLabel="Fuerte"/>
-                </h:panelGrid>
-                <h:panelGrid columns="2" cellpadding="5">
+                    <p:message for="password_usuario"/>
+                </div>
+                <div class="form-acciones">
                     <p:commandButton action="#{usuarioBean.registrarUsuario}" value="Registrar"
-                                     update="@form"/>
+                                     update="@form :mensajes"/>
                     <p:button outcome="/index" value="Volver"/>
-                </h:panelGrid>
+                </div>
             </h:form>
         </p:panel>
     </ui:define>

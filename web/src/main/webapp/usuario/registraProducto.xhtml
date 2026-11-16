@@ -7,39 +7,87 @@
                 template="/WEB-INF/template.xhtml">
     <ui:define name="titulo">UniShop - Publicar producto</ui:define>
     <ui:define name="contenido">
-        <p:panel header="Registrar producto">
-            <h:form>
-                <h:panelGrid columns="2" cellpadding="5">
-                    <p:outputLabel for="nombre_producto" value="Nombre:"/>
-                    <p:inputText id="nombre_producto" value="#{productoBean.producto.nombre}"/>
+        <p:panel header="Registrar producto" styleClass="formulario">
+            <h:form id="formProducto">
+                <f:event type="postValidate" listener="#{productoBean.validarImagenes}"/>
 
-                    <p:outputLabel for="cantidad_producto" value="Unidades:"/>
-                    <p:inputText id="cantidad_producto" value="#{productoBean.producto.unidades}"/>
+                <div class="form-campo">
+                    <p:outputLabel for="nombre_producto" value="Nombre"/>
+                    <p:inputText id="nombre_producto" value="#{productoBean.producto.nombre}" label="Nombre"
+                                 maxlength="100" required="true" requiredMessage="El nombre es obligatorio"/>
+                    <p:message for="nombre_producto"/>
+                </div>
 
-                    <p:outputLabel for="descripcion_producto" value="Descripcion:"/>
-                    <p:textEditor id="descripcion_producto" value="#{productoBean.producto.descripcion}" height="300" secure="false" />
+                <div class="form-campo">
+                    <p:outputLabel for="cantidad_producto" value="Unidades"/>
+                    <p:inputText id="cantidad_producto" value="#{productoBean.producto.unidades}" label="Unidades"
+                                 required="true" requiredMessage="Las unidades son obligatorias"
+                                 converterMessage="Las unidades deben ser un número entero (por ejemplo 5)"
+                                 validatorMessage="Las unidades deben ser un número entero mayor que 0">
+                        <f:validateLongRange minimum="1"/>
+                    </p:inputText>
+                    <p:message for="cantidad_producto"/>
+                </div>
 
-                    <p:outputLabel for="precio_producto" value="Precio:"/>
-                    <p:inputText  id="precio_producto" value="#{productoBean.producto.precio}"/>
+                <div class="form-campo">
+                    <p:outputLabel for="descripcion_producto" value="Descripción"/>
+                    <p:textEditor id="descripcion_producto" value="#{productoBean.producto.descripcion}" height="300"
+                                  secure="false" label="Descripción"
+                                  required="true" requiredMessage="La descripción es obligatoria"/>
+                    <p:message for="descripcion_producto"/>
+                </div>
 
-                    <p:outputLabel for="descuento_producto" value="Descuento:"/>
-                    <p:inputText type="number" converter="javax.faces.Double" id="descuento_producto"
-                                 value="#{productoBean.producto.descuento}"/>
+                <div class="form-campo">
+                    <p:outputLabel for="precio_producto" value="Precio"/>
+                    <p:inputText id="precio_producto" value="#{productoBean.producto.precio}" label="Precio"
+                                 required="true" requiredMessage="El precio es obligatorio"
+                                 converterMessage="El precio debe ser un número (por ejemplo 25000)"
+                                 validatorMessage="El precio debe ser mayor que 0">
+                        <f:validateDoubleRange minimum="0.01"/>
+                    </p:inputText>
+                    <p:message for="precio_producto"/>
+                </div>
 
-                    <p:outputLabel for="fecha_limite_producto" value="Fecha limite:"/>
-                    <p:inputText type="date" id="fecha_limite_producto" value="#{productoBean.fecha}"/>
+                <div class="form-campo">
+                    <p:outputLabel for="descuento_producto" value="Descuento (0 a 1)"/>
+                    <p:inputText id="descuento_producto" value="#{productoBean.producto.descuento}"
+                                 label="Descuento"
+                                 converterMessage="El descuento debe ser un número entre 0 y 1 (por ejemplo 0.25)"
+                                 validatorMessage="El descuento debe estar entre 0 y 1 (0.25 equivale a 25 %)">
+                        <f:validateDoubleRange minimum="0" maximum="1"/>
+                    </p:inputText>
+                    <small>Opcional. Usa punto decimal: 0.25 equivale a 25 % de descuento.</small>
+                    <p:message for="descuento_producto"/>
+                </div>
 
-                    <p:outputLabel for="imagenes_producto" value="Imágenes: "/>
+                <div class="form-campo">
+                    <p:outputLabel for="fecha_limite_producto" value="Fecha límite de la publicación"/>
+                    <p:datePicker id="fecha_limite_producto" value="#{productoBean.producto.fechaLimite}"
+                                  label="Fecha límite" pattern="dd/MM/yyyy" mindate="#{productoBean.manana}"
+                                  showIcon="true" readonlyInput="true"
+                                  required="true" requiredMessage="La fecha límite es obligatoria"
+                                  validator="#{productoBean.validarFechaLimite}"/>
+                    <p:message for="fecha_limite_producto"/>
+                </div>
+
+                <div class="form-campo">
+                    <p:outputLabel for="imagenes_producto" value="Imágenes (al menos una)"/>
                     <p:fileUpload id="imagenes_producto"
                                   listener="#{productoBean.subirImagenes}" mode="advanced"
                                   multiple="true" sizeLimit="1000000" fileLimit="5"
-                                  allowTypes="/(\.|\/)(gif|jpe?g|png)$/" required="true"/>
-                </h:panelGrid>
-                <h:panelGrid columns="2" cellpadding="5">
-                    <p:commandButton action="#{productoBean.registrarProducto}" value="Registrar"
-                                     update="@form"/>
+                                  allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
+                                  label="Elegir imágenes" uploadLabel="Subir" cancelLabel="Cancelar"
+                                  invalidFileMessage="Solo se permiten imágenes gif, jpg o png"
+                                  invalidSizeMessage="Cada imagen debe pesar máximo 1 MB"
+                                  fileLimitMessage="Máximo 5 imágenes" update=":mensajes"/>
+                    <p:message for="imagenes_producto"/>
+                </div>
+
+                <div class="form-acciones">
+                    <p:commandButton id="botonRegistrar" action="#{productoBean.registrarProducto}" value="Registrar"
+                                     update="@form :mensajes"/>
                     <p:button outcome="/index" value="Volver"/>
-                </h:panelGrid>
+                </div>
             </h:form>
         </p:panel>
     </ui:define>
