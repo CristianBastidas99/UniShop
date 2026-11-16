@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyecto.rest;
 
 import co.edu.uniquindio.proyecto.entidades.Usuario;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,8 @@ public class UsuarioRestController {
     public ResponseEntity<?> obtenerUsuario(@PathVariable(name = "email") String email){
         try {
             return ResponseEntity.status(200).body(usuarioServicio.obtenerUsuario(email));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(new Mensaje(e.getMessage()));
+        } catch (NegocioException e) {
+            return ResponseEntity.status(404).body(new Mensaje(e.getMessage()));
         }
     }
 
@@ -35,8 +36,8 @@ public class UsuarioRestController {
         try {
             usuarioServicio.registrarUsuario(usuario);
             return ResponseEntity.status(201).body(new Mensaje("Usuario creado correctamente"));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(new Mensaje(e.getMessage()));
+        } catch (NegocioException e) {
+            return ResponseEntity.status(400).body(new Mensaje(e.getMessage()));
         }
     }
 

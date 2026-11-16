@@ -1,16 +1,15 @@
 package co.edu.uniquindio.proyecto.servicios;
 
 import co.edu.uniquindio.proyecto.entidades.Producto;
-import co.edu.uniquindio.proyecto.entidades.Usuario;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class ProductoServicioImpl implements ProductoServicio{
+public class ProductoServicioImpl implements ProductoServicio {
 
     private final ProductoRepo productoRepo;
 
@@ -19,41 +18,32 @@ public class ProductoServicioImpl implements ProductoServicio{
     }
 
     @Override
-    public Producto registrarProducto(Producto p) throws Exception {
-        Optional<Producto> buscado = productoRepo.findById(p.getId());
-        if (buscado.isPresent()) {
-            throw new Exception("El producto ya se encuentra registrado");
+    public Producto registrarProducto(Producto producto) throws NegocioException {
+        if (producto.getId() != null && productoRepo.existsById(producto.getId())) {
+            throw new NegocioException("El producto ya existe");
         }
-        return productoRepo.save(p);
+        return productoRepo.save(producto);
     }
 
     @Override
-    public Producto actualizarProducto(Producto p) throws Exception {
-        Optional<Producto> buscado = productoRepo.findById(p.getId());
-        if (!buscado.isPresent()) {
-            throw new Exception("Se produjo un error y el producto no se encontro");
+    public Producto actualizarProducto(Producto producto) throws NegocioException {
+        if (producto.getId() == null || !productoRepo.existsById(producto.getId())) {
+            throw new NegocioException("El producto no existe");
         }
-        return productoRepo.save(p);
+        return productoRepo.save(producto);
     }
 
     @Override
-    public Producto obtenerProducto(Long id) throws Exception {
-        Optional<Producto> buscado = productoRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("Un producto con ese id no existe");
-        }
-        return buscado.get();
+    public Producto obtenerProducto(Long id) throws NegocioException {
+        return productoRepo.findById(id)
+                .orElseThrow(() -> new NegocioException("El producto no existe"));
     }
 
     @Override
-    public void eliminarProducto(Long id) throws Exception {
-        Optional<Producto> buscado = productoRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("El producto que quiere eliminar no existe en la base de datos");
-        }
-        productoRepo.delete(buscado.get());
+    public void eliminarProducto(Long id) throws NegocioException {
+        Producto buscado = obtenerProducto(id);
+        productoRepo.delete(buscado);
     }
-
 
     @Override
     public List<Producto> listarProducto() {

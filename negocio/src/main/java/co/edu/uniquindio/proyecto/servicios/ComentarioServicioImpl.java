@@ -1,15 +1,13 @@
 package co.edu.uniquindio.proyecto.servicios;
 
 import co.edu.uniquindio.proyecto.entidades.Comentario;
-import co.edu.uniquindio.proyecto.entidades.Producto;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.ComentarioRepo;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class ComentarioServicioImpl implements  ComentarioServicio{
+public class ComentarioServicioImpl implements ComentarioServicio {
 
     private final ComentarioRepo comentarioRepo;
 
@@ -17,41 +15,32 @@ public class ComentarioServicioImpl implements  ComentarioServicio{
         this.comentarioRepo = comentarioRepo;
     }
 
-
     @Override
-    public Comentario registrarComentario(Comentario c) throws Exception {
-        Optional<Comentario> buscado = comentarioRepo.findById(c.getId());
-        if (buscado.isPresent()) {
-            throw new Exception("El producto ya se encuentra registrado");
+    public Comentario registrarComentario(Comentario comentario) throws NegocioException {
+        if (comentario.getId() != null && comentarioRepo.existsById(comentario.getId())) {
+            throw new NegocioException("El comentario ya existe");
         }
-        return comentarioRepo.save(c);
+        return comentarioRepo.save(comentario);
     }
 
     @Override
-    public Comentario actualizarComentario(Comentario c) throws Exception {
-        Optional<Comentario> buscado = comentarioRepo.findById(c.getId());
-        if (!buscado.isPresent()) {
-            throw new Exception("Se produjo un error y el producto no se encontro");
+    public Comentario actualizarComentario(Comentario comentario) throws NegocioException {
+        if (comentario.getId() == null || !comentarioRepo.existsById(comentario.getId())) {
+            throw new NegocioException("El comentario no existe");
         }
-        return comentarioRepo.save(c);
+        return comentarioRepo.save(comentario);
     }
 
     @Override
-    public Comentario obtenerComentario(Long id) throws Exception {
-        Optional<Comentario> buscado = comentarioRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("Un producto con ese id no existe");
-        }
-        return buscado.get();
+    public Comentario obtenerComentario(Long id) throws NegocioException {
+        return comentarioRepo.findById(id)
+                .orElseThrow(() -> new NegocioException("El comentario no existe"));
     }
 
     @Override
-    public void eliminarComentario(Long id) throws Exception {
-        Optional<Comentario> buscado = comentarioRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("El producto que quiere eliminar no existe en la base de datos");
-        }
-        comentarioRepo.delete(buscado.get());
+    public void eliminarComentario(Long id) throws NegocioException {
+        Comentario buscado = obtenerComentario(id);
+        comentarioRepo.delete(buscado);
     }
 
     @Override

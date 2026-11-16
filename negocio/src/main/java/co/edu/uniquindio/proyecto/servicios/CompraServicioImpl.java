@@ -1,15 +1,13 @@
 package co.edu.uniquindio.proyecto.servicios;
 
 import co.edu.uniquindio.proyecto.entidades.Compra;
-import co.edu.uniquindio.proyecto.entidades.Usuario;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.CompraRepo;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class CompraServicioImpl implements CompraServicio{
+public class CompraServicioImpl implements CompraServicio {
 
     private final CompraRepo compraRepo;
 
@@ -17,45 +15,37 @@ public class CompraServicioImpl implements CompraServicio{
         this.compraRepo = compraRepo;
     }
 
-
     @Override
-    public Compra registrarCompra(Compra c) throws Exception {
-        Optional<Compra> buscado = compraRepo.findById(c.getId());
-        if (buscado.isPresent()) {
-            throw new Exception("La compra ya se encuentra registrada");
+    public Compra registrarCompra(Compra compra) throws NegocioException {
+        if (compra.getId() != null && compraRepo.existsById(compra.getId())) {
+            throw new NegocioException("La compra ya existe");
         }
-        return compraRepo.save(c);
+        return compraRepo.save(compra);
     }
 
     @Override
-    public Compra actualizarCompra(Compra c) throws Exception {
-        Optional<Compra> buscado = compraRepo.findById(c.getId());
-        if (!buscado.isPresent()) {
-            throw new Exception("La compra no existe");
+    public Compra actualizarCompra(Compra compra) throws NegocioException {
+        if (compra.getId() == null || !compraRepo.existsById(compra.getId())) {
+            throw new NegocioException("La compra no existe");
         }
-        return compraRepo.save(c);
+        return compraRepo.save(compra);
     }
 
     @Override
-    public Compra obtenerCompra(Long id) throws Exception {
-        Optional<Compra> buscado = compraRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("La compra que busca no existe");
-        }
-        return buscado.get();
+    public Compra obtenerCompra(Long id) throws NegocioException {
+        return compraRepo.findById(id)
+                .orElseThrow(() -> new NegocioException("La compra no existe"));
     }
 
     @Override
-    public void eliminarCompra(Long id) throws Exception {
-        Optional<Compra> buscado = compraRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("La compra no existe");
-        }
-        compraRepo.delete(buscado.get());
+    public void eliminarCompra(Long id) throws NegocioException {
+        Compra buscado = obtenerCompra(id);
+        compraRepo.delete(buscado);
     }
 
     @Override
     public List<Compra> listarCompra() {
         return compraRepo.findAll();
     }
+
 }

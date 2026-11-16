@@ -1,97 +1,72 @@
 package co.edu.uniquindio.proyecto.test;
 
-import co.edu.uniquindio.proyecto.NegocioApplication;
 import co.edu.uniquindio.proyecto.entidades.Usuario;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = NegocioApplication.class)
-@Transactional
-public class UsuarioServicioTest {
+public class UsuarioServicioTest extends BaseServicioTest {
 
     @Autowired
     private UsuarioServicio usuarioServicio;
 
-    @Test
-    public void registrarUsuarioTest(){
+    private Usuario nuevoUsuario(String email) {
         Usuario u = new Usuario();
         u.setNombre("Juanita");
-        u.setEmail("juana@mail.com");
+        u.setEmail(email);
         u.setPassword("12345");
-        try {
-            //Guardamos el registro
-            Usuario guardado = usuarioServicio.registrarUsuario(u);
-            //Comprobamos que si haya quedado
-            Assert.assertNotNull(guardado);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        return u;
     }
 
     @Test
-    public void actualizarUsuarioTest() {
-        Usuario u = new Usuario();
-        u.setNombre("Juanita");
-        u.setEmail("juana@mail.com");
-        u.setPassword("12345");
-        try {
-            //Guardamos el registro
-            Usuario registrado = usuarioServicio.registrarUsuario(u);
-            //Modificamos el nombre
-            registrado.setNombre("Juanita Lopez");
-            //Con save guardamos el registro modificado
-            usuarioServicio.actualizarUsuario(registrado);
-            //Por último, verificamos que si haya quedado actualizado
-            Usuario buscado = usuarioServicio.obtenerUsuario("juana@mail.com");
-            Assertions.assertEquals("Juanita Lopez", buscado.getNombre());;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-
+    public void registrarUsuarioTest() throws Exception {
+        Usuario guardado = usuarioServicio.registrarUsuario(nuevoUsuario("juana@mail.com"));
+        sincronizar();
+        assertNotNull(guardado.getId());
+        assertEquals("juana@mail.com", usuarioServicio.obtenerUsuario("juana@mail.com").getEmail());
     }
 
     @Test
-    public void eliminarUsuarioTest() {
-
-        Usuario u = new Usuario();
-        u.setNombre("Juanita");
-        u.setEmail("juana@mail.com");
-        u.setPassword("12345");
-
-        try {
-            //Guardamos el registro
-            Usuario guardado = usuarioServicio.registrarUsuario(u);
-            //Luego lo eliminamos
-            usuarioServicio.eliminarUsuario(u.getEmail());
-            //Por último, verificamos que si haya quedado borrado
-            Usuario buscado = usuarioServicio.obtenerUsuario("juana@mail.com");
-            Assertions.assertNull(buscado);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public void registrarEmailRepetidoDeUsuarioTest() {
+        NegocioException e = assertThrows(NegocioException.class,
+                () -> usuarioServicio.registrarUsuario(nuevoUsuario("lorena@email.com")));
+        assertEquals("El correo lorena@email.com ya se encuentra registrado", e.getMessage());
     }
 
+    @Test
+    public void registrarEmailDeAdministradorTest() {
+        NegocioException e = assertThrows(NegocioException.class,
+                () -> usuarioServicio.registrarUsuario(nuevoUsuario("juanito@uniquindio.com")));
+        assertEquals("El correo juanito@uniquindio.com ya se encuentra registrado", e.getMessage());
+    }
 
     @Test
-    @Sql("classpath:unishop.sql")
+    public void actualizarUsuarioTest() throws Exception {
+        Usuario u = usuarioServicio.obtenerUsuario("lorena@email.com");
+        u.setNombre("Lorena Gomez");
+        usuarioServicio.actualizarUsuario(u);
+        sincronizar();
+        assertEquals("Lorena Gomez", usuarioServicio.obtenerUsuario("lorena@email.com").getNombre());
+    }
+
+    @Test
+    public void eliminarUsuarioTest() throws Exception {
+        usuarioServicio.registrarUsuario(nuevoUsuario("juana@mail.com"));
+        usuarioServicio.eliminarUsuario("juana@mail.com");
+        sincronizar();
+        assertThrows(NegocioException.class, () -> usuarioServicio.obtenerUsuario("juana@mail.com"));
+    }
+
+    @Test
+    public void obtenerUsuarioInexistenteTest() {
+        assertThrows(NegocioException.class, () -> usuarioServicio.obtenerUsuario("noexiste@mail.com"));
+    }
+
+    @Test
     public void listarUsuariosTest() {
-        //Obtenemos la lista de todos los usuarios
-        List<Usuario> lista = usuarioServicio.listarUsuarios();
-        //Imprimimos la lista
-        System.out.println(lista);
+        assertEquals(5, usuarioServicio.listarUsuarios().size());
     }
-
 }

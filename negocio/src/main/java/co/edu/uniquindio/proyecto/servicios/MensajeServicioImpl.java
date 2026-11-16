@@ -1,16 +1,13 @@
 package co.edu.uniquindio.proyecto.servicios;
 
 import co.edu.uniquindio.proyecto.entidades.Mensaje;
-import co.edu.uniquindio.proyecto.entidades.Producto;
+import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.MensajeRepo;
-import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class MensajeServicioImpl implements MensajeServicio{
+public class MensajeServicioImpl implements MensajeServicio {
 
     private final MensajeRepo mensajeRepo;
 
@@ -19,39 +16,31 @@ public class MensajeServicioImpl implements MensajeServicio{
     }
 
     @Override
-    public Mensaje registrarMensaje(Mensaje m) throws Exception {
-        Optional<Mensaje> buscado = mensajeRepo.findById(m.getId());
-        if (buscado.isPresent()) {
-            throw new Exception("El mensaje ya se encuentra registrado");
+    public Mensaje registrarMensaje(Mensaje mensaje) throws NegocioException {
+        if (mensaje.getId() != null && mensajeRepo.existsById(mensaje.getId())) {
+            throw new NegocioException("El mensaje ya existe");
         }
-        return mensajeRepo.save(m);
+        return mensajeRepo.save(mensaje);
     }
 
     @Override
-    public Mensaje actualizarMensaje(Mensaje m) throws Exception {
-        Optional<Mensaje> buscado = mensajeRepo.findById(m.getId());
-        if (!buscado.isPresent()) {
-            throw new Exception("Se produjo un error y el mensaje no se encontro");
+    public Mensaje actualizarMensaje(Mensaje mensaje) throws NegocioException {
+        if (mensaje.getId() == null || !mensajeRepo.existsById(mensaje.getId())) {
+            throw new NegocioException("El mensaje no existe");
         }
-        return mensajeRepo.save(m);
+        return mensajeRepo.save(mensaje);
     }
 
     @Override
-    public Mensaje obtenerMensaje(Long id) throws Exception {
-        Optional<Mensaje> buscado = mensajeRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("Un mensaje con ese id no existe");
-        }
-        return buscado.get();
+    public Mensaje obtenerMensaje(Long id) throws NegocioException {
+        return mensajeRepo.findById(id)
+                .orElseThrow(() -> new NegocioException("El mensaje no existe"));
     }
 
     @Override
-    public void eliminarMensaje(Long id) throws Exception {
-        Optional<Mensaje> buscado = mensajeRepo.findById(id);
-        if (!buscado.isPresent()) {
-            throw new Exception("El mensaje que quiere eliminar no existe en la base de datos");
-        }
-        mensajeRepo.delete(buscado.get());
+    public void eliminarMensaje(Long id) throws NegocioException {
+        Mensaje buscado = obtenerMensaje(id);
+        mensajeRepo.delete(buscado);
     }
 
     @Override
