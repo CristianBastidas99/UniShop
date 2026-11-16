@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Acceso a datos de {@link Chat}: CRUD y chats por producto o por usuario (comprador o vendedor).
+ */
 @Repository
 public interface ChatRepo extends JpaRepository<Chat, Long> {
 

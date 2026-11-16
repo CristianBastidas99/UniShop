@@ -10,6 +10,9 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * Puja de un {@link Usuario} en una {@link Subasta}: valor ofrecido y fecha.
+ */
 @Entity
 @Getter
 @Setter

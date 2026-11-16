@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link Comentario}: CRUD, comentarios por producto o usuario y calificación promedio.
+ */
 @Repository
 public interface ComentarioRepo extends JpaRepository<Comentario, Long> {
 

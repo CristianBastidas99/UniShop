@@ -12,6 +12,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link Producto}: CRUD, productos vigentes, búsqueda con filtros, favoritos, productos de un vendedor y reportes de productos por categoría y mejor calificados.
+ */
 @Repository
 public interface ProductoRepo extends JpaRepository<Producto, Long> {
 

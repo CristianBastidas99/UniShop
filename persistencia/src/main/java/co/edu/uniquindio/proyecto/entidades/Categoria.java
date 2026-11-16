@@ -10,6 +10,10 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Categoría de productos (Tecnología, Hogar...). Es la dueña de la relación muchos a muchos con
+ * {@link Producto} (tabla {@code producto_categoria}). El nombre es único.
+ */
 @Entity
 @Getter
 @Setter

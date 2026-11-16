@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link ReporteProducto}: CRUD y reportes por estado o por producto.
+ */
 @Repository
 public interface ReporteProductoRepo extends JpaRepository<ReporteProducto, Long> {
 

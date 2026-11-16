@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Acceso a datos de {@link Administrador}: CRUD, búsqueda por email y login.
+ */
 @Repository
 public interface AdministradorRepo extends JpaRepository<Administrador, Long> {
 

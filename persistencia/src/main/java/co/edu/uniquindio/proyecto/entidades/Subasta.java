@@ -11,6 +11,10 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Subasta de un {@link Producto} hasta una fecha límite. Las pujas están en {@link SubastaUsuario};
+ * al vencer, la puja más alta gana.
+ */
 @Entity
 @Getter
 @Setter

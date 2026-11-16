@@ -7,6 +7,10 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Conversación entre un comprador ({@code usuario}) y el vendedor de un {@link Producto}.
+ * Sus mensajes están en {@link Mensaje}.
+ */
 @Entity
 @Getter
 @Setter

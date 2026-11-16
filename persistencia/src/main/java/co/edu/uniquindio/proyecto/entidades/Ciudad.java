@@ -11,6 +11,10 @@ import java.io.Serializable;
 import java.util.List;
 
 
+/**
+ * Ciudad donde vive un {@link Usuario} y donde se encuentra un {@link Producto}. Se usa como filtro
+ * de búsqueda ("lugar").
+ */
 @Entity
 @Getter
 @Setter

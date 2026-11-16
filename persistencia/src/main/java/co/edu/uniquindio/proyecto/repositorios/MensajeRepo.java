@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link Mensaje}: CRUD y mensajes de un chat ordenados por fecha.
+ */
 @Repository
 public interface MensajeRepo extends JpaRepository<Mensaje, Long> {
 

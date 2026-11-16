@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link Subasta}: CRUD y subastas activas.
+ */
 @Repository
 public interface SubastaRepo extends JpaRepository<Subasta, Long> {
 

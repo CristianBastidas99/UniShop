@@ -12,6 +12,10 @@ import java.util.Date;
 import java.util.List;
 
 
+/**
+ * Compra hecha por un {@link Usuario}: fecha, medio de pago y, opcionalmente, un {@link Cupon} de
+ * descuento. Los productos comprados están en sus {@link DetalleCompra}.
+ */
 @Entity
 @Getter
 @Setter

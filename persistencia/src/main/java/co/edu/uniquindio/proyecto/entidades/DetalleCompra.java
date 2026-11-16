@@ -9,6 +9,11 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 
+/**
+ * Línea de una {@link Compra}: qué {@link Producto} se compró, cuántas unidades y a qué precio.
+ * El precio se guarda al momento de la compra (ya con el descuento) para que no cambie si después cambia el
+ * precio del producto.
+ */
 @Entity
 @Getter
 @Setter

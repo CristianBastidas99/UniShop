@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link Compra}: CRUD, compras de un usuario y reporte de compras por medio de pago.
+ */
 @Repository
 public interface CompraRepo extends JpaRepository<Compra, Long> {
 

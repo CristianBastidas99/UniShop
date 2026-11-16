@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link HistorialPrecio}: CRUD e historial de un producto.
+ */
 @Repository
 public interface HistorialPrecioRepo extends JpaRepository<HistorialPrecio, Long> {
 

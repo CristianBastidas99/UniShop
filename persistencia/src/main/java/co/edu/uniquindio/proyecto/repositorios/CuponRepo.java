@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ * Acceso a datos de {@link Cupon}: CRUD, búsqueda por código y cupones disponibles.
+ */
 @Repository
 public interface CuponRepo extends JpaRepository<Cupon, Long> {
 

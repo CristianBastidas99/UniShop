@@ -8,6 +8,13 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Producto publicado por un vendedor ({@link Usuario}).
+ * Tiene unidades disponibles, precio, descuento opcional (0 a 1) y una fecha límite de publicación: después
+ * de esa fecha (o sin unidades) deja de mostrarse. Relaciones: ciudad donde está, imágenes (tabla {@code imagen},
+ * mínimo una), categorías (tabla {@code producto_categoria}, el dueño es {@link Categoria}), comentarios, chats,
+ * detalles de compra, subastas, usuarios que lo tienen de favorito, historial de precios y reportes.
+ */
 @Entity
 @Getter
 @Setter

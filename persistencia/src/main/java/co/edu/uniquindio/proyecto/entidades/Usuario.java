@@ -11,6 +11,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Usuario de la tienda (hereda de {@link Persona}): puede vender y comprar productos.
+ * Relaciones: vive en una {@link Ciudad}, tiene varios teléfonos (tabla {@code telefono}), publica
+ * {@link Producto}s, hace {@link Compra}s, escribe {@link Comentario}s, abre {@link Chat}s como comprador,
+ * puja en subastas ({@link SubastaUsuario}), reporta productos ({@link ReporteProducto}) y tiene una lista de
+ * productos favoritos (tabla {@code favorito}, el dueño de la relación es Usuario).
+ */
 @Entity
 @DiscriminatorValue("Usuario")
 @NoArgsConstructor

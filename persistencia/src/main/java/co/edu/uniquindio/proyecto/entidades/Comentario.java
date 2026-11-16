@@ -10,6 +10,11 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * Comentario y calificación (0 a 5 estrellas) que un {@link Usuario} deja en un {@link Producto}.
+ * El vendedor puede contestarlo en {@code respuesta}. La calificación promedio del producto se calcula con
+ * estos comentarios.
+ */
 @Entity
 @Getter
 @Setter

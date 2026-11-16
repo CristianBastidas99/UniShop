@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Acceso a datos de {@link Usuario}: CRUD, búsqueda por email y login.
+ */
 @Repository
 public interface UsuarioRepo extends JpaRepository<Usuario, Long> {
 

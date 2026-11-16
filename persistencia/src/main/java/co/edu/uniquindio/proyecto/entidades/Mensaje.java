@@ -7,6 +7,9 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * Mensaje enviado dentro de un {@link Chat}, con su fecha.
+ */
 @Entity
 @Getter
 @Setter

@@ -11,6 +11,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link DetalleCompra}: CRUD, detalles de una compra y reportes de ventas por mes y top vendedores.
+ */
 @Repository
 public interface DetalleCompraRepo extends JpaRepository<DetalleCompra, Long> {
 

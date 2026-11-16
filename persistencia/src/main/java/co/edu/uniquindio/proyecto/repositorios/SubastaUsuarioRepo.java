@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Acceso a datos de {@link SubastaUsuario} (pujas): CRUD, puja más alta y pujas de una subasta.
+ */
 @Repository
 public interface SubastaUsuarioRepo extends JpaRepository<SubastaUsuario, Long> {
 

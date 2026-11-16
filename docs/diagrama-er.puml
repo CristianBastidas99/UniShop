@@ -1,0 +1,205 @@
+@startuml diagrama-er
+' Generado por docs/generar-diagrama-er.py a partir de la base de datos. No editar a mano.
+!pragma layout smetana
+hide circle
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam entity {
+  BackgroundColor #FDFDFD
+  BorderColor #555555
+}
+title UniShop - Diagrama entidad-relacion
+
+entity administrador {
+  * **id** : bigint <<PK>>
+  --
+  * email : varchar(100) <<UK>>
+  * nombre : varchar(100)
+  * password : varchar(255)
+}
+
+entity categoria {
+  * **id** : bigint <<PK>>
+  --
+  * nombre : varchar(50) <<UK>>
+}
+
+entity chat {
+  * **id** : bigint <<PK>>
+  --
+  * id_producto : bigint <<FK>>
+  * id_usuario : bigint <<FK>>
+}
+
+entity ciudad {
+  * **id** : bigint <<PK>>
+  --
+  * nombre : varchar(100)
+}
+
+entity comentario {
+  * **id** : bigint <<PK>>
+  --
+  * calificacion : int
+  * fecha : datetime(6)
+  * mensaje : varchar(1000)
+  respuesta : varchar(255)
+  * id_producto : bigint <<FK>>
+  * id_usuario : bigint <<FK>>
+}
+
+entity compra {
+  * **id** : bigint <<PK>>
+  --
+  * fecha_compra : datetime(6)
+  * medio_pago : varchar(20)
+  id_cupon : bigint <<FK>>
+  * id_usuario : bigint <<FK>>
+}
+
+entity cupon {
+  * **id** : bigint <<PK>>
+  --
+  * codigo : varchar(20) <<UK>>
+  * fecha_vencimiento : datetime(6)
+  * porcentaje : double
+  * usos_maximos : int
+  * usos_realizados : int
+}
+
+entity detalle_compra {
+  * **id** : bigint <<PK>>
+  --
+  * precio_producto : double
+  * unidades : int
+  * id_compra : bigint <<FK>>
+  * id_producto : bigint <<FK>>
+}
+
+entity favorito {
+  --
+  * id_usuario : bigint <<FK>>
+  * id_producto : bigint <<FK>>
+}
+
+entity historial_precio {
+  * **id** : bigint <<PK>>
+  --
+  descuento_anterior : double
+  descuento_nuevo : double
+  * fecha : datetime(6)
+  * precio_anterior : double
+  * precio_nuevo : double
+  * id_producto : bigint <<FK>>
+}
+
+entity imagen {
+  --
+  * id_producto : bigint <<FK>>
+  ruta : varchar(255)
+}
+
+entity mensaje {
+  * **id** : bigint <<PK>>
+  --
+  * fecha : datetime(6)
+  * mensaje : varchar(1000)
+  * id_chat : bigint <<FK>>
+}
+
+entity producto {
+  * **id** : bigint <<PK>>
+  --
+  descripcion : varchar(2000)
+  descuento : double
+  * fecha_limite : datetime(6)
+  * nombre : varchar(100)
+  * precio : double
+  * unidades : int
+  id_ciudad : bigint <<FK>>
+  * id_usuario : bigint <<FK>>
+}
+
+entity producto_categoria {
+  --
+  * id_categoria : bigint <<FK>>
+  * id_producto : bigint <<FK>>
+}
+
+entity reporte_producto {
+  * **id** : bigint <<PK>>
+  --
+  descripcion : varchar(1000)
+  * estado : varchar(20)
+  * fecha : datetime(6)
+  * motivo : varchar(30)
+  respuesta_administrador : varchar(1000)
+  id_administrador : bigint <<FK>>
+  * id_producto : bigint <<FK>>
+  * id_usuario : bigint <<FK>>
+}
+
+entity subasta {
+  * **id** : bigint <<PK>>
+  --
+  * fecha_limite : datetime(6)
+  * id_producto : bigint <<FK>>
+}
+
+entity subasta_usuario {
+  * **id** : bigint <<PK>>
+  --
+  * fecha_subasta : datetime(6)
+  * valor : double
+  * id_subasta : bigint <<FK>>
+  * id_usuario : bigint <<FK>>
+}
+
+entity telefono {
+  --
+  * id_usuario : bigint <<FK>>
+  num_telefono : varchar(255)
+}
+
+entity usuario {
+  * **id** : bigint <<PK>>
+  --
+  * email : varchar(100) <<UK>>
+  * nombre : varchar(100)
+  * password : varchar(255)
+  id_ciudad : bigint <<FK>>
+}
+
+producto ||--o{ chat : id_producto
+usuario ||--o{ chat : id_usuario
+producto ||--o{ comentario : id_producto
+usuario ||--o{ comentario : id_usuario
+cupon |o--o{ compra : id_cupon
+usuario ||--o{ compra : id_usuario
+compra ||--o{ detalle_compra : id_compra
+producto ||--o{ detalle_compra : id_producto
+producto ||--o{ favorito : id_producto
+usuario ||--o{ favorito : id_usuario
+producto ||--o{ historial_precio : id_producto
+producto ||--o{ imagen : id_producto
+chat ||--o{ mensaje : id_chat
+ciudad |o--o{ producto : id_ciudad
+usuario ||--o{ producto : id_usuario
+categoria ||--o{ producto_categoria : id_categoria
+producto ||--o{ producto_categoria : id_producto
+administrador |o--o{ reporte_producto : id_administrador
+producto ||--o{ reporte_producto : id_producto
+usuario ||--o{ reporte_producto : id_usuario
+producto ||--o{ subasta : id_producto
+subasta ||--o{ subasta_usuario : id_subasta
+usuario ||--o{ subasta_usuario : id_usuario
+usuario ||--o{ telefono : id_usuario
+ciudad |o--o{ usuario : id_ciudad
+
+legend right
+  * = obligatorio (NOT NULL)
+  PK = llave primaria, FK = llave foranea, UK = valor unico
+  ||--o{ : uno a muchos (FK obligatoria)
+  |o--o{ : cero o uno a muchos (FK opcional)
+endlegend
+@enduml
