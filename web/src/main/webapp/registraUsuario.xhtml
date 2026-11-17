@@ -30,6 +30,18 @@
                                 goodLabel="Buena" strongLabel="Fuerte"/>
                     <p:message for="password_usuario"/>
                 </div>
+                <div class="form-campo">
+                    <p:outputLabel for="ciudad_usuario" value="Ciudad"/>
+                    <p:selectOneMenu id="ciudad_usuario" value="#{usuarioBean.usuario.ciudad}"
+                                     converter="#{ciudadConverter}" label="Ciudad"
+                                     filter="true" filterMatchMode="contains"
+                                     required="true" requiredMessage="La ciudad es obligatoria">
+                        <f:selectItem itemLabel="Selecciona una ciudad" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{seleccionBean.ciudades}" var="ciudad" itemLabel="#{ciudad.nombre}"
+                                       itemValue="#{ciudad}"/>
+                    </p:selectOneMenu>
+                    <p:message for="ciudad_usuario"/>
+                </div>
                 <div class="form-acciones">
                     <p:commandButton action="#{usuarioBean.registrarUsuario}" value="Registrar"
                                      update="@form :mensajes"/>

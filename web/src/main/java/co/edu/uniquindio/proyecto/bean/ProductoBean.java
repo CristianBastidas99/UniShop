@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyecto.bean;
 
+import co.edu.uniquindio.proyecto.entidades.Categoria;
 import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
@@ -57,6 +58,8 @@ public class ProductoBean implements Serializable {
 
     private ArrayList<String> imagenes;
 
+    private List<Categoria> categoriasSeleccionadas;
+
     public ProductoBean(ProductoServicio productoServicio) {
         this.productoServicio = productoServicio;
     }
@@ -66,18 +69,24 @@ public class ProductoBean implements Serializable {
         this.producto = new Producto();
         this.listaProductos = productoServicio.listarVigentes();
         this.imagenes = new ArrayList<>();
+        this.categoriasSeleccionadas = new ArrayList<>();
     }
 
     public void registrarProducto() {
         FacesContext contexto = FacesContext.getCurrentInstance();
         try {
             producto.setMisImagenes(imagenes);
-            productoServicio.publicarProducto(producto, new ArrayList<>());
+            List<Long> idsCategorias = new ArrayList<>();
+            for (Categoria categoria : categoriasSeleccionadas) {
+                idsCategorias.add(categoria.getId());
+            }
+            productoServicio.publicarProducto(producto, idsCategorias);
             contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Producto publicado", "Tu producto se publicó correctamente."));
             // Deja el formulario limpio
             this.producto = new Producto();
             this.imagenes = new ArrayList<>();
+            this.categoriasSeleccionadas = new ArrayList<>();
         } catch (NegocioException e) {
             contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     "No se pudo publicar el producto", e.getMessage()));
@@ -164,6 +173,14 @@ public class ProductoBean implements Serializable {
 
     public void setProducto(Producto producto) {
         this.producto = producto;
+    }
+
+    public List<Categoria> getCategoriasSeleccionadas() {
+        return categoriasSeleccionadas;
+    }
+
+    public void setCategoriasSeleccionadas(List<Categoria> categoriasSeleccionadas) {
+        this.categoriasSeleccionadas = categoriasSeleccionadas;
     }
 
     public List<Producto> getListaProductos() {

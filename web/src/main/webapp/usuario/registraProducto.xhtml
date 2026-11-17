@@ -71,6 +71,31 @@
                 </div>
 
                 <div class="form-campo">
+                    <p:outputLabel for="ciudad_producto" value="Ciudad"/>
+                    <p:selectOneMenu id="ciudad_producto" value="#{productoBean.producto.ciudad}"
+                                     converter="#{ciudadConverter}" label="Ciudad"
+                                     filter="true" filterMatchMode="contains"
+                                     required="true" requiredMessage="La ciudad es obligatoria">
+                        <f:selectItem itemLabel="Selecciona una ciudad" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{seleccionBean.ciudades}" var="ciudad" itemLabel="#{ciudad.nombre}"
+                                       itemValue="#{ciudad}"/>
+                    </p:selectOneMenu>
+                    <p:message for="ciudad_producto"/>
+                </div>
+
+                <div class="form-campo">
+                    <p:outputLabel for="categorias_producto" value="Categorías"/>
+                    <p:selectCheckboxMenu id="categorias_producto" value="#{productoBean.categoriasSeleccionadas}"
+                                          converter="#{categoriaConverter}" label="Selecciona una o más categorías"
+                                          multiple="true" filter="true" filterMatchMode="contains"
+                                          required="true" requiredMessage="Selecciona al menos una categoría">
+                        <f:selectItems value="#{seleccionBean.categorias}" var="categoria"
+                                       itemLabel="#{categoria.nombre}" itemValue="#{categoria}"/>
+                    </p:selectCheckboxMenu>
+                    <p:message for="categorias_producto"/>
+                </div>
+
+                <div class="form-campo">
                     <p:outputLabel for="imagenes_producto" value="Imágenes (al menos una)"/>
                     <p:fileUpload id="imagenes_producto"
                                   listener="#{productoBean.subirImagenes}" mode="advanced"
