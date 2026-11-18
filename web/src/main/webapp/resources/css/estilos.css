@@ -34,8 +34,29 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .menu-sesion { display: inline-flex; align-items: center; gap: 8px; }
 .menu-nombre { font-weight: 600; color: #1565c0; }
 
-/* Listado de productos del inicio (se rehace en el Paso 4.3) */
-.trElementEmulation li { list-style: none; float: left; padding: 5px 10px; border: 1px solid #eee; }
-.sin-imagen { width: 400px; height: 400px; display: flex; align-items: center; justify-content: center;
-    background: #f0f2f5; color: #667; }
+/* Descripción en el resultado de búsqueda (se rehace en el Paso 4.4) */
 .producto-descripcion { white-space: pre-line; margin: 8px 0; }
+
+/* Inicio: barra de categorías */
+.categorias { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.categorias a { padding: 6px 14px; border-radius: 16px; background: #ffffff; border: 1px solid #dde2e7;
+    color: #333; text-decoration: none; font-size: .95rem; }
+.categorias a:hover { border-color: #1565c0; color: #1565c0; }
+.categorias a.categoria-activa { background: #1565c0; border-color: #1565c0; color: #ffffff; font-weight: 600; }
+.titulo-inicio { margin: 0 0 16px; font-size: 1.4rem; color: #222; }
+
+/* Inicio: cuadrícula de tarjetas de producto */
+.productos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 16px; }
+.producto-tarjeta { min-width: 0; background: #ffffff; border: 1px solid #dde2e7; border-radius: 8px; overflow: hidden;
+    display: flex; flex-direction: column; }
+.producto-imagen { width: 100%; max-width: 100%; height: 200px; object-fit: cover; display: block; background: #eef0f3; }
+.producto-info { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.producto-nombre { font-weight: 600; color: #222; overflow-wrap: anywhere; }
+.producto-precios { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+.precio-final { font-size: 1.2rem; font-weight: 700; color: #1565c0; }
+.precio-original { color: #889; text-decoration: line-through; font-size: .9rem; }
+.etiqueta-descuento { background: #e53935; color: #ffffff; border-radius: 4px; padding: 1px 6px;
+    font-size: .8rem; font-weight: 600; }
+.producto-calificacion { display: flex; align-items: center; gap: 6px; color: #667; font-size: .9rem; }
+.sin-calificaciones { color: #889; font-size: .9rem; }
+.sin-productos { color: #667; padding: 32px 0; text-align: center; }

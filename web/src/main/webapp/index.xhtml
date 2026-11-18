@@ -6,23 +6,64 @@
                 xmlns:p="http://primefaces.org/ui"
                 template="/WEB-INF/template.xhtml">
     <ui:define name="titulo">UniShop - Inicio</ui:define>
+
+    <!-- Filtro por categoría: index.xhtml?categoria=ID -->
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="categoria" value="#{inicioBean.idCategoria}"/>
+            <f:viewAction action="#{inicioBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="contenido">
-        <h:form>
-            <ul class="trElementEmulation">
-                <p:repeat value="#{productoBean.listaProductos}" var="producto">
-                    <li class="trElementEmulation">
-                        <p:panel header="#{producto.nombre}">
-                            <p:graphicImage url="#{producto.misImagenes[0]}" height="400" width="400"
-                                            rendered="#{not empty producto.misImagenes}"/>
-                            <h:panelGroup layout="block" styleClass="sin-imagen" rendered="#{empty producto.misImagenes}">Sin imagen</h:panelGroup>
-                            <div class="producto-descripcion"><h:outputText value="#{producto.descripcion}"/></div>
-                            <h:outputText value="#{producto.precio}">
+        <!-- Barra de categorías: enlaces GET -->
+        <nav class="categorias">
+            <h:link outcome="/index" value="Todas"
+                    styleClass="#{inicioBean.categoriaSeleccionada == null ? 'categoria-activa' : ''}"/>
+            <ui:repeat value="#{seleccionBean.categorias}" var="categoria">
+                <h:link outcome="/index" value="#{categoria.nombre}"
+                        styleClass="#{inicioBean.categoriaSeleccionada == categoria.id ? 'categoria-activa' : ''}">
+                    <f:param name="categoria" value="#{categoria.id}"/>
+                </h:link>
+            </ui:repeat>
+        </nav>
+
+        <h1 class="titulo-inicio">#{inicioBean.titulo}</h1>
+
+        <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{empty inicioBean.productos}">
+            #{inicioBean.categoriaSeleccionada == null ? 'No hay productos disponibles' : 'No hay productos disponibles en esta categoría'}
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="productos-grid" rendered="#{not empty inicioBean.productos}">
+            <ui:repeat value="#{inicioBean.productos}" var="producto">
+                <div class="producto-tarjeta">
+                    <img class="producto-imagen" src="#{inicioBean.imagen(producto)}" alt="#{producto.nombre}"/>
+                    <div class="producto-info">
+                        <span class="producto-nombre">#{producto.nombre}</span>
+                        <div class="producto-precios">
+                            <h:outputText styleClass="precio-final"
+                                          value="#{inicioBean.tieneDescuento(producto) ? inicioBean.precioFinal(producto) : producto.precio}">
                                 <f:convertNumber pattern="$#,##0"/>
                             </h:outputText>
-                        </p:panel>
-                    </li>
-                </p:repeat>
-            </ul>
-        </h:form>
+                            <h:outputText styleClass="precio-original" value="#{producto.precio}"
+                                          rendered="#{inicioBean.tieneDescuento(producto)}">
+                                <f:convertNumber pattern="$#,##0"/>
+                            </h:outputText>
+                            <h:outputText styleClass="etiqueta-descuento"
+                                          value="-#{inicioBean.porcentajeDescuento(producto)} %"
+                                          rendered="#{inicioBean.tieneDescuento(producto)}"/>
+                        </div>
+                        <div class="producto-calificacion">
+                            <p:rating value="#{inicioBean.estrellas(producto)}" readonly="true"
+                                      rendered="#{inicioBean.tieneCalificacion(producto)}"/>
+                            <h:outputText value="(#{inicioBean.calificacion(producto)})"
+                                          rendered="#{inicioBean.tieneCalificacion(producto)}"/>
+                            <h:outputText styleClass="sin-calificaciones" value="Sin calificaciones"
+                                          rendered="#{not inicioBean.tieneCalificacion(producto)}"/>
+                        </div>
+                    </div>
+                </div>
+            </ui:repeat>
+        </h:panelGroup>
     </ui:define>
 </ui:composition>

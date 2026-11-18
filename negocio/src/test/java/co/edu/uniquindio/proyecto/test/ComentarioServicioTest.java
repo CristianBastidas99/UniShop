@@ -228,4 +228,35 @@ public class ComentarioServicioTest extends BaseServicioTest {
         e = assertThrows(NegocioException.class, () -> comentarioServicio.calcularCalificacion(null));
         assertEquals("El producto no existe", e.getMessage());
     }
+
+    @Test
+    public void calcularCalificacionesTest() throws Exception {
+        // Datos del SQL: producto 1 = 5 y 4 (4.5), 2 = 3, 3 = 5, 4 sin comentarios
+        java.util.Map<Long, Double> mapa = comentarioServicio.calcularCalificaciones(java.util.Arrays.asList(1L, 2L, 3L, 4L));
+        assertEquals(4, mapa.size());
+        assertEquals(4.5, mapa.get(1L), 0.0001);
+        assertEquals(3.0, mapa.get(2L), 0.0001);
+        assertEquals(5.0, mapa.get(3L), 0.0001);
+        assertEquals(0.0, mapa.get(4L), 0.0001);
+    }
+
+    @Test
+    public void calcularCalificacionesRedondeoTest() throws Exception {
+        // 5, 5 y 4 = 4.666... -> 4.7 (igual que calcularCalificacion)
+        comentarioServicio.comentarProducto(nuevo("a", 5, 6L, 4L));
+        comentarioServicio.comentarProducto(nuevo("b", 5, 7L, 4L));
+        comentarioServicio.comentarProducto(nuevo("c", 4, 8L, 4L));
+        sincronizar();
+        java.util.Map<Long, Double> mapa = comentarioServicio.calcularCalificaciones(java.util.Arrays.asList(4L, 1L));
+        assertEquals(4.7, mapa.get(4L), 0.0001);
+        assertEquals(comentarioServicio.calcularCalificacion(4L), mapa.get(4L), 0.0001);
+        assertEquals(4.5, mapa.get(1L), 0.0001);
+    }
+
+    @Test
+    public void calcularCalificacionesListaVaciaONulaTest() {
+        assertTrue(comentarioServicio.calcularCalificaciones(null).isEmpty());
+        assertTrue(comentarioServicio.calcularCalificaciones(new java.util.ArrayList<>()).isEmpty());
+        assertTrue(comentarioServicio.calcularCalificaciones(java.util.Collections.singletonList(null)).isEmpty());
+    }
 }

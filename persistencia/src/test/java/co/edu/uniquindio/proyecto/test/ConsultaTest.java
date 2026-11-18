@@ -193,6 +193,21 @@ public class ConsultaTest {
     }
 
     @Test
+    public void calificacionPromedioPorProductosTest() {
+        List<Object[]> filas = comentarioRepo.calificacionPromedioPorProductos(
+                List.of(celular.getId(), cepillo.getId(), mesa.getId()));
+        // Mesa no tiene comentarios: no aparece
+        Assertions.assertEquals(2, filas.size());
+        java.util.Map<Long, Double> promedios = new java.util.HashMap<>();
+        for (Object[] fila : filas) {
+            promedios.put((Long) fila[0], (Double) fila[1]);
+        }
+        Assertions.assertEquals(4.0, promedios.get(celular.getId()));
+        Assertions.assertEquals(2.0, promedios.get(cepillo.getId()));
+        Assertions.assertFalse(promedios.containsKey(mesa.getId()));
+    }
+
+    @Test
     public void listarComentariosTest() {
         List<Comentario> delCelular = comentarioRepo.listarPorProducto(celular.getId());
         Assertions.assertEquals(List.of(3, 4, 5),

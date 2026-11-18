@@ -4,6 +4,7 @@ import co.edu.uniquindio.proyecto.entidades.Comentario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Operaciones de negocio sobre comentarios.
@@ -75,4 +76,14 @@ public interface ComentarioServicio {
      * @throws NegocioException si el producto no existe
      */
     double calcularCalificacion(Long idProducto) throws NegocioException;
+
+    /**
+     * Calcula en una sola consulta la calificación promedio (redondeada a un decimal, HALF_UP, igual que
+     * {@link #calcularCalificacion(Long)}) de varios productos. Los productos sin comentarios (o que no
+     * existen) quedan con 0.0. Si la lista es nula o vacía devuelve un mapa vacío.
+     *
+     * @param idsProductos ids de los productos; los nulos se ignoran
+     * @return mapa idProducto -> calificación, con una entrada por cada id recibido
+     */
+    Map<Long, Double> calcularCalificaciones(List<Long> idsProductos);
 }

@@ -53,8 +53,6 @@ public class ProductoBean implements Serializable {
 
     private Producto producto;
 
-    private List<Producto> listaProductos;
-
     @Value("${upload.url}")
     private String urlImagenes;
 
@@ -70,7 +68,6 @@ public class ProductoBean implements Serializable {
     @PostConstruct
     public void inicializar() {
         this.producto = new Producto();
-        this.listaProductos = productoServicio.listarVigentes();
         this.imagenes = new ArrayList<>();
         this.categoriasSeleccionadas = new ArrayList<>();
     }
@@ -194,13 +191,5 @@ public class ProductoBean implements Serializable {
 
     public void setCategoriasSeleccionadas(List<Categoria> categoriasSeleccionadas) {
         this.categoriasSeleccionadas = categoriasSeleccionadas;
-    }
-
-    public List<Producto> getListaProductos() {
-        return listaProductos;
-    }
-
-    public void setListaProductos(List<Producto> listaProductos) {
-        this.listaProductos = listaProductos;
     }
 }

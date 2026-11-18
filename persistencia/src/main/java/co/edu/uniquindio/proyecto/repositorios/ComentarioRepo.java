@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,4 +29,11 @@ public interface ComentarioRepo extends JpaRepository<Comentario, Long> {
     /** Calificación promedio de un producto, o {@code null} si no tiene comentarios. */
     @Query("select avg(c.calificacion) from Comentario c where c.producto.id = :idProducto")
     Double calificacionPromedio(@Param("idProducto") Long idProducto);
+
+    /**
+     * Calificación promedio de varios productos en una sola consulta (evita una consulta por producto).
+     * Cada fila es {@code [idProducto (Long), promedio (Double)]}; los productos sin comentarios no aparecen.
+     */
+    @Query("select c.producto.id, avg(c.calificacion) from Comentario c where c.producto.id in :ids group by c.producto.id")
+    List<Object[]> calificacionPromedioPorProductos(@Param("ids") Collection<Long> ids);
 }

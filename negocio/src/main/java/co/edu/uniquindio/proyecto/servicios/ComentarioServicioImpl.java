@@ -13,7 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class ComentarioServicioImpl implements ComentarioServicio {
@@ -146,5 +150,25 @@ public class ComentarioServicioImpl implements ComentarioServicio {
             return 0;
         }
         return BigDecimal.valueOf(promedio).setScale(1, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Double> calcularCalificaciones(List<Long> idsProductos) {
+        Map<Long, Double> resultado = new HashMap<>();
+        if (idsProductos == null || idsProductos.isEmpty()) {
+            return resultado;
+        }
+        List<Long> ids = idsProductos.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            return resultado;
+        }
+        // Todos arrancan en 0.0; los que tienen comentarios se sobrescriben con su promedio
+        ids.forEach(id -> resultado.put(id, 0.0));
+        for (Object[] fila : comentarioRepo.calificacionPromedioPorProductos(ids)) {
+            double promedio = ((Number) fila[1]).doubleValue();
+            resultado.put((Long) fila[0], BigDecimal.valueOf(promedio).setScale(1, RoundingMode.HALF_UP).doubleValue());
+        }
+        return resultado;
     }
 }
