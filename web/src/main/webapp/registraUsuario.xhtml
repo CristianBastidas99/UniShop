@@ -42,11 +42,45 @@
                     </p:selectOneMenu>
                     <p:message for="ciudad_usuario"/>
                 </div>
+                <div class="form-campo">
+                    <label>Teléfono</label>
+                    <small>Ejemplo: 3001234567. Puedes registrar hasta 3 teléfonos.</small>
+                    <h:panelGroup id="telefonos" layout="block">
+                        <ui:repeat value="#{usuarioBean.telefonos}" var="tel" varStatus="est">
+                            <div class="telefono-fila">
+                                <p:inputText id="telefono" value="#{tel.numero}" label="Teléfono" maxlength="16"
+                                             required="#{est.first and (empty param['javax.faces.source'] or param['javax.faces.source'] eq 'formUsuario:btnRegistrar')}"
+                                             requiredMessage="Escribe al menos un teléfono"
+                                             validatorMessage="El teléfono debe tener entre 7 y 15 dígitos (puede empezar con +)">
+                                    <ui:remove>El patrón admite vacío: JSF valida también los campos vacíos y los teléfonos extra son opcionales.
+                                        El primero es obligatorio solo al pulsar Registrar, para que agregar o quitar no lo exija.</ui:remove>
+                                    <f:validateRegex pattern="(\+?\d{7,15})?"/>
+                                </p:inputText>
+                                <p:commandButton icon="pi pi-fw pi-times" title="Quitar teléfono"
+                                                 rendered="#{usuarioBean.puedeQuitarTelefono}"
+                                                 action="#{usuarioBean.quitarTelefono(tel)}"
+                                                 process="@this :formUsuario:telefonos"
+                                                 update=":formUsuario:telefonos :mensajes"/>
+                                <p:message for="telefono"/>
+                            </div>
+                        </ui:repeat>
+                        <div>
+                            <p:commandButton id="btnAgregarTelefono" value="Agregar teléfono" icon="pi pi-fw pi-plus"
+                                             disabled="#{!usuarioBean.puedeAgregarTelefono}"
+                                             action="#{usuarioBean.agregarTelefono}"
+                                             process="@this :formUsuario:telefonos"
+                                             update=":formUsuario:telefonos :mensajes"/>
+                        </div>
+                    </h:panelGroup>
+                </div>
                 <div class="form-acciones">
-                    <p:commandButton action="#{usuarioBean.registrarUsuario}" value="Registrar"
+                    <p:commandButton id="btnRegistrar" action="#{usuarioBean.registrarUsuario}" value="Registrar"
                                      update="@form :mensajes"/>
                     <p:button outcome="/index" value="Volver"/>
                 </div>
+                <p class="login-enlace">
+                    ¿Ya tienes cuenta? <h:link outcome="/login" value="Inicia sesión"/>
+                </p>
             </h:form>
         </p:panel>
     </ui:define>

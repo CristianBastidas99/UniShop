@@ -27,6 +27,9 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .form-campo small { color: #667; }
 .form-acciones { display: flex; gap: 8px; margin-top: 8px; }
 
+/* Filas de teléfonos: campo, botón quitar y mensaje en línea */
+.telefono-fila { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+
 /* Menú: nombre en sesión y formulario de cerrar sesión */
 .menu-sesion { display: inline-flex; align-items: center; gap: 8px; }
 .menu-nombre { font-weight: 600; color: #1565c0; }
