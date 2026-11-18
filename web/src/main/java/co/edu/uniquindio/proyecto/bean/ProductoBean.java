@@ -2,6 +2,7 @@ package co.edu.uniquindio.proyecto.bean;
 
 import co.edu.uniquindio.proyecto.entidades.Categoria;
 import co.edu.uniquindio.proyecto.entidades.Producto;
+import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
 import org.apache.commons.io.IOUtils;
@@ -48,6 +49,7 @@ public class ProductoBean implements Serializable {
     private static final List<String> EXTENSIONES_PERMITIDAS = List.of(".jpg", ".jpeg", ".png", ".gif");
 
     private final ProductoServicio productoServicio;
+    private final SeguridadBean seguridadBean;
 
     private Producto producto;
 
@@ -60,8 +62,9 @@ public class ProductoBean implements Serializable {
 
     private List<Categoria> categoriasSeleccionadas;
 
-    public ProductoBean(ProductoServicio productoServicio) {
+    public ProductoBean(ProductoServicio productoServicio, SeguridadBean seguridadBean) {
         this.productoServicio = productoServicio;
+        this.seguridadBean = seguridadBean;
     }
 
     @PostConstruct
@@ -72,9 +75,20 @@ public class ProductoBean implements Serializable {
         this.categoriasSeleccionadas = new ArrayList<>();
     }
 
-    public void registrarProducto() {
+    /** Publica el producto del usuario en sesión. Devuelve la navegación al inicio, o null si hay errores. */
+    public String registrarProducto() {
         FacesContext contexto = FacesContext.getCurrentInstance();
+        Long idUsuario = seguridadBean.getIdUsuario();
+        if (idUsuario == null) {
+            contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Debes iniciar sesión como usuario para publicar", null));
+            return null;
+        }
         try {
+            // El servicio recarga el vendedor desde la base de datos a partir de su id
+            Usuario vendedor = new Usuario();
+            vendedor.setId(idUsuario);
+            producto.setUsuario(vendedor);
             producto.setMisImagenes(imagenes);
             List<Long> idsCategorias = new ArrayList<>();
             for (Categoria categoria : categoriasSeleccionadas) {
@@ -83,10 +97,8 @@ public class ProductoBean implements Serializable {
             productoServicio.publicarProducto(producto, idsCategorias);
             contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Producto publicado", "Tu producto se publicó correctamente."));
-            // Deja el formulario limpio
-            this.producto = new Producto();
-            this.imagenes = new ArrayList<>();
-            this.categoriasSeleccionadas = new ArrayList<>();
+            contexto.getExternalContext().getFlash().setKeepMessages(true);
+            return "/index?faces-redirect=true";
         } catch (NegocioException e) {
             contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     "No se pudo publicar el producto", e.getMessage()));
@@ -95,6 +107,7 @@ public class ProductoBean implements Serializable {
             contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     "No se pudo publicar el producto", "Ocurrió un error inesperado. Inténtalo de nuevo más tarde."));
         }
+        return null;
     }
 
     /**

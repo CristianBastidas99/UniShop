@@ -36,3 +36,6 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 
 /* Listado de productos del inicio (se rehace en el Paso 4.3) */
 .trElementEmulation li { list-style: none; float: left; padding: 5px 10px; border: 1px solid #eee; }
+.sin-imagen { width: 400px; height: 400px; display: flex; align-items: center; justify-content: center;
+    background: #f0f2f5; color: #667; }
+.producto-descripcion { white-space: pre-line; margin: 8px 0; }

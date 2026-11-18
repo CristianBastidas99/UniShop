@@ -126,4 +126,9 @@ public class SeguridadBean implements Serializable {
     public String getNombre() {
         return persona != null ? persona.getNombre() : null;
     }
+
+    /** Id del usuario en sesión (solo si el rol es USUARIO); null en otro caso. No expone la persona. */
+    public Long getIdUsuario() {
+        return (persona != null && rol == Rol.USUARIO) ? persona.getId() : null;
+    }
 }

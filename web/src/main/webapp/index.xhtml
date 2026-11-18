@@ -9,12 +9,16 @@
     <ui:define name="contenido">
         <h:form>
             <ul class="trElementEmulation">
-                <p:repeat value="#{productoBean.listaProductos}" var="listaProductos">
+                <p:repeat value="#{productoBean.listaProductos}" var="producto">
                     <li class="trElementEmulation">
-                        <p:panel header="#{listaProductos.nombre}">
-                            <p:graphicImage url="#{listaProductos.misImagenes.get(0)}" library="demo" height="400" width="400"/><br/>
-                            <h:outputText value="#{productos.descripcion}" escape="false" /><br/>
-                            $<p:outputLabel value="#{productos.precio}"/>
+                        <p:panel header="#{producto.nombre}">
+                            <p:graphicImage url="#{producto.misImagenes[0]}" height="400" width="400"
+                                            rendered="#{not empty producto.misImagenes}"/>
+                            <h:panelGroup layout="block" styleClass="sin-imagen" rendered="#{empty producto.misImagenes}">Sin imagen</h:panelGroup>
+                            <div class="producto-descripcion"><h:outputText value="#{producto.descripcion}"/></div>
+                            <h:outputText value="#{producto.precio}">
+                                <f:convertNumber pattern="$#,##0"/>
+                            </h:outputText>
                         </p:panel>
                     </li>
                 </p:repeat>

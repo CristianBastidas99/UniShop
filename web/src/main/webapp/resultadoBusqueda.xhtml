@@ -9,10 +9,14 @@
     <ui:define name="contenido">
         <p:panel header="#{busquedaBean.busquedaParam}">
             <h:form>
-                <p:repeat value="#{busquedaBean.productos}" var="productos">
-                    <p:panel header="#{productos.nombre}">
-                        <p:outputPanel value="#{productos.descripcion}" escape="false" /><br/>
-                        <p:outputLabel value="$#{productos.precio}"/>
+                <p:repeat value="#{busquedaBean.productos}" var="producto">
+                    <p:panel header="#{producto.nombre}">
+                        <h:panelGroup layout="block" styleClass="producto-descripcion">
+                            <h:outputText value="#{producto.descripcion}"/>
+                        </h:panelGroup>
+                        <h:outputText value="#{producto.precio}">
+                            <f:convertNumber pattern="$#,##0"/>
+                        </h:outputText>
                     </p:panel>
                 </p:repeat>
             </h:form>

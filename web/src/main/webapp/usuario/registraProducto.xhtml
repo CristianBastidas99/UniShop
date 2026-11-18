@@ -31,9 +31,11 @@
 
                 <div class="form-campo">
                     <p:outputLabel for="descripcion_producto" value="Descripción"/>
-                    <p:textEditor id="descripcion_producto" value="#{productoBean.producto.descripcion}" height="300"
-                                  secure="false" label="Descripción"
-                                  required="true" requiredMessage="La descripción es obligatoria"/>
+                    <p:inputTextarea id="descripcion_producto" value="#{productoBean.producto.descripcion}"
+                                     label="Descripción" rows="6" maxlength="2000" autoResize="false"
+                                     counter="contador_descripcion" counterTemplate="{0} caracteres restantes"
+                                     required="true" requiredMessage="La descripción es obligatoria"/>
+                    <h:outputText id="contador_descripcion"/>
                     <p:message for="descripcion_producto"/>
                 </div>
 
