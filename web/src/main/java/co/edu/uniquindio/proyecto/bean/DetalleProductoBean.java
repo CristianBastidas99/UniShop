@@ -59,6 +59,7 @@ public class DetalleProductoBean extends ListadoProductosBase {
     private List<Comentario> comentarios = new ArrayList<>();
     private double promedio;
     private boolean yaReporto;
+    private boolean favorito;
 
     // Formulario de comentario
     private String mensaje;
@@ -103,6 +104,7 @@ public class DetalleProductoBean extends ListadoProductosBase {
         calcularRebaja();
         recargarComentarios();
         recargarReporte();
+        recargarFavorito();
     }
 
     /** Aviso "Antes $X": el último cambio de precio final fue a la baja y el precio actual sigue por debajo. */
@@ -141,7 +143,32 @@ public class DetalleProductoBean extends ListadoProductosBase {
         yaReporto = esUsuarioNoVendedor() && reporteServicio.yaReporto(seguridadBean.getIdUsuario(), producto.getId());
     }
 
+    private void recargarFavorito() {
+        favorito = esUsuarioNoVendedor() && productoServicio.esFavorito(producto.getId(), seguridadBean.getIdUsuario());
+    }
+
     // ---------- Acciones ----------
+
+    /** Agrega el producto a favoritos o lo quita, según su estado actual. */
+    public void alternarFavorito() {
+        if (!esUsuarioNoVendedor()) {
+            aviso(FacesMessage.SEVERITY_WARN, "No puede guardar este producto en favoritos");
+            return;
+        }
+        Long idUsuario = seguridadBean.getIdUsuario();
+        try {
+            if (productoServicio.esFavorito(producto.getId(), idUsuario)) {
+                productoServicio.quitarFavorito(producto.getId(), idUsuario);
+                aviso(FacesMessage.SEVERITY_INFO, "Quitado de favoritos");
+            } else {
+                productoServicio.agregarFavorito(producto.getId(), idUsuario);
+                aviso(FacesMessage.SEVERITY_INFO, "Agregado a favoritos");
+            }
+        } catch (NegocioException e) {
+            aviso(FacesMessage.SEVERITY_WARN, e.getMessage());
+        }
+        recargarFavorito();
+    }
 
     public void comentar() {
         if (!esUsuarioNoVendedor()) {
@@ -261,7 +288,8 @@ public class DetalleProductoBean extends ListadoProductosBase {
     }
 
     private static void aviso(FacesMessage.Severity severidad, String texto) {
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severidad, texto, null));
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severidad,
+                severidad == FacesMessage.SEVERITY_INFO ? "Listo" : "Atención", texto));
     }
 
     // ---------- Getters y setters ----------
@@ -278,6 +306,7 @@ public class DetalleProductoBean extends ListadoProductosBase {
     public Double getPrecioAntes() { return precioAntes; }
     public List<Comentario> getComentarios() { return comentarios; }
     public double getPromedio() { return promedio; }
+    public boolean isFavorito() { return favorito; }
     public boolean isYaReporto() { return yaReporto; }
     public String getMensaje() { return mensaje; }
     public void setMensaje(String mensaje) { this.mensaje = mensaje; }

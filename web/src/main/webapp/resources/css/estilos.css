@@ -119,3 +119,12 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
     .detalle-layout { grid-template-columns: minmax(0, 1fr); }
     .galeria-principal { height: 260px; }
 }
+
+/* Mis favoritos: tarjeta con acciones debajo (fuera del enlace de la tarjeta) */
+.favorito-celda { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.favorito-celda .producto-enlace { flex: 1; }
+.favorito-acciones { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.etiqueta-no-disponible { background: #fff3e0; border: 1px solid #ffb74d; color: #8a4b00; border-radius: 4px;
+    padding: 2px 8px; font-size: .85rem; font-weight: 600; }
+/* PrimeIcons 5 no trae pi-heart-fill: se reutiliza el corazón con color para indicar "favorito" */
+.pi-heart-fill::before { content: "\e984"; color: #e53935; }

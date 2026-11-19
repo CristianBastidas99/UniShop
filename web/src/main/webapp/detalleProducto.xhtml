@@ -92,6 +92,18 @@
                         <h:outputText value="#{detalleProductoBean.producto.descripcion}"/>
                     </h:panelGroup>
 
+                    <h:panelGroup id="zonaFavorito" layout="block" styleClass="detalle-reporte">
+                        <p:commandButton value="#{detalleProductoBean.favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
+                                         icon="#{detalleProductoBean.favorito ? 'pi pi-fw pi-heart-fill' : 'pi pi-fw pi-heart'}"
+                                         action="#{detalleProductoBean.alternarFavorito}"
+                                         update="zonaFavorito :mensajes"
+                                         rendered="#{detalleProductoBean.usuarioNoVendedor and (detalleProductoBean.favorito or detalleProductoBean.disponible)}"/>
+                        <h:link outcome="/login" value="Inicia sesión para guardar en favoritos"
+                                rendered="#{not seguridadBean.autenticado}">
+                            <f:param name="destino" value="/detalleProducto.xhtml?producto=#{detalleProductoBean.producto.id}"/>
+                        </h:link>
+                    </h:panelGroup>
+
                     <h:panelGroup id="zonaReporte" layout="block" styleClass="detalle-reporte">
                         <p:commandButton value="Reportar producto" icon="pi pi-fw pi-flag" type="button"
                                          styleClass="ui-button-secondary"

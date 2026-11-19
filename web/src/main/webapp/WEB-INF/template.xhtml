@@ -40,6 +40,8 @@
                 <p:menuitem value="Inicio" icon="pi pi-fw pi-home" outcome="/index"/>
                 <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="/usuario/registraProducto"
                             rendered="#{seguridadBean.usuario}"/>
+                <p:menuitem value="Mis favoritos" icon="pi pi-fw pi-heart" outcome="/usuario/favoritos"
+                            rendered="#{seguridadBean.usuario}"/>
                 <p:menuitem value="Panel" icon="pi pi-fw pi-cog" outcome="/admin/inicio"
                             rendered="#{seguridadBean.administrador}"/>
                 <f:facet name="options">

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Mis favoritos</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{favoritosBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:panelGroup id="zonaFavoritos" layout="block">
+            <h1 class="titulo-inicio">Mis favoritos (#{favoritosBean.productos.size()})</h1>
+
+            <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{empty favoritosBean.productos}">
+                Aún no tienes productos favoritos
+                <p><h:link outcome="/index" value="Ir al inicio"/></p>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" styleClass="productos-grid" rendered="#{not empty favoritosBean.productos}">
+                <ui:repeat value="#{favoritosBean.productos}" var="producto">
+                    <div class="favorito-celda">
+                        <ui:include src="/WEB-INF/includes/tarjetaProducto.xhtml">
+                            <ui:param name="producto" value="#{producto}"/>
+                            <ui:param name="listado" value="#{favoritosBean}"/>
+                        </ui:include>
+                        <h:form styleClass="favorito-acciones">
+                            <h:outputText styleClass="etiqueta-no-disponible" value="No disponible"
+                                          rendered="#{favoritosBean.noDisponible(producto)}"/>
+                            <p:commandButton value="Quitar" icon="pi pi-fw pi-heart-fill"
+                                             styleClass="ui-button-secondary"
+                                             action="#{favoritosBean.quitar(producto.id)}"
+                                             update=":zonaFavoritos :mensajes"/>
+                        </h:form>
+                    </div>
+                </ui:repeat>
+            </h:panelGroup>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
