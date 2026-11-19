@@ -34,8 +34,21 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .menu-sesion { display: inline-flex; align-items: center; gap: 8px; }
 .menu-nombre { font-weight: 600; color: #1565c0; }
 
-/* Descripción en el resultado de búsqueda (se rehace en el Paso 4.4) */
-.producto-descripcion { white-space: pre-line; margin: 8px 0; }
+/* Resultados de búsqueda: filtros a la izquierda (arriba en móvil) y tarjetas */
+.busqueda-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: start; }
+.filtros { background: #ffffff; border: 1px solid #dde2e7; border-radius: 8px; padding: 16px; min-width: 0; }
+.filtros-titulo { margin: 0 0 12px; font-size: 1.1rem; color: #222; }
+.filtro-campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.filtro-campo label { font-size: .9rem; color: #445; }
+.filtro-campo .ui-inputtext, .filtro-campo .ui-selectonemenu { width: 100%; box-sizing: border-box; }
+.filtro-campo .ui-message:empty { display: none; }
+.filtros-acciones { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.filtros-limpiar { text-align: center; color: #1565c0; font-size: .95rem; }
+.resultados { min-width: 0; }
+.resultados-cantidad { margin: 0 0 16px; color: #667; }
+@media (max-width: 768px) {
+    .busqueda-layout { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* Inicio: barra de categorías */
 .categorias { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }

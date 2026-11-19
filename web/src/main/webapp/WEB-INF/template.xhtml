@@ -25,9 +25,9 @@
                 <div class="ui-inputgroup">
                     <p:inputText id="busqueda" placeholder="¿Qué producto está buscando?"
                                  required="true" requiredMessage="Escribe qué producto buscas"
-                                 label="Búsqueda" value="#{busquedaBean.busqueda}"/>
+                                 label="Búsqueda" value="#{buscadorBean.texto}"/>
                     <p:commandButton icon="pi pi-search" update="@form :mensajes"
-                                     action="#{busquedaBean.buscar}" styleClass="ui-button-warning"/>
+                                     action="#{buscadorBean.buscar}" styleClass="ui-button-warning"/>
                 </div>
             </h:form>
         </div>

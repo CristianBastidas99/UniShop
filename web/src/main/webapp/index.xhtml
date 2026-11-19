@@ -36,33 +36,10 @@
 
         <h:panelGroup layout="block" styleClass="productos-grid" rendered="#{not empty inicioBean.productos}">
             <ui:repeat value="#{inicioBean.productos}" var="producto">
-                <div class="producto-tarjeta">
-                    <img class="producto-imagen" src="#{inicioBean.imagen(producto)}" alt="#{producto.nombre}"/>
-                    <div class="producto-info">
-                        <span class="producto-nombre">#{producto.nombre}</span>
-                        <div class="producto-precios">
-                            <h:outputText styleClass="precio-final"
-                                          value="#{inicioBean.tieneDescuento(producto) ? inicioBean.precioFinal(producto) : producto.precio}">
-                                <f:convertNumber pattern="$#,##0"/>
-                            </h:outputText>
-                            <h:outputText styleClass="precio-original" value="#{producto.precio}"
-                                          rendered="#{inicioBean.tieneDescuento(producto)}">
-                                <f:convertNumber pattern="$#,##0"/>
-                            </h:outputText>
-                            <h:outputText styleClass="etiqueta-descuento"
-                                          value="-#{inicioBean.porcentajeDescuento(producto)} %"
-                                          rendered="#{inicioBean.tieneDescuento(producto)}"/>
-                        </div>
-                        <div class="producto-calificacion">
-                            <p:rating value="#{inicioBean.estrellas(producto)}" readonly="true"
-                                      rendered="#{inicioBean.tieneCalificacion(producto)}"/>
-                            <h:outputText value="(#{inicioBean.calificacion(producto)})"
-                                          rendered="#{inicioBean.tieneCalificacion(producto)}"/>
-                            <h:outputText styleClass="sin-calificaciones" value="Sin calificaciones"
-                                          rendered="#{not inicioBean.tieneCalificacion(producto)}"/>
-                        </div>
-                    </div>
-                </div>
+                <ui:include src="/WEB-INF/includes/tarjetaProducto.xhtml">
+                    <ui:param name="producto" value="#{producto}"/>
+                    <ui:param name="listado" value="#{inicioBean}"/>
+                </ui:include>
             </ui:repeat>
         </h:panelGroup>
     </ui:define>

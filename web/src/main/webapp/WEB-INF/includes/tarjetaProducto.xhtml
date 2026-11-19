@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Tarjeta de producto reutilizable. Parámetros: producto (Producto) y listado (bean que extiende ListadoProductosBase) -->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui">
+    <div class="producto-tarjeta">
+        <img class="producto-imagen" src="#{listado.imagen(producto)}" alt="#{producto.nombre}"/>
+        <div class="producto-info">
+            <span class="producto-nombre">#{producto.nombre}</span>
+            <div class="producto-precios">
+                <h:outputText styleClass="precio-final"
+                              value="#{listado.tieneDescuento(producto) ? listado.precioFinal(producto) : producto.precio}">
+                    <f:convertNumber pattern="$#,##0"/>
+                </h:outputText>
+                <h:outputText styleClass="precio-original" value="#{producto.precio}"
+                              rendered="#{listado.tieneDescuento(producto)}">
+                    <f:convertNumber pattern="$#,##0"/>
+                </h:outputText>
+                <h:outputText styleClass="etiqueta-descuento"
+                              value="-#{listado.porcentajeDescuento(producto)} %"
+                              rendered="#{listado.tieneDescuento(producto)}"/>
+            </div>
+            <div class="producto-calificacion">
+                <p:rating value="#{listado.estrellas(producto)}" readonly="true"
+                          rendered="#{listado.tieneCalificacion(producto)}"/>
+                <h:outputText value="(#{listado.calificacion(producto)})"
+                              rendered="#{listado.tieneCalificacion(producto)}"/>
+                <h:outputText styleClass="sin-calificaciones" value="Sin calificaciones"
+                              rendered="#{not listado.tieneCalificacion(producto)}"/>
+            </div>
+        </div>
+    </div>
+</ui:composition>
