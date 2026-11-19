@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Detalle del producto</ui:define>
+
+    <!-- Detalle público: detalleProducto.xhtml?producto=ID -->
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="producto" value="#{detalleProductoBean.idProducto}"/>
+            <f:viewAction action="#{detalleProductoBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <!-- Producto inexistente -->
+        <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{not detalleProductoBean.existe}">
+            <h1>El producto no existe</h1>
+            <p><h:link outcome="/index" value="Volver al inicio"/></p>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" rendered="#{detalleProductoBean.existe}">
+            <h:panelGroup layout="block" styleClass="aviso-no-disponible"
+                          rendered="#{not detalleProductoBean.disponible}">
+                Este producto ya no está disponible
+            </h:panelGroup>
+
+            <div class="detalle-layout">
+                <!-- Galería: fuera de los formularios para que no cambie con las actualizaciones ajax -->
+                <div class="galeria">
+                    <img id="imagenPrincipal" class="galeria-principal" src="#{detalleProductoBean.imagenPrincipal}"
+                         alt="#{detalleProductoBean.producto.nombre}"/>
+                    <h:panelGroup layout="block" styleClass="galeria-miniaturas"
+                                  rendered="#{detalleProductoBean.imagenes.size() gt 1}">
+                        <ui:repeat value="#{detalleProductoBean.imagenes}" var="ruta">
+                            <img class="galeria-miniatura" src="#{detalleProductoBean.rutaImagen(ruta)}" alt="Miniatura"
+                                 onclick="document.getElementById('imagenPrincipal').src = this.src"/>
+                        </ui:repeat>
+                    </h:panelGroup>
+                </div>
+
+                <h:form id="formDatos" styleClass="detalle-datos">
+                    <h1 class="detalle-nombre">#{detalleProductoBean.producto.nombre}</h1>
+
+                    <h:panelGroup id="calificacionGeneral" layout="block" styleClass="producto-calificacion">
+                        <p:rating value="#{detalleProductoBean.estrellasPromedio}" readonly="true"
+                                  rendered="#{detalleProductoBean.tieneCalificacion}"/>
+                        <h:outputText value="#{detalleProductoBean.promedio} de 5 (#{detalleProductoBean.comentarios.size()} comentarios)"
+                                      rendered="#{detalleProductoBean.tieneCalificacion}"/>
+                        <h:outputText styleClass="sin-calificaciones" value="Sin calificaciones"
+                                      rendered="#{not detalleProductoBean.tieneCalificacion}"/>
+                    </h:panelGroup>
+
+                    <div class="producto-precios detalle-precios">
+                        <h:outputText styleClass="precio-final detalle-precio-final"
+                                      value="#{detalleProductoBean.precioFinal(detalleProductoBean.producto)}">
+                            <f:convertNumber pattern="$#,##0"/>
+                        </h:outputText>
+                        <h:outputText styleClass="precio-original" value="#{detalleProductoBean.producto.precio}"
+                                      rendered="#{detalleProductoBean.tieneDescuento(detalleProductoBean.producto)}">
+                            <f:convertNumber pattern="$#,##0"/>
+                        </h:outputText>
+                        <h:outputText styleClass="etiqueta-descuento"
+                                      value="-#{detalleProductoBean.porcentajeDescuento(detalleProductoBean.producto)} %"
+                                      rendered="#{detalleProductoBean.tieneDescuento(detalleProductoBean.producto)}"/>
+                    </div>
+                    <h:panelGroup layout="block" styleClass="aviso-rebaja"
+                                  rendered="#{detalleProductoBean.precioAntes != null}">
+                        Rebaja: antes
+                        <h:outputText value="#{detalleProductoBean.precioAntes}">
+                            <f:convertNumber pattern="$#,##0"/>
+                        </h:outputText>
+                    </h:panelGroup>
+
+                    <ul class="detalle-lista">
+                        <li><strong>Unidades disponibles:</strong> #{detalleProductoBean.producto.unidades}</li>
+                        <li><strong>Disponible hasta:</strong>&#160;
+                            <h:outputText value="#{detalleProductoBean.producto.fechaLimite}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                            </h:outputText>
+                        </li>
+                        <li><strong>Ciudad:</strong> #{empty detalleProductoBean.ciudad ? 'No indicada' : detalleProductoBean.ciudad}</li>
+                        <li><strong>Categorías:</strong> #{empty detalleProductoBean.categorias ? 'Sin categoría' : detalleProductoBean.categorias}</li>
+                        <li><strong>Vendedor:</strong> #{detalleProductoBean.nombreVendedor}</li>
+                    </ul>
+
+                    <h:panelGroup layout="block" styleClass="detalle-descripcion"
+                                  rendered="#{not empty detalleProductoBean.producto.descripcion}">
+                        <h:outputText value="#{detalleProductoBean.producto.descripcion}"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup id="zonaReporte" layout="block" styleClass="detalle-reporte">
+                        <p:commandButton value="Reportar producto" icon="pi pi-fw pi-flag" type="button"
+                                         styleClass="ui-button-secondary"
+                                         onclick="PF('dlgReporte').show()"
+                                         rendered="#{detalleProductoBean.usuarioNoVendedor and not detalleProductoBean.yaReporto}"/>
+                        <h:outputText styleClass="sin-calificaciones" value="Ya reportaste este producto"
+                                      rendered="#{detalleProductoBean.usuarioNoVendedor and detalleProductoBean.yaReporto}"/>
+                    </h:panelGroup>
+                </h:form>
+            </div>
+
+            <!-- Diálogo de reporte (formulario propio) -->
+            <h:form id="formReporte" rendered="#{detalleProductoBean.usuarioNoVendedor}">
+                <p:dialog header="Reportar producto" widgetVar="dlgReporte" modal="true" resizable="false"
+                          draggable="false" styleClass="dialogo-reporte">
+                    <div class="form-campo">
+                        <p:outputLabel for="motivo" value="Motivo"/>
+                        <p:selectOneMenu id="motivo" value="#{detalleProductoBean.motivo}"
+                                         required="true" requiredMessage="Elige el motivo del reporte">
+                            <f:selectItem itemLabel="Selecciona un motivo" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{detalleProductoBean.motivos}" var="m"
+                                           itemLabel="#{detalleProductoBean.etiqueta(m)}" itemValue="#{m}"/>
+                        </p:selectOneMenu>
+                        <p:message id="msgMotivo" for="motivo"/>
+                    </div>
+                    <div class="form-campo">
+                        <p:outputLabel for="descripcionReporte" value="Descripción (opcional)"/>
+                        <p:inputTextarea id="descripcionReporte" rows="4" maxlength="1000" counter="contadorReporte"
+                                         counterTemplate="{0} caracteres restantes"
+                                         value="#{detalleProductoBean.descripcionReporte}"/>
+                        <small><h:outputText id="contadorReporte"/></small>
+                    </div>
+                    <p:commandButton value="Enviar reporte" icon="pi pi-fw pi-send"
+                                     action="#{detalleProductoBean.reportar}"
+                                     update="motivo msgMotivo descripcionReporte :formDatos:zonaReporte :mensajes"/>
+                </p:dialog>
+            </h:form>
+
+            <!-- Comentarios -->
+            <h:form id="formComentarios" styleClass="comentarios">
+                <h2>Comentarios (#{detalleProductoBean.comentarios.size()})</h2>
+
+                <h:panelGroup layout="block" styleClass="comentar-caja"
+                              rendered="#{detalleProductoBean.usuarioNoVendedor}">
+                    <h3>Deja tu comentario</h3>
+                    <div class="form-campo">
+                        <p:outputLabel for="mensaje" value="Comentario"/>
+                        <p:inputTextarea id="mensaje" rows="4" maxlength="1000" counter="contadorMensaje"
+                                         counterTemplate="{0} caracteres restantes"
+                                         value="#{detalleProductoBean.mensaje}"/>
+                        <small><h:outputText id="contadorMensaje"/></small>
+                    </div>
+                    <div class="form-campo">
+                        <p:outputLabel for="calificacion" value="Calificación (0 a 5)"/>
+                        <p:rating id="calificacion" value="#{detalleProductoBean.calificacion}" stars="5" cancel="true"/>
+                    </div>
+                    <p:commandButton value="Comentar" icon="pi pi-fw pi-comment"
+                                     action="#{detalleProductoBean.comentar}"
+                                     update="@form :formDatos:calificacionGeneral :mensajes"/>
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="comentar-caja"
+                              rendered="#{not seguridadBean.autenticado}">
+                    <h:link outcome="/login" value="Inicia sesión para comentar">
+                        <f:param name="destino" value="/detalleProducto.xhtml?producto=#{detalleProductoBean.producto.id}"/>
+                    </h:link>
+                </h:panelGroup>
+
+                <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{empty detalleProductoBean.comentarios}">
+                    Aún no hay comentarios
+                </h:panelGroup>
+
+                <ui:repeat value="#{detalleProductoBean.comentarios}" var="comentario">
+                    <div class="comentario">
+                        <div class="comentario-cabecera">
+                            <strong>#{comentario.usuario.nombre}</strong>
+                            <h:outputText styleClass="comentario-fecha" value="#{comentario.fecha}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                            </h:outputText>
+                        </div>
+                        <p:rating value="#{comentario.calificacion}" readonly="true"/>
+                        <div class="comentario-mensaje">
+                            <h:outputText value="#{comentario.mensaje}"/>
+                        </div>
+                        <h:panelGroup layout="block" styleClass="comentario-respuesta"
+                                      rendered="#{not empty comentario.respuesta}">
+                            <strong>Respuesta del vendedor:</strong>
+                            <div class="comentario-mensaje"><h:outputText value="#{comentario.respuesta}"/></div>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="comentario-responder"
+                                      rendered="#{empty comentario.respuesta and detalleProductoBean.vendedor}">
+                            <p:inputText value="#{detalleProductoBean.respuestas[comentario.id]}" maxlength="255"
+                                         placeholder="Escribe tu respuesta"/>
+                            <p:commandButton value="Responder" icon="pi pi-fw pi-reply"
+                                             action="#{detalleProductoBean.responder(comentario.id)}"
+                                             update="@form :mensajes"/>
+                        </h:panelGroup>
+                    </div>
+                </ui:repeat>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

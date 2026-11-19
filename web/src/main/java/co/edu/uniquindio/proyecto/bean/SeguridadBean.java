@@ -87,11 +87,15 @@ public class SeguridadBean implements Serializable {
         // Vuelve a la página privada pedida si es válida para el rol; si no, al inicio
         String volver = destinoValido();
         destino = null;
-        return (volver != null ? volver : "/index") + "?faces-redirect=true";
+        String destinoFinal = volver != null ? volver : "/index";
+        return destinoFinal + (destinoFinal.contains("?") ? "&" : "?") + "faces-redirect=true";
     }
 
-    /** Devuelve el destino solo si es una ruta interna privada permitida para el rol; si no, null. */
+    /** Devuelve el destino solo si es una ruta interna permitida (privada para el rol o el detalle de un producto); si no, null. */
     private String destinoValido() {
+        if (destino != null && destino.matches("/detalleProducto\\.xhtml\\?producto=[0-9]{1,18}")) {
+            return destino;
+        }
         if (destino == null || !destino.matches("/(usuario|admin)/[A-Za-z0-9_-]+(/[A-Za-z0-9_-]+)*\\.xhtml")) {
             return null;
         }

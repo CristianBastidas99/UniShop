@@ -55,6 +55,9 @@ public interface ReporteProductoServicio {
     /** Lista los reportes pendientes de revisión. */
     List<ReporteProducto> listarPendientes();
 
+    /** Indica si el usuario ya reportó el producto (false si alguno de los ids es nulo). */
+    boolean yaReporto(Long idUsuario, Long idProducto);
+
     /** Lista los reportes de un producto. */
     List<ReporteProducto> listarPorProducto(Long idProducto);
 

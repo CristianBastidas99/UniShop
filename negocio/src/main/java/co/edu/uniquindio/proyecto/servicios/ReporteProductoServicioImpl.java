@@ -98,6 +98,12 @@ public class ReporteProductoServicioImpl implements ReporteProductoServicio {
     }
 
     @Override
+    public boolean yaReporto(Long idUsuario, Long idProducto) {
+        return idUsuario != null && idProducto != null
+                && reporteProductoRepo.existsByUsuarioIdAndProductoId(idUsuario, idProducto);
+    }
+
+    @Override
     public List<ReporteProducto> listarPorProducto(Long idProducto) {
         return reporteProductoRepo.listarPorProducto(idProducto);
     }

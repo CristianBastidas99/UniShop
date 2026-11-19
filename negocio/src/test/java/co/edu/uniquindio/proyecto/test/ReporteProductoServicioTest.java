@@ -143,6 +143,22 @@ public class ReporteProductoServicioTest extends BaseServicioTest {
     }
 
     @Test
+    public void yaReportoTest() throws Exception {
+        // El usuario 9 ya reportó el producto 3 en los datos de prueba.
+        assertTrue(reporteServicio.yaReporto(9L, 3L));
+        assertFalse(reporteServicio.yaReporto(6L, 1L));
+        reporteServicio.reportarProducto(nuevoReporte(6L, 1L));
+        sincronizar();
+        assertTrue(reporteServicio.yaReporto(6L, 1L));
+    }
+
+    @Test
+    public void yaReportoConIdsNulosTest() {
+        assertFalse(reporteServicio.yaReporto(null, 1L));
+        assertFalse(reporteServicio.yaReporto(6L, null));
+    }
+
+    @Test
     public void reportarPropioProductoTest() {
         // El producto 1 es del usuario 5.
         NegocioException e = assertThrows(NegocioException.class,
