@@ -128,3 +128,15 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
     padding: 2px 8px; font-size: .85rem; font-weight: 600; }
 /* PrimeIcons 5 no trae pi-heart-fill: se reutiliza el corazón con color para indicar "favorito" */
 .pi-heart-fill::before { content: "\e984"; color: #e53935; }
+
+/* Carrito */
+.carrito-producto { display: flex; align-items: center; gap: 12px; }
+.carrito-imagen { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; background: #eef0f3; flex: none; }
+.carrito-disponibles { font-size: .8rem; color: #667; margin-top: 2px; }
+.carrito-excedido { color: #c62828; font-weight: 600; }
+.carrito-pie { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 24px; margin-top: 24px; }
+.carrito-pie h2 { font-size: 1.1rem; margin: 0 0 12px; }
+.resumen-fila { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; }
+.resumen-total { font-size: 1.25rem; font-weight: 700; border-top: 1px solid #dde2e7; margin-bottom: 16px; }
+.carrito-resumen .ui-selectonemenu { width: 100%; box-sizing: border-box; }
+.detalle-carrito { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }

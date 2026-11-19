@@ -92,6 +92,15 @@
                         <h:outputText value="#{detalleProductoBean.producto.descripcion}"/>
                     </h:panelGroup>
 
+                    <h:panelGroup id="zonaCompra" layout="block" styleClass="detalle-carrito"
+                                  rendered="#{detalleProductoBean.usuarioNoVendedor and detalleProductoBean.disponible}">
+                        <p:spinner id="cantidad" value="#{detalleProductoBean.cantidad}" min="1"
+                                   max="#{detalleProductoBean.producto.unidades}" size="4" label="Cantidad"/>
+                        <p:commandButton id="agregarCarrito" value="Agregar al carrito" icon="pi pi-fw pi-shopping-cart"
+                                         process="@this cantidad" action="#{detalleProductoBean.agregarAlCarrito}"
+                                         update=":zonaCarrito :mensajes"/>
+                    </h:panelGroup>
+
                     <h:panelGroup id="zonaFavorito" layout="block" styleClass="detalle-reporte">
                         <p:commandButton value="#{detalleProductoBean.favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
                                          icon="#{detalleProductoBean.favorito ? 'pi pi-fw pi-heart-fill' : 'pi pi-fw pi-heart'}"

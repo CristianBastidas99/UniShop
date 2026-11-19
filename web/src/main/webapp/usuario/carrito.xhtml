@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Mi carrito</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{carritoBean.refrescar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:panelGroup id="zonaPagina" layout="block">
+            <h1 class="titulo-inicio">Mi carrito</h1>
+
+            <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{carritoBean.vacio}">
+                Tu carrito está vacío
+                <p><h:link outcome="/index" value="Ir al inicio"/></p>
+            </h:panelGroup>
+
+            <h:form id="formCarrito" rendered="#{not carritoBean.vacio}">
+                <p:dataTable id="tabla" value="#{carritoBean.lineas}" var="linea" reflow="true"
+                             rowKey="#{linea.idProducto}">
+                    <p:column headerText="Producto">
+                        <div class="carrito-producto">
+                            <img class="carrito-imagen" src="#{carritoBean.rutaImagen(linea)}" alt="#{linea.nombre}"/>
+                            <h:link outcome="/detalleProducto" value="#{linea.nombre}">
+                                <f:param name="producto" value="#{linea.idProducto}"/>
+                            </h:link>
+                        </div>
+                    </p:column>
+                    <p:column headerText="Precio">
+                        <h:outputText value="#{carritoBean.precioUnitario(linea)}">
+                            <f:convertNumber pattern="$#,##0.00"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Cantidad">
+                        <p:spinner id="cantidad" value="#{linea.cantidad}" min="1" max="#{linea.maximo}"
+                                   size="4" label="Cantidad">
+                            <p:ajax event="change" listener="#{carritoBean.ajustarCantidad(linea)}"
+                                    update=":zonaPagina :zonaCarrito :mensajes"/>
+                        </p:spinner>
+                        <div class="carrito-disponibles #{linea.excedido ? 'carrito-excedido' : ''}">
+                            Disponibles: #{linea.disponibles}
+                        </div>
+                    </p:column>
+                    <p:column headerText="Subtotal">
+                        <h:outputText value="#{carritoBean.subtotalLinea(linea)}">
+                            <f:convertNumber pattern="$#,##0.00"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Quitar">
+                        <p:commandButton icon="pi pi-fw pi-trash" title="Quitar del carrito"
+                                         styleClass="ui-button-danger" process="@this"
+                                         action="#{carritoBean.quitar(linea.idProducto)}"
+                                         update=":zonaPagina :zonaCarrito :mensajes"/>
+                    </p:column>
+                </p:dataTable>
+
+                <div class="carrito-pie">
+                    <div class="carrito-cupon">
+                        <h2>Cupón de descuento</h2>
+                        <h:panelGroup layout="block" rendered="#{carritoBean.conCupon}">
+                            <p>Cupón <strong>#{carritoBean.cuponAplicado}</strong> aplicado (-#{carritoBean.porcentajeCupon} %)</p>
+                            <p:commandButton value="Quitar cupón" icon="pi pi-fw pi-times" process="@this"
+                                             styleClass="ui-button-secondary"
+                                             action="#{carritoBean.quitarCupon}"
+                                             update=":zonaPagina :mensajes"/>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" rendered="#{not carritoBean.conCupon}">
+                            <div class="ui-inputgroup">
+                                <p:inputText id="codigoCupon" value="#{carritoBean.codigoCupon}"
+                                             placeholder="Código del cupón" label="Código del cupón"/>
+                                <p:commandButton value="Aplicar" process="codigoCupon @this"
+                                                 action="#{carritoBean.aplicarCupon}"
+                                                 update=":zonaPagina :mensajes"/>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+
+                    <div class="carrito-resumen">
+                        <h2>Resumen</h2>
+                        <div class="resumen-fila"><span>Subtotal</span>
+                            <h:outputText value="#{carritoBean.subtotal}"><f:convertNumber pattern="$#,##0.00"/></h:outputText>
+                        </div>
+                        <h:panelGroup layout="block" styleClass="resumen-fila" rendered="#{carritoBean.conCupon}">
+                            <span>Descuento del cupón</span>
+                            <h:outputText value="#{carritoBean.descuentoCupon}"><f:convertNumber pattern="-$#,##0.00"/></h:outputText>
+                        </h:panelGroup>
+                        <div class="resumen-fila resumen-total"><span>Total</span>
+                            <h:outputText id="total" value="#{carritoBean.total}"><f:convertNumber pattern="$#,##0.00"/></h:outputText>
+                        </div>
+
+                        <div class="form-campo">
+                            <p:outputLabel for="medioPago" value="Medio de pago *"/>
+                            <p:selectOneMenu id="medioPago" value="#{carritoBean.medioPago}">
+                                <f:selectItem itemLabel="Selecciona un medio de pago" itemValue="#{null}"
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{carritoBean.mediosPago}" var="m"
+                                               itemLabel="#{carritoBean.etiqueta(m)}" itemValue="#{m}"/>
+                            </p:selectOneMenu>
+                        </div>
+
+                        <p:commandButton id="confirmar" value="Confirmar compra" icon="pi pi-fw pi-check"
+                                         process="@this medioPago" action="#{carritoBean.confirmar}"
+                                         update=":zonaPagina :zonaCarrito :mensajes"/>
+                    </div>
+                </div>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

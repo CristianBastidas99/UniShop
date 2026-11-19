@@ -45,8 +45,11 @@
                 <p:menuitem value="Panel" icon="pi pi-fw pi-cog" outcome="/admin/inicio"
                             rendered="#{seguridadBean.administrador}"/>
                 <f:facet name="options">
-                    <p:button value="Carrito" icon="pi pi-fw pi-shopping-cart" href="#" disabled="true"
-                              styleClass="ui-button-flat" rendered="#{seguridadBean.usuario}"/>
+                    <h:panelGroup id="zonaCarrito">
+                        <p:button value="Carrito (#{carritoBean.cantidadProductos})" icon="pi pi-fw pi-shopping-cart"
+                                  outcome="/usuario/carrito" styleClass="ui-button-flat"
+                                  rendered="#{seguridadBean.usuario}"/>
+                    </h:panelGroup>
                     <p:button value="Iniciar sesión" icon="pi pi-fw pi-sign-in" outcome="/login"
                               styleClass="ui-button-flat" rendered="#{!seguridadBean.autenticado}"/>
                     <p:button value="Registrarse" icon="pi pi-fw pi-user-plus" outcome="/registraUsuario"

@@ -38,6 +38,7 @@ public class DetalleProductoBean extends ListadoProductosBase {
     private final ReporteProductoServicio reporteServicio;
     private final HistorialPrecioServicio historialServicio;
     private final SeguridadBean seguridadBean;
+    private final CarritoBean carritoBean;
 
     /** Valor crudo del parámetro {@code producto} (texto, para tolerar valores no numéricos). */
     private String idProducto;
@@ -61,6 +62,9 @@ public class DetalleProductoBean extends ListadoProductosBase {
     private boolean yaReporto;
     private boolean favorito;
 
+    // Cantidad a agregar al carrito
+    private int cantidad = 1;
+
     // Formulario de comentario
     private String mensaje;
     private int calificacion;
@@ -74,12 +78,13 @@ public class DetalleProductoBean extends ListadoProductosBase {
 
     public DetalleProductoBean(ProductoServicio productoServicio, ComentarioServicio comentarioServicio,
                                ReporteProductoServicio reporteServicio, HistorialPrecioServicio historialServicio,
-                               SeguridadBean seguridadBean) {
+                               SeguridadBean seguridadBean, CarritoBean carritoBean) {
         super(productoServicio, comentarioServicio);
         this.comentarioServicio = comentarioServicio;
         this.reporteServicio = reporteServicio;
         this.historialServicio = historialServicio;
         this.seguridadBean = seguridadBean;
+        this.carritoBean = carritoBean;
     }
 
     /** Se ejecuta con f:viewAction: carga el producto o marca que no existe (sin lanzar error). */
@@ -168,6 +173,26 @@ public class DetalleProductoBean extends ListadoProductosBase {
             aviso(FacesMessage.SEVERITY_WARN, e.getMessage());
         }
         recargarFavorito();
+    }
+
+    /** Agrega al carrito la cantidad elegida (solo usuarios que no son el vendedor y con el producto disponible). */
+    public void agregarAlCarrito() {
+        if (!esUsuarioNoVendedor()) {
+            aviso(FacesMessage.SEVERITY_WARN, "No puede agregar este producto al carrito");
+            return;
+        }
+        try {
+            // Se vuelve a leer el producto: las unidades y la vigencia pudieron cambiar
+            Producto actual = productoServicio.obtenerProducto(producto.getId());
+            if (actual.getFechaLimite() == null || !actual.getFechaLimite().after(new Date())) {
+                aviso(FacesMessage.SEVERITY_WARN, "El producto ya no está disponible");
+                return;
+            }
+            int total = carritoBean.agregar(actual, cantidad);
+            aviso(FacesMessage.SEVERITY_INFO, "Agregado al carrito (en tu carrito: " + total + ")");
+        } catch (NegocioException e) {
+            aviso(FacesMessage.SEVERITY_WARN, e.getMessage());
+        }
     }
 
     public void comentar() {
@@ -307,6 +332,8 @@ public class DetalleProductoBean extends ListadoProductosBase {
     public List<Comentario> getComentarios() { return comentarios; }
     public double getPromedio() { return promedio; }
     public boolean isFavorito() { return favorito; }
+    public int getCantidad() { return cantidad; }
+    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
     public boolean isYaReporto() { return yaReporto; }
     public String getMensaje() { return mensaje; }
     public void setMensaje(String mensaje) { this.mensaje = mensaje; }
