@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Cupones</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{cuponesAdminBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h1 class="titulo-inicio">Cupones</h1>
+
+        <h:form id="formAcciones" styleClass="admin-barra">
+            <p:commandButton value="Nuevo cupón" icon="pi pi-fw pi-plus" styleClass="ui-button-success"
+                             action="#{cuponesAdminBean.prepararNuevo}" process="@this" update=":formCupon"
+                             oncomplete="PF('dlgCupon').show()"/>
+        </h:form>
+
+        <h:panelGroup id="zonaCupones" layout="block">
+            <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{empty cuponesAdminBean.cupones}">
+                No hay cupones creados
+            </h:panelGroup>
+
+            <h:form id="formLista" rendered="#{not empty cuponesAdminBean.cupones}">
+                <p:dataTable id="tablaCupones" value="#{cuponesAdminBean.cupones}" var="fila" reflow="true"
+                             paginator="true" rows="10" paginatorPosition="bottom">
+                    <p:column headerText="Código" sortBy="#{fila.codigo}">
+                        <h:outputText value="#{fila.codigo}"/>
+                    </p:column>
+                    <p:column headerText="Descuento" sortBy="#{fila.porcentaje}">
+                        <h:outputText value="#{fila.porcentaje} %"/>
+                    </p:column>
+                    <p:column headerText="Vencimiento" sortBy="#{fila.fechaVencimiento}">
+                        <h:outputText value="#{fila.fechaVencimiento}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Usos">
+                        <h:outputText value="#{fila.usosRealizados} / #{fila.usosMaximos}"/>
+                    </p:column>
+                    <p:column headerText="Estado" sortBy="#{fila.estado}">
+                        <h:outputText value="#{fila.estado}" styleClass="estado-producto #{fila.claseEstado}"/>
+                    </p:column>
+                    <p:column headerText="Acciones">
+                        <div class="acciones-producto">
+                            <p:commandButton value="Editar" icon="pi pi-fw pi-pencil"
+                                             action="#{cuponesAdminBean.prepararEdicion(fila)}"
+                                             process="@this" update=":formCupon"
+                                             oncomplete="PF('dlgCupon').show()"/>
+                            <p:commandButton value="Desactivar" icon="pi pi-fw pi-ban" styleClass="ui-button-secondary"
+                                             rendered="#{fila.vigente}"
+                                             action="#{cuponesAdminBean.desactivar(fila)}"
+                                             process="@this" update=":zonaCupones :mensajes"/>
+                            <p:commandButton value="Eliminar" icon="pi pi-fw pi-trash" styleClass="ui-button-danger"
+                                             action="#{cuponesAdminBean.prepararEliminar(fila)}"
+                                             process="@this" update=":formEliminar"
+                                             oncomplete="PF('dlgEliminar').show()"/>
+                        </div>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+
+        <p:dialog header="Cupón" widgetVar="dlgCupon" modal="true" resizable="false" draggable="false"
+                  styleClass="dialogo-admin">
+            <h:form id="formCupon">
+                <h2 class="subasta-subtitulo">#{cuponesAdminBean.edicion ? 'Editar cupón' : 'Nuevo cupón'}</h2>
+                <div class="form-campo">
+                    <p:outputLabel for="codigo" value="Código"/>
+                    <p:inputText id="codigo" value="#{cuponesAdminBean.codigo}" label="Código" maxlength="20"
+                                 required="true" requiredMessage="El código es obligatorio"/>
+                    <small>Se guarda en mayúsculas.</small>
+                    <p:message for="codigo"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="porcentaje" value="Porcentaje de descuento (1 a 99)"/>
+                    <p:spinner id="porcentaje" value="#{cuponesAdminBean.porcentaje}" min="1" max="99"
+                               label="Porcentaje" required="true" requiredMessage="El porcentaje es obligatorio"
+                               converterMessage="Escribe un número entero entre 1 y 99"/>
+                    <p:message for="porcentaje"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="vencimiento" value="Fecha de vencimiento"/>
+                    <p:datePicker id="vencimiento" value="#{cuponesAdminBean.fechaVencimiento}" label="Vencimiento"
+                                  pattern="dd/MM/yyyy HH:mm" showTime="true" showIcon="true" readonlyInput="true"
+                                  required="true" requiredMessage="La fecha de vencimiento es obligatoria"/>
+                    <p:message for="vencimiento"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="usos" value="Usos máximos"/>
+                    <p:spinner id="usos" value="#{cuponesAdminBean.usosMaximos}" min="1"
+                               label="Usos máximos" required="true" requiredMessage="Los usos máximos son obligatorios"
+                               converterMessage="Escribe un número entero mayor o igual a 1"/>
+                    <p:message for="usos"/>
+                </div>
+                <div class="form-acciones">
+                    <p:commandButton value="Guardar" icon="pi pi-fw pi-check"
+                                     action="#{cuponesAdminBean.guardar}" process="@form"
+                                     update="@form :zonaCupones :mensajes"
+                                     oncomplete="if (args &amp;&amp; !args.validationFailed &amp;&amp; args.ok) PF('dlgCupon').hide()"/>
+                    <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary"
+                                     onclick="PF('dlgCupon').hide()"/>
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="dlgEliminar" header="Eliminar cupón" severity="warn"
+                         message="Se eliminará el cupón. Si ya se usó en una compra no se podrá borrar: en ese caso puedes desactivarlo.">
+            <h:form id="formEliminar">
+                <p>Cupón: <strong>#{cuponesAdminBean.codigoSeleccionado}</strong></p>
+                <p:commandButton value="Sí, eliminar" icon="pi pi-fw pi-check" styleClass="ui-button-danger"
+                                 action="#{cuponesAdminBean.eliminar}" process="@this"
+                                 update=":zonaCupones :mensajes" oncomplete="PF('dlgEliminar').hide()"/>
+                <p:commandButton value="Cancelar" type="button" icon="pi pi-fw pi-times"
+                                 styleClass="ui-button-secondary" onclick="PF('dlgEliminar').hide()"/>
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

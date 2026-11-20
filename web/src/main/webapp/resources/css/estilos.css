@@ -174,3 +174,31 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .subasta-pujas li strong { margin-left: 8px; color: #1565c0; }
 .subasta-puja { margin-top: 16px; }
 .subasta-puja .ui-inputnumber, .subasta-puja .ui-inputnumber input { width: 100%; box-sizing: border-box; }
+
+/* Administrador: panel con tarjetas de acceso */
+.panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 16px; margin-top: 16px; }
+.panel-tarjeta { min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 20px; background: #ffffff;
+    border: 1px solid #dde2e7; border-radius: 8px; color: #222; text-decoration: none; }
+a.panel-tarjeta:hover { border-color: #1565c0; box-shadow: 0 2px 8px rgba(21, 101, 192, .15); }
+.panel-tarjeta i { font-size: 1.6rem; color: #1565c0; }
+.panel-tarjeta-titulo { font-weight: 600; font-size: 1.1rem; }
+.panel-numero { font-size: 2rem; font-weight: 700; color: #1565c0; }
+.panel-detalle { color: #667; font-size: .9rem; }
+.panel-deshabilitada { opacity: .6; cursor: not-allowed; }
+.panel-deshabilitada i, .panel-deshabilitada .panel-numero { color: #889; }
+
+/* Administrador: tablas y diálogos */
+.admin-barra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.admin-barra .ui-inputtext { flex: 1; min-width: 200px; }
+.dialogo-admin { width: 520px; max-width: 95vw; }
+/* El contenido del diálogo se desplaza si no cabe en la pantalla (si no, el botón Guardar queda fuera) */
+.dialogo-admin .ui-dialog-content { max-height: calc(100vh - 120px); overflow-y: auto; }
+.dialogo-admin .ui-inputtext, .dialogo-admin .ui-selectonemenu, .dialogo-admin .ui-inputtextarea,
+.dialogo-admin .ui-datepicker, .dialogo-admin .ui-datepicker input, .dialogo-admin .ui-password,
+.dialogo-admin .ui-password input, .dialogo-admin .ui-inputnumber, .dialogo-admin .ui-inputnumber input {
+    width: 100%; box-sizing: border-box; }
+.dialogo-admin .ui-message:empty { display: none; }
+.aviso-admin { background: #fff3e0; border: 1px solid #ffb74d; color: #8a4b00; border-radius: 6px; padding: 8px 12px; margin: 8px 0; }
+.texto-largo { white-space: pre-wrap; overflow-wrap: anywhere; }
+.estado-agotado { background: #fdecea; border: 1px solid #ef9a9a; color: #b71c1c; }
+.estado-proceso { background: #e3f2fd; border: 1px solid #90caf9; color: #0d47a1; }

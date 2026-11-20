@@ -12,6 +12,7 @@ import co.edu.uniquindio.proyecto.repositorios.ReporteProductoRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -98,6 +99,18 @@ public class ReporteProductoServicioImpl implements ReporteProductoServicio {
     }
 
     @Override
+    public List<ReporteProducto> listarPorRevisar() {
+        return reporteProductoRepo.listarPorEstadosAntiguosPrimero(
+                Arrays.asList(EstadoReporte.PENDIENTE, EstadoReporte.EN_REVISION));
+    }
+
+    @Override
+    public List<ReporteProducto> listarResueltos() {
+        return reporteProductoRepo.listarPorEstadosRecientesPrimero(
+                Arrays.asList(EstadoReporte.ACEPTADO, EstadoReporte.RECHAZADO));
+    }
+
+    @Override
     public boolean yaReporto(Long idUsuario, Long idProducto) {
         return idUsuario != null && idProducto != null
                 && reporteProductoRepo.existsByUsuarioIdAndProductoId(idUsuario, idProducto);
@@ -130,6 +143,15 @@ public class ReporteProductoServicioImpl implements ReporteProductoServicio {
         reporte.setEstado(nuevoEstado);
         reporte.setRespuestaAdministrador(respuesta);
         reporte.setAdministrador(administrador);
+        if (nuevoEstado == EstadoReporte.ACEPTADO) {
+            // Invalida el producto reportado (igual que ProductoServicioImpl.eliminarProducto con dependientes)
+            Producto producto = reporte.getProducto();
+            Date ahora = new Date();
+            if (producto != null && producto.getFechaLimite() != null && producto.getFechaLimite().after(ahora)) {
+                producto.setFechaLimite(ahora);
+                productoRepo.save(producto);
+            }
+        }
         return reporteProductoRepo.save(reporte);
     }
 }

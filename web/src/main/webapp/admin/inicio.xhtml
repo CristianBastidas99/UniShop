@@ -1,12 +1,45 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
                 template="/WEB-INF/template.xhtml">
     <ui:define name="titulo">UniShop - Panel del administrador</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{panelAdminBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="contenido">
-        <p:panel header="Panel del administrador">
-            <p>Las opciones del administrador llegarán en la Fase 5.</p>
-        </p:panel>
+        <h1 class="titulo-inicio">Panel del administrador</h1>
+        <p>Hola, <strong>#{panelAdminBean.nombre}</strong>. ¿Qué quieres gestionar hoy?</p>
+
+        <div class="panel-grid">
+            <h:link outcome="/admin/usuarios" styleClass="panel-tarjeta">
+                <i class="pi pi-users"></i>
+                <span class="panel-tarjeta-titulo">Usuarios</span>
+                <span class="panel-numero">#{panelAdminBean.totalUsuarios}</span>
+                <span class="panel-detalle">#{panelAdminBean.usuariosDesactivados} desactivados</span>
+            </h:link>
+            <h:link outcome="/admin/reportes-productos" styleClass="panel-tarjeta">
+                <i class="pi pi-flag"></i>
+                <span class="panel-tarjeta-titulo">Reportes de productos</span>
+                <span class="panel-numero">#{panelAdminBean.reportesPorRevisar}</span>
+                <span class="panel-detalle">por revisar</span>
+            </h:link>
+            <h:link outcome="/admin/cupones" styleClass="panel-tarjeta">
+                <i class="pi pi-ticket"></i>
+                <span class="panel-tarjeta-titulo">Cupones</span>
+                <span class="panel-numero">#{panelAdminBean.cuponesVigentes} / #{panelAdminBean.totalCupones}</span>
+                <span class="panel-detalle">vigentes con usos disponibles / total</span>
+            </h:link>
+            <div class="panel-tarjeta panel-deshabilitada">
+                <i class="pi pi-chart-bar"></i>
+                <span class="panel-tarjeta-titulo">Reportes estadísticos</span>
+                <span class="panel-detalle">Disponible en la siguiente entrega</span>
+            </div>
+        </div>
     </ui:define>
 </ui:composition>

@@ -36,4 +36,7 @@ public interface ComentarioRepo extends JpaRepository<Comentario, Long> {
      */
     @Query("select c.producto.id, avg(c.calificacion) from Comentario c where c.producto.id in :ids group by c.producto.id")
     List<Object[]> calificacionPromedioPorProductos(@Param("ids") Collection<Long> ids);
+
+    /** Indica si el usuario ha escrito al menos un comentario. */
+    boolean existsByUsuarioId(Long idUsuario);
 }

@@ -33,7 +33,7 @@
         </div>
 
         <div class="barra-menu">
-            <ui:remove>Las opciones del administrador llegan en la Fase 5. En el facet options van botones
+            <ui:remove>En el facet options van botones
                  porque PrimeFaces 10 no pinta p:menuitem allí; y no se ponen comentarios XML
                  dentro del p:menubar (PrimeFaces 10 falla al pintarlos).</ui:remove>
             <p:menubar>
@@ -48,6 +48,12 @@
                 <p:menuitem value="Mis compras" icon="pi pi-fw pi-shopping-bag" outcome="/usuario/compras"
                             rendered="#{seguridadBean.usuario}"/>
                 <p:menuitem value="Panel" icon="pi pi-fw pi-cog" outcome="/admin/inicio"
+                            rendered="#{seguridadBean.administrador}"/>
+                <p:menuitem value="Usuarios" icon="pi pi-fw pi-users" outcome="/admin/usuarios"
+                            rendered="#{seguridadBean.administrador}"/>
+                <p:menuitem value="Reportes de productos" icon="pi pi-fw pi-flag" outcome="/admin/reportes-productos"
+                            rendered="#{seguridadBean.administrador}"/>
+                <p:menuitem value="Cupones" icon="pi pi-fw pi-ticket" outcome="/admin/cupones"
                             rendered="#{seguridadBean.administrador}"/>
                 <f:facet name="options">
                     <h:panelGroup id="zonaCarrito">

@@ -24,4 +24,7 @@ public interface SubastaUsuarioRepo extends JpaRepository<SubastaUsuario, Long> 
     /** Pujas de una subasta de la mayor a la menor (la primera es la ganadora). */
     @Query("select s from SubastaUsuario s where s.subasta.id = :idSubasta order by s.valor desc, s.fechaSubasta asc")
     List<SubastaUsuario> listarPorSubasta(@Param("idSubasta") Long idSubasta);
+
+    /** Indica si el usuario ha hecho al menos una puja. */
+    boolean existsByUsuarioId(Long idUsuario);
 }

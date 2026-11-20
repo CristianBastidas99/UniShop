@@ -15,8 +15,8 @@ public interface UsuarioServicio {
      * Si el correo no existe o la contraseña es errónea se lanza el mismo mensaje, para no revelar
      * si el correo está registrado.
      *
-     * @throws NegocioException si el correo o la contraseña vienen nulos o vacíos, o si las credenciales
-     *                          son incorrectas
+     * @throws NegocioException si el correo o la contraseña vienen nulos o vacíos, si las credenciales
+     *                          son incorrectas o si la cuenta está desactivada
      */
     Usuario iniciarSesion(String email, String password) throws NegocioException;
 
@@ -32,7 +32,9 @@ public interface UsuarioServicio {
     Usuario registrarUsuario(Usuario u) throws NegocioException;
 
     /**
-     * Actualiza un usuario buscándolo por su correo. Aplica las mismas validaciones de ciudad y
+     * Actualiza un usuario buscándolo por su correo. Solo copia nombre, ciudad, teléfonos y contraseña
+     * (esta última solo si viene no vacía; si es nula o en blanco se conserva la actual); el correo, el estado
+     * activo y las relaciones no cambian. Aplica las mismas validaciones de ciudad y
      * teléfonos que el registro.
      *
      * @throws NegocioException si no existe un usuario con ese correo, o si la ciudad o los teléfonos
@@ -48,12 +50,34 @@ public interface UsuarioServicio {
     Usuario obtenerUsuario(String email) throws NegocioException;
 
     /**
-     * Elimina un usuario por su correo.
+     * Elimina un usuario por su correo. Si tiene actividad (ver {@link #tieneActividad(String)}) no se puede
+     * eliminar y se debe desactivar. Sus teléfonos y favoritos se borran con él.
      *
-     * @throws NegocioException si no existe un usuario con ese correo
+     * @throws NegocioException si no existe un usuario con ese correo o si tiene actividad
      */
     void eliminarUsuario(String email) throws NegocioException;
 
     /** Lista todos los usuarios. */
     List<Usuario> listarUsuarios();
+
+    /**
+     * Activa o desactiva la cuenta de un usuario. Un usuario desactivado no puede iniciar sesión.
+     *
+     * @throws NegocioException si no existe un usuario con ese correo
+     */
+    void cambiarActivo(String email, boolean activo) throws NegocioException;
+
+    /**
+     * Indica si el usuario tiene actividad en la tienda: productos publicados, compras, comentarios,
+     * chats (como comprador), mensajes enviados, pujas o reportes.
+     *
+     * @throws NegocioException si no existe un usuario con ese correo
+     */
+    boolean tieneActividad(String email) throws NegocioException;
+
+    /**
+     * Busca usuarios cuyo nombre o correo contenga el texto (parcial, sin distinguir mayúsculas).
+     * Un texto nulo o vacío devuelve todos los usuarios. El resultado va ordenado por nombre.
+     */
+    List<Usuario> buscarUsuarios(String texto);
 }

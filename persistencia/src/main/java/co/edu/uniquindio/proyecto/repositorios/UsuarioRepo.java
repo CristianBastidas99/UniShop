@@ -27,4 +27,12 @@ public interface UsuarioRepo extends JpaRepository<Usuario, Long> {
     /** Usuario con ese email y contraseña (login). */
     @Query("select u from Usuario u where u.email = :email and u.password = :password")
     Optional<Usuario> buscarPorEmailYPassword(@Param("email") String email, @Param("password") String password);
+
+    /** Usuarios cuyo nombre o email contiene el texto (sin distinguir mayúsculas), ordenados por nombre. */
+    @Query("select u from Usuario u where lower(u.nombre) like lower(concat('%', :texto, '%')) " +
+            "or lower(u.email) like lower(concat('%', :texto, '%')) order by u.nombre, u.id")
+    List<Usuario> buscarPorTexto(@Param("texto") String texto);
+
+    /** Todos los usuarios ordenados por nombre. */
+    List<Usuario> findAllByOrderByNombreAscIdAsc();
 }

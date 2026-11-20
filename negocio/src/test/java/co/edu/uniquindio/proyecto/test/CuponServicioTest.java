@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyecto.test;
 import co.edu.uniquindio.proyecto.entidades.Cupon;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.CuponServicio;
+import co.edu.uniquindio.proyecto.repositorios.CuponRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +17,9 @@ public class CuponServicioTest extends BaseServicioTest {
 
     @Autowired
     private CuponServicio cuponServicio;
+
+    @Autowired
+    private CuponRepo cuponRepo;
 
     private Cupon nuevoCupon(String codigo, int usosMaximos, int usosRealizados) {
         Cupon c = new Cupon();
@@ -178,9 +182,150 @@ public class CuponServicioTest extends BaseServicioTest {
 
     @Test
     public void obtenerDisponibleSinUsosTest() throws Exception {
-        cuponServicio.registrarCupon(nuevoCupon("AGOTADO", 5, 5));
+        Cupon guardado = cuponServicio.registrarCupon(nuevoCupon("AGOTADO", 5, 0));
+        guardado.setUsosRealizados(5);
+        cuponRepo.save(guardado);
         sincronizar();
         NegocioException e = assertThrows(NegocioException.class, () -> cuponServicio.obtenerDisponible("AGOTADO"));
         assertEquals("El cupón AGOTADO ya no tiene usos disponibles", e.getMessage());
+    }
+
+    // ---------- reglas de la Fase 5 ----------
+
+    private void assertRegistroFalla(Cupon c, String mensaje) {
+        NegocioException e = assertThrows(NegocioException.class, () -> cuponServicio.registrarCupon(c));
+        assertEquals(mensaje, e.getMessage());
+    }
+
+    private void assertActualizacionFalla(Cupon c, String mensaje) {
+        NegocioException e = assertThrows(NegocioException.class, () -> cuponServicio.actualizarCupon(c));
+        assertEquals(mensaje, e.getMessage());
+    }
+
+    @Test
+    public void registrarPorcentajeInvalidoTest() {
+        String mensaje = "El porcentaje del cupón debe estar entre 1 % y 99 %";
+        for (Double invalido : new Double[]{null, 0.0, -0.1, 1.0, 1.5}) {
+            Cupon c = nuevoCupon("PROMO", 10, 0);
+            c.setPorcentaje(invalido);
+            assertRegistroFalla(c, mensaje);
+        }
+    }
+
+    @Test
+    public void registrarPorcentajeLimiteValidoTest() throws Exception {
+        Cupon c = nuevoCupon("MAXIMO", 10, 0);
+        c.setPorcentaje(0.99);
+        assertNotNull(cuponServicio.registrarCupon(c).getId());
+    }
+
+    @Test
+    public void actualizarPorcentajeInvalidoTest() {
+        String mensaje = "El porcentaje del cupón debe estar entre 1 % y 99 %";
+        for (Double invalido : new Double[]{null, 0.0, 1.0, 2.0}) {
+            Cupon c = nuevoCupon("NAVIDAD20", 50, 0);
+            c.setId(2L);
+            c.setPorcentaje(invalido);
+            assertActualizacionFalla(c, mensaje);
+        }
+    }
+
+    @Test
+    public void registrarNormalizaCodigoTest() throws Exception {
+        Cupon guardado = cuponServicio.registrarCupon(nuevoCupon("  promo25 ", 10, 0));
+        sincronizar();
+        assertEquals("PROMO25", cuponServicio.obtenerCupon(guardado.getId()).getCodigo());
+    }
+
+    @Test
+    public void registrarCodigoRepetidoConOtraCapitalizacionTest() {
+        assertRegistroFalla(nuevoCupon(" navidad20", 10, 0), "El cupón NAVIDAD20 ya existe");
+    }
+
+    @Test
+    public void registrarSinCodigoTest() {
+        assertRegistroFalla(nuevoCupon(null, 10, 0), "El código del cupón es obligatorio");
+        assertRegistroFalla(nuevoCupon("   ", 10, 0), "El código del cupón es obligatorio");
+    }
+
+    @Test
+    public void registrarFechaInvalidaTest() {
+        String mensaje = "La fecha de vencimiento es obligatoria y debe ser futura";
+        Cupon sinFecha = nuevoCupon("PROMO", 10, 0);
+        sinFecha.setFechaVencimiento(null);
+        assertRegistroFalla(sinFecha, mensaje);
+        Cupon pasada = nuevoCupon("PROMO", 10, 0);
+        pasada.setFechaVencimiento(new Date(System.currentTimeMillis() - UN_DIA));
+        assertRegistroFalla(pasada, mensaje);
+    }
+
+    @Test
+    public void registrarUsosMaximosInvalidosTest() {
+        assertRegistroFalla(nuevoCupon("PROMO", 0, 0), "Los usos máximos deben ser al menos 1");
+    }
+
+    @Test
+    public void registrarFuerzaUsosRealizadosEnCeroTest() throws Exception {
+        Cupon guardado = cuponServicio.registrarCupon(nuevoCupon("PROMO25", 10, 7));
+        sincronizar();
+        assertEquals(0, cuponServicio.obtenerCupon(guardado.getId()).getUsosRealizados());
+    }
+
+    @Test
+    public void actualizarUsosMaximosMenoresQueRealizadosTest() {
+        // El cupón 1 tiene 2 usos realizados.
+        Cupon c = nuevoCupon("BIENVENIDA10", 1, 0);
+        c.setId(1L);
+        assertActualizacionFalla(c, "Los usos máximos no pueden ser menores que los usos ya realizados");
+    }
+
+    @Test
+    public void actualizarConservaUsosRealizadosTest() throws Exception {
+        Cupon c = nuevoCupon("BIENVENIDA10", 2, 0);
+        c.setId(1L);
+        cuponServicio.actualizarCupon(c);
+        sincronizar();
+        Cupon leido = cuponServicio.obtenerCupon(1L);
+        assertEquals(2, leido.getUsosRealizados());
+        assertEquals(2, leido.getUsosMaximos());
+    }
+
+    @Test
+    public void actualizarNormalizaCodigoTest() throws Exception {
+        Cupon c = nuevoCupon(" navidad30 ", 50, 0);
+        c.setId(2L);
+        cuponServicio.actualizarCupon(c);
+        sincronizar();
+        assertEquals("NAVIDAD30", cuponServicio.obtenerCupon(2L).getCodigo());
+    }
+
+    @Test
+    public void actualizarPermiteFechaPasadaTest() throws Exception {
+        Cupon c = nuevoCupon("NAVIDAD20", 50, 0);
+        c.setId(2L);
+        c.setFechaVencimiento(new Date(System.currentTimeMillis() - UN_DIA));
+        cuponServicio.actualizarCupon(c);
+        sincronizar();
+        NegocioException e = assertThrows(NegocioException.class, () -> cuponServicio.obtenerDisponible("NAVIDAD20"));
+        assertEquals("El cupón NAVIDAD20 está vencido", e.getMessage());
+    }
+
+    @Test
+    public void actualizarSinFechaTest() {
+        Cupon c = nuevoCupon("NAVIDAD20", 50, 0);
+        c.setId(2L);
+        c.setFechaVencimiento(null);
+        assertActualizacionFalla(c, "La fecha de vencimiento es obligatoria");
+    }
+
+    @Test
+    public void obtenerPorCodigoEnMinusculasTest() throws Exception {
+        assertEquals(2L, cuponServicio.obtenerPorCodigo(" navidad20 ").getId());
+        assertEquals(1L, cuponServicio.obtenerDisponible("bienvenida10").getId());
+    }
+
+    @Test
+    public void obtenerPorCodigoNuloTest() {
+        assertThrows(NegocioException.class, () -> cuponServicio.obtenerPorCodigo(null));
     }
 }

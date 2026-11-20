@@ -17,4 +17,7 @@ public interface MensajeRepo extends JpaRepository<Mensaje, Long> {
     /** Mensajes de un chat, del más antiguo al más reciente. */
     @Query("select m from Mensaje m where m.chat.id = :idChat order by m.fecha asc")
     List<Mensaje> listarPorChat(@Param("idChat") Long idChat);
+
+    /** Indica si el usuario ha enviado al menos un mensaje. */
+    boolean existsByRemitenteId(Long idUsuario);
 }

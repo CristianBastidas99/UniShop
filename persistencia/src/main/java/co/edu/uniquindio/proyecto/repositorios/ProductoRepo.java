@@ -79,4 +79,7 @@ public interface ProductoRepo extends JpaRepository<Producto, Long> {
     @Query("select new co.edu.uniquindio.proyecto.dto.PromedioDTO(p.nombre, avg(c.calificacion)) " +
             "from Comentario c join c.producto p group by p.id, p.nombre order by avg(c.calificacion) desc, p.nombre")
     List<PromedioDTO> mejorCalificados(Pageable pageable);
+
+    /** Indica si el usuario ha publicado al menos un producto. */
+    boolean existsByUsuarioId(Long idUsuario);
 }

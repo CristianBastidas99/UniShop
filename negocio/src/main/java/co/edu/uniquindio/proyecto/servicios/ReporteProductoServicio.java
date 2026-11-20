@@ -55,6 +55,12 @@ public interface ReporteProductoServicio {
     /** Lista los reportes pendientes de revisión. */
     List<ReporteProducto> listarPendientes();
 
+    /** Lista los reportes por revisar (PENDIENTE y EN_REVISION), el más antiguo primero. */
+    List<ReporteProducto> listarPorRevisar();
+
+    /** Lista los reportes ya resueltos (ACEPTADO y RECHAZADO), el más reciente primero. */
+    List<ReporteProducto> listarResueltos();
+
     /** Indica si el usuario ya reportó el producto (false si alguno de los ids es nulo). */
     boolean yaReporto(Long idUsuario, Long idProducto);
 
@@ -63,6 +69,8 @@ public interface ReporteProductoServicio {
 
     /**
      * Cambia el estado de un reporte registrando la respuesta y el administrador que lo revisó.
+     * Si el nuevo estado es ACEPTADO, el producto reportado se invalida (su fecha límite pasa a ser ahora,
+     * solo si era posterior) para que deje de aparecer en los listados públicos.
      *
      * @throws NegocioException si el reporte o el administrador no existen, si el nuevo estado es
      *                          PENDIENTE o nulo, si el estado es ACEPTADO o RECHAZADO sin respuesta,

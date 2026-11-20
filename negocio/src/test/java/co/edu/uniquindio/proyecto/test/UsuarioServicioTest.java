@@ -198,4 +198,140 @@ public class UsuarioServicioTest extends BaseServicioTest {
     public void listarUsuariosTest() {
         assertEquals(5, usuarioServicio.listarUsuarios().size());
     }
+
+    // ---------- Fase 5: activar/desactivar, actividad, eliminación, búsqueda, actualización ----------
+
+    @Test
+    public void iniciarSesionUsuarioInactivoTest() throws Exception {
+        usuarioServicio.cambiarActivo("lorena@email.com", false);
+        sincronizar();
+        NegocioException e = assertThrows(NegocioException.class,
+                () -> usuarioServicio.iniciarSesion("lorena@email.com", "12345"));
+        assertEquals("Tu cuenta está desactivada. Comunícate con el administrador", e.getMessage());
+        // Con contraseña errónea el mensaje sigue siendo el genérico.
+        NegocioException e2 = assertThrows(NegocioException.class,
+                () -> usuarioServicio.iniciarSesion("lorena@email.com", "mala"));
+        assertEquals("Correo o contraseña incorrectos", e2.getMessage());
+    }
+
+    @Test
+    public void usuariosDelSqlEstanActivosTest() throws Exception {
+        assertTrue(usuarioServicio.obtenerUsuario("lorena@email.com").isActivo());
+    }
+
+    @Test
+    public void cambiarActivoTest() throws Exception {
+        usuarioServicio.cambiarActivo("lorena@email.com", false);
+        sincronizar();
+        assertFalse(usuarioServicio.obtenerUsuario("lorena@email.com").isActivo());
+        usuarioServicio.cambiarActivo("lorena@email.com", true);
+        sincronizar();
+        assertTrue(usuarioServicio.obtenerUsuario("lorena@email.com").isActivo());
+        assertEquals(5L, usuarioServicio.iniciarSesion("lorena@email.com", "12345").getId());
+    }
+
+    @Test
+    public void cambiarActivoInexistenteTest() {
+        assertThrows(NegocioException.class, () -> usuarioServicio.cambiarActivo("noexiste@mail.com", false));
+    }
+
+    @Test
+    public void tieneActividadTest() throws Exception {
+        assertTrue(usuarioServicio.tieneActividad("lorena@email.com"));
+        usuarioServicio.registrarUsuario(nuevoUsuario("juana@mail.com"));
+        sincronizar();
+        assertFalse(usuarioServicio.tieneActividad("juana@mail.com"));
+    }
+
+    @Test
+    public void tieneActividadInexistenteTest() {
+        assertThrows(NegocioException.class, () -> usuarioServicio.tieneActividad("noexiste@mail.com"));
+    }
+
+    @Test
+    public void eliminarUsuarioConActividadTest() {
+        NegocioException e = assertThrows(NegocioException.class, () -> usuarioServicio.eliminarUsuario("lorena@email.com"));
+        assertEquals("El usuario lorena@email.com tiene actividad (productos, compras, comentarios...) "
+                + "y no se puede eliminar; puedes desactivarlo", e.getMessage());
+    }
+
+    @Test
+    public void eliminarUsuarioSinActividadTest() throws Exception {
+        usuarioServicio.registrarUsuario(nuevoUsuario("juana@mail.com"));
+        sincronizar();
+        usuarioServicio.eliminarUsuario("juana@mail.com");
+        sincronizar();
+        assertThrows(NegocioException.class, () -> usuarioServicio.obtenerUsuario("juana@mail.com"));
+    }
+
+    @Test
+    public void buscarUsuariosPorNombreParcialTest() {
+        List<Usuario> lista = usuarioServicio.buscarUsuarios("per");
+        assertEquals(1, lista.size());
+        assertEquals("Pepe Perez", lista.get(0).getNombre());
+    }
+
+    @Test
+    public void buscarUsuariosPorEmailEnMayusculasTest() {
+        List<Usuario> lista = usuarioServicio.buscarUsuarios("MARTA@EMAIL");
+        assertEquals(1, lista.size());
+        assertEquals("marta@email.com", lista.get(0).getEmail());
+    }
+
+    @Test
+    public void buscarUsuariosVacioDevuelveTodosOrdenadosTest() {
+        for (String texto : new String[]{null, "", "   "}) {
+            List<Usuario> lista = usuarioServicio.buscarUsuarios(texto);
+            assertEquals(5, lista.size());
+            assertEquals("Lorena Lopez", lista.get(0).getNombre());
+            assertEquals("Sofia Ramirez", lista.get(4).getNombre());
+        }
+    }
+
+    @Test
+    public void buscarUsuariosSinCoincidenciasTest() {
+        assertTrue(usuarioServicio.buscarUsuarios("zzzz").isEmpty());
+    }
+
+    private Usuario datosEdicion(String nombre, String password) {
+        Usuario u = new Usuario();
+        u.setEmail("lorena@email.com");
+        u.setNombre(nombre);
+        u.setPassword(password);
+        u.setCiudad(ciudad(2L));
+        u.setNumeroTelefono(new ArrayList<>(Arrays.asList("3000000001")));
+        return u;
+    }
+
+    @Test
+    public void actualizarSinPasswordConservaLaActualTest() throws Exception {
+        usuarioServicio.actualizarUsuario(datosEdicion("Lorena Nueva", null));
+        usuarioServicio.actualizarUsuario(datosEdicion("Lorena Nueva", "   "));
+        sincronizar();
+        Usuario leido = usuarioServicio.obtenerUsuario("lorena@email.com");
+        assertEquals("12345", leido.getPassword());
+        assertEquals("Lorena Nueva", leido.getNombre());
+        assertEquals(2L, leido.getCiudad().getId());
+        assertEquals(Arrays.asList("3000000001"), leido.getNumeroTelefono());
+        assertTrue(leido.isActivo());
+        assertEquals(5L, leido.getId());
+    }
+
+    @Test
+    public void actualizarConPasswordLaCambiaTest() throws Exception {
+        usuarioServicio.actualizarUsuario(datosEdicion("Lorena Lopez", "nueva123"));
+        sincronizar();
+        assertEquals("nueva123", usuarioServicio.obtenerUsuario("lorena@email.com").getPassword());
+        assertEquals(5L, usuarioServicio.iniciarSesion("lorena@email.com", "nueva123").getId());
+    }
+
+    @Test
+    public void actualizarNoPierdeActivoNiRelacionesTest() throws Exception {
+        usuarioServicio.cambiarActivo("lorena@email.com", false);
+        sincronizar();
+        usuarioServicio.actualizarUsuario(datosEdicion("Lorena Lopez", null));
+        sincronizar();
+        assertFalse(usuarioServicio.obtenerUsuario("lorena@email.com").isActivo());
+        assertTrue(usuarioServicio.tieneActividad("lorena@email.com"));
+    }
 }

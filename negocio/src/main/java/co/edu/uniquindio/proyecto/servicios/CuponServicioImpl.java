@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class CuponServicioImpl implements CuponServicio {
@@ -20,21 +21,55 @@ public class CuponServicioImpl implements CuponServicio {
         this.compraRepo = compraRepo;
     }
 
+    /** Código en mayúsculas y sin espacios en los extremos (null si viene nulo). */
+    private static String normalizarCodigo(String codigo) {
+        return codigo == null ? null : codigo.trim().toUpperCase(Locale.ROOT);
+    }
+
+    /** Valida y normaliza el código y el porcentaje, comunes a registrar y actualizar. */
+    private void validarCodigoYPorcentaje(Cupon c) throws NegocioException {
+        c.setCodigo(normalizarCodigo(c.getCodigo()));
+        if (c.getCodigo() == null || c.getCodigo().isEmpty()) {
+            throw new NegocioException("El código del cupón es obligatorio");
+        }
+        Double porcentaje = c.getPorcentaje();
+        if (porcentaje == null || porcentaje.isNaN() || porcentaje <= 0 || porcentaje >= 1) {
+            throw new NegocioException("El porcentaje del cupón debe estar entre 1 % y 99 %");
+        }
+    }
+
     @Override
     public Cupon registrarCupon(Cupon c) throws NegocioException {
         if (c.getId() != null && cuponRepo.existsById(c.getId())) {
             throw new NegocioException("El cupón ya existe");
         }
+        validarCodigoYPorcentaje(c);
+        if (c.getFechaVencimiento() == null || !c.getFechaVencimiento().after(new Date())) {
+            throw new NegocioException("La fecha de vencimiento es obligatoria y debe ser futura");
+        }
+        if (c.getUsosMaximos() < 1) {
+            throw new NegocioException("Los usos máximos deben ser al menos 1");
+        }
         if (cuponRepo.findByCodigo(c.getCodigo()).isPresent()) {
             throw new NegocioException("El cupón " + c.getCodigo() + " ya existe");
         }
+        c.setUsosRealizados(0);
         return cuponRepo.save(c);
     }
 
     @Override
     public Cupon actualizarCupon(Cupon c) throws NegocioException {
-        if (c.getId() == null || !cuponRepo.existsById(c.getId())) {
+        if (c.getId() == null) {
             throw new NegocioException("El cupón no existe");
+        }
+        Cupon existente = cuponRepo.findById(c.getId())
+                .orElseThrow(() -> new NegocioException("El cupón no existe"));
+        validarCodigoYPorcentaje(c);
+        if (c.getFechaVencimiento() == null) {
+            throw new NegocioException("La fecha de vencimiento es obligatoria");
+        }
+        if (c.getUsosMaximos() < existente.getUsosRealizados()) {
+            throw new NegocioException("Los usos máximos no pueden ser menores que los usos ya realizados");
         }
         boolean codigoDeOtro = cuponRepo.findByCodigo(c.getCodigo())
                 .map(otro -> !otro.getId().equals(c.getId()))
@@ -42,6 +77,9 @@ public class CuponServicioImpl implements CuponServicio {
         if (codigoDeOtro) {
             throw new NegocioException("El cupón " + c.getCodigo() + " ya existe");
         }
+        // Los usos realizados no se editan desde fuera: se conservan los de la base.
+        int usosRealizados = existente.getUsosRealizados();
+        c.setUsosRealizados(usosRealizados);
         return cuponRepo.save(c);
     }
 
@@ -70,18 +108,19 @@ public class CuponServicioImpl implements CuponServicio {
 
     @Override
     public Cupon obtenerPorCodigo(String codigo) throws NegocioException {
-        return cuponRepo.findByCodigo(codigo)
-                .orElseThrow(() -> new NegocioException("El cupón " + codigo + " no existe"));
+        String normalizado = normalizarCodigo(codigo);
+        return cuponRepo.findByCodigo(normalizado == null ? "" : normalizado)
+                .orElseThrow(() -> new NegocioException("El cupón " + normalizado + " no existe"));
     }
 
     @Override
     public Cupon obtenerDisponible(String codigo) throws NegocioException {
         Cupon cupon = obtenerPorCodigo(codigo);
         if (!cupon.getFechaVencimiento().after(new Date())) {
-            throw new NegocioException("El cupón " + codigo + " está vencido");
+            throw new NegocioException("El cupón " + cupon.getCodigo() + " está vencido");
         }
         if (cupon.getUsosRealizados() >= cupon.getUsosMaximos()) {
-            throw new NegocioException("El cupón " + codigo + " ya no tiene usos disponibles");
+            throw new NegocioException("El cupón " + cupon.getCodigo() + " ya no tiene usos disponibles");
         }
         return cupon;
     }

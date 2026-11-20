@@ -26,6 +26,13 @@ import java.util.Map;
 @ToString(callSuper = true)
 public class Usuario extends Persona implements Serializable {
 
+    /**
+     * Indica si la cuenta está activa. Un usuario desactivado por el administrador no puede iniciar sesión.
+     * El {@code DEFAULT 1} hace que las filas existentes queden activas al actualizar el esquema.
+     */
+    @Column(name = "activo", nullable = false, columnDefinition = "BIT(1) DEFAULT 1")
+    private boolean activo = true;
+
     @ManyToOne
     @JoinColumn(name = "id_ciudad")
     @JsonIgnore

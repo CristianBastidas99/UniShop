@@ -26,6 +26,8 @@ public class SeguridadBean implements Serializable {
     /** Rol de la persona autenticada. */
     public enum Rol { USUARIO, ADMINISTRADOR }
 
+    private static final String MENSAJE_GENERICO = "Correo o contraseña incorrectos";
+
     private final UsuarioServicio usuarioServicio;
     private final AdministradorServicio administradorServicio;
 
@@ -65,12 +67,15 @@ public class SeguridadBean implements Serializable {
             encontrada = usuarioServicio.iniciarSesion(email, password);
             rolEncontrado = Rol.USUARIO;
         } catch (NegocioException e) {
+            final String mensajeUsuario = e.getMessage();
             try {
                 encontrada = administradorServicio.iniciarSesion(email, password);
                 rolEncontrado = Rol.ADMINISTRADOR;
             } catch (NegocioException e2) {
-                // Mismo mensaje del servicio: no revela si el correo existe como usuario o administrador
-                contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, e2.getMessage(), null));
+                // El mensaje del intento de usuario solo es distinto del genérico cuando la contraseña era correcta
+                // (p. ej. cuenta desactivada), así que no revela si un correo existe
+                String mensaje = MENSAJE_GENERICO.equals(mensajeUsuario) ? e2.getMessage() : mensajeUsuario;
+                contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, mensaje, null));
                 password = null;
                 return null;
             }
@@ -87,7 +92,7 @@ public class SeguridadBean implements Serializable {
         // Vuelve a la página privada pedida si es válida para el rol; si no, al inicio
         String volver = destinoValido();
         destino = null;
-        String destinoFinal = volver != null ? volver : "/index";
+        String destinoFinal = volver != null ? volver : (rol == Rol.ADMINISTRADOR ? "/admin/inicio" : "/index");
         return destinoFinal + (destinoFinal.contains("?") ? "&" : "?") + "faces-redirect=true";
     }
 
@@ -115,7 +120,10 @@ public class SeguridadBean implements Serializable {
 
     /** Si ya hay sesión, quien entra al login va al inicio (se usa desde f:viewAction). */
     public String redirigirSiAutenticado() {
-        return isAutenticado() ? "/index?faces-redirect=true" : null;
+        if (!isAutenticado()) {
+            return null;
+        }
+        return isAdministrador() ? "/admin/inicio?faces-redirect=true" : "/index?faces-redirect=true";
     }
 
     public boolean isAutenticado() {
@@ -137,5 +145,10 @@ public class SeguridadBean implements Serializable {
     /** Id del usuario en sesión (solo si el rol es USUARIO); null en otro caso. No expone la persona. */
     public Long getIdUsuario() {
         return (persona != null && rol == Rol.USUARIO) ? persona.getId() : null;
+    }
+
+    /** Correo del administrador en sesión (solo si el rol es ADMINISTRADOR); null en otro caso. */
+    public String getEmailAdministrador() {
+        return (persona != null && rol == Rol.ADMINISTRADOR) ? persona.getEmail() : null;
     }
 }

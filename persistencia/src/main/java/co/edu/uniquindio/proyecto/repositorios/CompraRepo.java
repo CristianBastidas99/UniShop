@@ -26,4 +26,7 @@ public interface CompraRepo extends JpaRepository<Compra, Long> {
     @Query("select new co.edu.uniquindio.proyecto.dto.MedioPagoDTO(c.medioPago, count(c)) " +
             "from Compra c group by c.medioPago order by count(c) desc")
     List<MedioPagoDTO> contarPorMedioPago();
+
+    /** Indica si el usuario ha hecho al menos una compra. */
+    boolean existsByUsuarioId(Long idUsuario);
 }

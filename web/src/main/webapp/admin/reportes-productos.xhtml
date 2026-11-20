@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Reportes de productos</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{reportesProductosBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h1 class="titulo-inicio">Reportes de productos</h1>
+
+        <h:panelGroup id="zonaReportes" layout="block">
+            <p:tabView id="pestanas" dynamic="false">
+                <p:tab title="Por revisar (#{reportesProductosBean.porRevisar.size()})">
+                    <h:panelGroup layout="block" styleClass="sin-productos"
+                                  rendered="#{empty reportesProductosBean.porRevisar}">
+                        No hay reportes por revisar
+                    </h:panelGroup>
+                    <h:form id="formPorRevisar" rendered="#{not empty reportesProductosBean.porRevisar}">
+                        <p:dataTable value="#{reportesProductosBean.porRevisar}" var="fila" reflow="true"
+                                     paginator="true" rows="10" paginatorPosition="bottom">
+                            <p:column headerText="Fecha">
+                                <h:outputText value="#{fila.fecha}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Producto">
+                                <h:link outcome="/detalleProducto" value="#{fila.producto}">
+                                    <f:param name="producto" value="#{fila.idProducto}"/>
+                                </h:link>
+                            </p:column>
+                            <p:column headerText="Reportado por">
+                                <h:outputText value="#{fila.reportadoPor}"/>
+                            </p:column>
+                            <p:column headerText="Motivo">
+                                <h:outputText value="#{fila.motivo}"/>
+                            </p:column>
+                            <p:column headerText="Descripción">
+                                <h:outputText value="#{fila.descripcion}" styleClass="texto-largo"/>
+                            </p:column>
+                            <p:column headerText="Estado">
+                                <h:outputText value="#{fila.estadoTexto}"
+                                              styleClass="estado-producto #{fila.claseEstado}"/>
+                            </p:column>
+                            <p:column headerText="Acciones">
+                                <p:commandButton value="Revisar" icon="pi pi-fw pi-pencil"
+                                                 action="#{reportesProductosBean.prepararRevision(fila)}"
+                                                 process="@this" update=":formRevision"
+                                                 oncomplete="PF('dlgRevision').show()"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                </p:tab>
+
+                <p:tab title="Resueltos (#{reportesProductosBean.resueltos.size()})">
+                    <h:panelGroup layout="block" styleClass="sin-productos"
+                                  rendered="#{empty reportesProductosBean.resueltos}">
+                        No hay reportes resueltos
+                    </h:panelGroup>
+                    <h:form id="formResueltos" rendered="#{not empty reportesProductosBean.resueltos}">
+                        <p:dataTable value="#{reportesProductosBean.resueltos}" var="fila" reflow="true"
+                                     paginator="true" rows="10" paginatorPosition="bottom">
+                            <p:column headerText="Fecha">
+                                <h:outputText value="#{fila.fecha}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Producto">
+                                <h:link outcome="/detalleProducto" value="#{fila.producto}">
+                                    <f:param name="producto" value="#{fila.idProducto}"/>
+                                </h:link>
+                            </p:column>
+                            <p:column headerText="Reportado por">
+                                <h:outputText value="#{fila.reportadoPor}"/>
+                            </p:column>
+                            <p:column headerText="Motivo">
+                                <h:outputText value="#{fila.motivo}"/>
+                            </p:column>
+                            <p:column headerText="Descripción">
+                                <h:outputText value="#{fila.descripcion}" styleClass="texto-largo"/>
+                            </p:column>
+                            <p:column headerText="Estado">
+                                <h:outputText value="#{fila.estadoTexto}"
+                                              styleClass="estado-producto #{fila.claseEstado}"/>
+                            </p:column>
+                            <p:column headerText="Respuesta">
+                                <h:outputText value="#{fila.respuesta}" styleClass="texto-largo"/>
+                            </p:column>
+                            <p:column headerText="Administrador">
+                                <h:outputText value="#{fila.administrador}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                </p:tab>
+            </p:tabView>
+        </h:panelGroup>
+
+        <p:dialog header="Revisar reporte" widgetVar="dlgRevision" modal="true" resizable="false" draggable="false"
+                  styleClass="dialogo-admin">
+            <h:form id="formRevision">
+                <h:panelGroup rendered="#{reportesProductosBean.seleccionado != null}">
+                    <p>Producto: <strong>#{reportesProductosBean.seleccionado.producto}</strong></p>
+                    <p>Reportado por: #{reportesProductosBean.seleccionado.reportadoPor}</p>
+                    <p>Motivo: #{reportesProductosBean.seleccionado.motivo}</p>
+                    <p class="texto-largo">Descripción: #{reportesProductosBean.seleccionado.descripcion}</p>
+                </h:panelGroup>
+                <div class="form-campo">
+                    <p:outputLabel for="estado" value="Nuevo estado"/>
+                    <p:selectOneMenu id="estado" value="#{reportesProductosBean.nuevoEstado}" label="Estado"
+                                     required="true" requiredMessage="Elige el nuevo estado">
+                        <f:selectItem itemLabel="Selecciona un estado" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="En revisión" itemValue="EN_REVISION"/>
+                        <f:selectItem itemLabel="Aceptado" itemValue="ACEPTADO"/>
+                        <f:selectItem itemLabel="Rechazado" itemValue="RECHAZADO"/>
+                    </p:selectOneMenu>
+                    <p:message for="estado"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="respuesta" value="Respuesta"/>
+                    <p:inputTextarea id="respuesta" value="#{reportesProductosBean.respuesta}" rows="4"
+                                     maxlength="#{reportesProductosBean.maxRespuesta}" counter="contador"
+                                     counterTemplate="{0} caracteres restantes" label="Respuesta" autoResize="false"/>
+                    <h:outputText id="contador"/>
+                    <small>Obligatoria al aceptar o rechazar el reporte.</small>
+                    <p:message for="respuesta"/>
+                </div>
+                <div class="aviso-admin">
+                    Si aceptas el reporte, el producto se invalida y deja de mostrarse al público.
+                </div>
+                <div class="form-acciones">
+                    <p:commandButton value="Guardar" icon="pi pi-fw pi-check"
+                                     action="#{reportesProductosBean.guardar}" process="@form"
+                                     update="@form :zonaReportes :mensajes"
+                                     oncomplete="if (args &amp;&amp; !args.validationFailed &amp;&amp; args.ok) PF('dlgRevision').hide()"/>
+                    <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary"
+                                     onclick="PF('dlgRevision').hide()"/>
+                </div>
+            </h:form>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

@@ -30,4 +30,7 @@ public interface ChatRepo extends JpaRepository<Chat, Long> {
     @Query("select c from Chat c where c.usuario.id = :idComprador and c.producto.id = :idProducto")
     Optional<Chat> buscarPorCompradorYProducto(@Param("idComprador") Long idComprador,
                                                @Param("idProducto") Long idProducto);
+
+    /** Indica si el usuario ha abierto al menos un chat como comprador. */
+    boolean existsByUsuarioId(Long idUsuario);
 }

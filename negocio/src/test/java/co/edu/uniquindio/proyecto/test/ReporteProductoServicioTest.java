@@ -9,10 +9,12 @@ import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
 import co.edu.uniquindio.proyecto.servicios.ReporteProductoServicio;
+import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,6 +24,9 @@ public class ReporteProductoServicioTest extends BaseServicioTest {
 
     @Autowired
     private ReporteProductoServicio reporteServicio;
+
+    @Autowired
+    private ProductoServicio productoServicio;
 
     @Autowired
     private UsuarioRepo usuarioRepo;
@@ -279,5 +284,52 @@ public class ReporteProductoServicioTest extends BaseServicioTest {
         NegocioException e = assertThrows(NegocioException.class,
                 () -> reporteServicio.cambiarEstado(3L, EstadoReporte.ACEPTADO, "Ok", ADMIN_EMAIL));
         assertEquals("El reporte ya fue resuelto", e.getMessage());
+    }
+
+    // ---------- Fase 5: listados del administrador e invalidación del producto ----------
+
+    @Test
+    public void listarPorRevisarTest() {
+        // Datos de prueba: reporte 1 (12/03, PENDIENTE) y reporte 2 (15/03, EN_REVISION); el más antiguo primero.
+        List<ReporteProducto> lista = reporteServicio.listarPorRevisar();
+        assertEquals(2, lista.size());
+        assertEquals(1L, lista.get(0).getId());
+        assertEquals(2L, lista.get(1).getId());
+    }
+
+    @Test
+    public void listarResueltosTest() throws Exception {
+        List<ReporteProducto> lista = reporteServicio.listarResueltos();
+        assertEquals(1, lista.size());
+        assertEquals(3L, lista.get(0).getId());
+        reporteServicio.cambiarEstado(2L, EstadoReporte.RECHAZADO, "Las fotos son correctas", ADMIN_EMAIL);
+        sincronizar();
+        lista = reporteServicio.listarResueltos();
+        assertEquals(2, lista.size());
+        assertEquals(2L, lista.get(0).getId());   // 15/03/2026, más reciente que el reporte 3 (20/02/2026)
+        assertEquals(3L, lista.get(1).getId());
+        assertEquals(1, reporteServicio.listarPorRevisar().size());
+    }
+
+    @Test
+    public void aceptarReporteInvalidaProductoTest() throws Exception {
+        assertTrue(productoServicio.listarVigentes().stream().anyMatch(p -> p.getId().equals(3L)));
+        reporteServicio.cambiarEstado(1L, EstadoReporte.ACEPTADO, "Se confirmó el fraude", ADMIN_EMAIL);
+        sincronizar();
+        assertTrue(productoServicio.listarVigentes().stream().noneMatch(p -> p.getId().equals(3L)));
+    }
+
+    @Test
+    public void rechazarReporteNoAfectaProductoTest() throws Exception {
+        reporteServicio.cambiarEstado(1L, EstadoReporte.RECHAZADO, "Sin pruebas", ADMIN_EMAIL);
+        sincronizar();
+        assertTrue(productoServicio.listarVigentes().stream().anyMatch(p -> p.getId().equals(3L)));
+    }
+
+    @Test
+    public void enRevisionNoAfectaProductoTest() throws Exception {
+        reporteServicio.cambiarEstado(1L, EstadoReporte.EN_REVISION, null, ADMIN_EMAIL);
+        sincronizar();
+        assertTrue(productoServicio.listarVigentes().stream().anyMatch(p -> p.getId().equals(3L)));
     }
 }

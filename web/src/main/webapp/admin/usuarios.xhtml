@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Gestión de usuarios</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{usuariosAdminBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h1 class="titulo-inicio">Gestión de usuarios</h1>
+
+        <h:form id="formBusquedaUsuarios" styleClass="admin-barra">
+            <p:defaultCommand target="btnBuscar"/>
+            <p:inputText id="textoBusqueda" value="#{usuariosAdminBean.textoBusqueda}" maxlength="100"
+                         placeholder="Buscar por nombre o correo" label="Búsqueda"/>
+            <p:commandButton id="btnBuscar" value="Buscar" icon="pi pi-fw pi-search"
+                             action="#{usuariosAdminBean.buscar}" process="@form" update="@form :zonaUsuarios :mensajes"/>
+            <p:commandButton value="Limpiar" icon="pi pi-fw pi-times" styleClass="ui-button-secondary"
+                             action="#{usuariosAdminBean.limpiarBusqueda}" process="@this"
+                             update="@form :zonaUsuarios :mensajes" resetValues="true"/>
+            <p:commandButton value="Nuevo usuario" icon="pi pi-fw pi-plus" styleClass="ui-button-success"
+                             action="#{usuariosAdminBean.prepararNuevo}" process="@this" update=":formUsuario"
+                             oncomplete="PF('dlgUsuario').show()"/>
+        </h:form>
+
+        <h:panelGroup id="zonaUsuarios" layout="block">
+            <h:form id="formLista">
+                <p:dataTable id="tablaUsuarios" value="#{usuariosAdminBean.usuarios}" var="fila" reflow="true"
+                             paginator="true" rows="10" paginatorPosition="bottom"
+                             filteredValue="#{usuariosAdminBean.usuariosFiltrados}"
+                             emptyMessage="No hay usuarios que coincidan con la búsqueda"
+                             currentPageReportTemplate="{startRecord}-{endRecord} de {totalRecords}"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+                    <p:column headerText="Nombre" sortBy="#{fila.nombre}" filterBy="#{fila.nombre}"
+                              filterMatchMode="contains">
+                        <h:outputText value="#{fila.nombre}"/>
+                    </p:column>
+                    <p:column headerText="Correo" sortBy="#{fila.email}" filterBy="#{fila.email}"
+                              filterMatchMode="contains">
+                        <h:outputText value="#{fila.email}"/>
+                    </p:column>
+                    <p:column headerText="Ciudad" sortBy="#{fila.ciudad}" filterBy="#{fila.ciudad}"
+                              filterMatchMode="contains">
+                        <h:outputText value="#{fila.ciudad}"/>
+                    </p:column>
+                    <p:column headerText="Teléfonos">
+                        <h:outputText value="#{fila.telefonos}"/>
+                    </p:column>
+                    <p:column headerText="Estado" sortBy="#{fila.estado}">
+                        <h:outputText value="#{fila.estado}"
+                                      styleClass="estado-producto #{fila.activo ? 'estado-vigente' : 'estado-inactivo'}"/>
+                    </p:column>
+                    <p:column headerText="Acciones">
+                        <div class="acciones-producto">
+                            <p:commandButton value="Editar" icon="pi pi-fw pi-pencil"
+                                             action="#{usuariosAdminBean.prepararEdicion(fila)}"
+                                             process="@this" update=":formUsuario"
+                                             oncomplete="PF('dlgUsuario').show()"/>
+                            <p:commandButton value="#{fila.activo ? 'Desactivar' : 'Activar'}"
+                                             icon="#{fila.activo ? 'pi pi-fw pi-ban' : 'pi pi-fw pi-check'}"
+                                             styleClass="ui-button-secondary"
+                                             action="#{usuariosAdminBean.cambiarActivo(fila)}"
+                                             process="@this" update=":zonaUsuarios :mensajes"/>
+                            <p:commandButton value="Eliminar" icon="pi pi-fw pi-trash" styleClass="ui-button-danger"
+                                             action="#{usuariosAdminBean.prepararEliminar(fila)}"
+                                             process="@this" update=":formEliminar"
+                                             oncomplete="PF('dlgEliminar').show()"/>
+                        </div>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+
+        <p:dialog header="Usuario" widgetVar="dlgUsuario" modal="true" resizable="false" draggable="false"
+                  styleClass="dialogo-admin">
+            <h:form id="formUsuario">
+                <h2 class="subasta-subtitulo">#{usuariosAdminBean.edicion ? 'Editar usuario' : 'Nuevo usuario'}</h2>
+                <div class="form-campo">
+                    <p:outputLabel for="nombre" value="Nombre"/>
+                    <p:inputText id="nombre" value="#{usuariosAdminBean.nombre}" label="Nombre" maxlength="100"
+                                 required="true" requiredMessage="El nombre es obligatorio"/>
+                    <p:message for="nombre"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="email" value="Correo electrónico"/>
+                    <p:inputText id="email" type="email" value="#{usuariosAdminBean.email}" label="Correo electrónico"
+                                 maxlength="100" readonly="#{usuariosAdminBean.edicion}"
+                                 required="true" requiredMessage="El correo electrónico es obligatorio"/>
+                    <p:message for="email"/>
+                    <h:panelGroup rendered="#{usuariosAdminBean.edicion}"><small>El correo no se puede cambiar.</small></h:panelGroup>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="password" value="Contraseña"/>
+                    <p:password id="password" value="#{usuariosAdminBean.password}" feedback="false" label="Contraseña"
+                                required="#{!usuariosAdminBean.edicion}" requiredMessage="La contraseña es obligatoria"/>
+                    <h:panelGroup rendered="#{usuariosAdminBean.edicion}"><small>Déjala vacía para conservar la actual.</small></h:panelGroup>
+                    <p:message for="password"/>
+                </div>
+                <div class="form-campo">
+                    <p:outputLabel for="ciudad" value="Ciudad"/>
+                    <p:selectOneMenu id="ciudad" value="#{usuariosAdminBean.ciudad}" converter="#{ciudadConverter}"
+                                     label="Ciudad" filter="true" filterMatchMode="contains"
+                                     required="true" requiredMessage="La ciudad es obligatoria">
+                        <f:selectItem itemLabel="Selecciona una ciudad" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{seleccionBean.ciudades}" var="c" itemLabel="#{c.nombre}" itemValue="#{c}"/>
+                    </p:selectOneMenu>
+                    <p:message for="ciudad"/>
+                </div>
+                <div class="form-campo">
+                    <label>Teléfono</label>
+                    <small>Ejemplo: 3001234567. Puedes registrar hasta 3 teléfonos.</small>
+                    <h:panelGroup id="telefonos" layout="block">
+                        <ui:repeat value="#{usuariosAdminBean.telefonos}" var="tel" varStatus="est">
+                            <div class="telefono-fila">
+                                <p:inputText id="telefono" value="#{tel.numero}" label="Teléfono" maxlength="16"
+                                             required="#{est.first and (empty param['javax.faces.source'] or param['javax.faces.source'] eq 'formUsuario:btnGuardar')}"
+                                             requiredMessage="Escribe al menos un teléfono"
+                                             validatorMessage="El teléfono debe tener entre 7 y 15 dígitos (puede empezar con +)">
+                                    <f:validateRegex pattern="(\+?\d{7,15})?"/>
+                                </p:inputText>
+                                <p:commandButton icon="pi pi-fw pi-times" title="Quitar teléfono"
+                                                 rendered="#{usuariosAdminBean.puedeQuitarTelefono}"
+                                                 action="#{usuariosAdminBean.quitarTelefono(tel)}"
+                                                 process="@this :formUsuario:telefonos"
+                                                 update=":formUsuario:telefonos :mensajes"/>
+                                <p:message for="telefono"/>
+                            </div>
+                        </ui:repeat>
+                        <div>
+                            <p:commandButton id="btnAgregarTelefono" value="Agregar teléfono" icon="pi pi-fw pi-plus"
+                                             disabled="#{!usuariosAdminBean.puedeAgregarTelefono}"
+                                             action="#{usuariosAdminBean.agregarTelefono}"
+                                             process="@this :formUsuario:telefonos"
+                                             update=":formUsuario:telefonos :mensajes"/>
+                        </div>
+                    </h:panelGroup>
+                </div>
+                <div class="form-acciones">
+                    <p:commandButton id="btnGuardar" value="Guardar" icon="pi pi-fw pi-check"
+                                     action="#{usuariosAdminBean.guardar}" process="@form"
+                                     update="@form :zonaUsuarios :mensajes"
+                                     oncomplete="if (args &amp;&amp; !args.validationFailed &amp;&amp; args.ok) PF('dlgUsuario').hide()"/>
+                    <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary"
+                                     onclick="PF('dlgUsuario').hide()"/>
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="dlgEliminar" header="Eliminar usuario" severity="warn"
+                         message="Se eliminará el usuario. Si ya tiene actividad (productos, compras, comentarios, etc.) no se podrá borrar: en ese caso puedes desactivarlo.">
+            <h:form id="formEliminar">
+                <p>Usuario: <strong>#{usuariosAdminBean.nombreSeleccionado}</strong></p>
+                <p:commandButton value="Sí, eliminar" icon="pi pi-fw pi-check" styleClass="ui-button-danger"
+                                 action="#{usuariosAdminBean.eliminar}" process="@this"
+                                 update=":zonaUsuarios :mensajes" oncomplete="PF('dlgEliminar').hide()"/>
+                <p:commandButton value="Cancelar" type="button" icon="pi pi-fw pi-times"
+                                 styleClass="ui-button-secondary" onclick="PF('dlgEliminar').hide()"/>
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,4 +29,15 @@ public interface ReporteProductoRepo extends JpaRepository<ReporteProducto, Long
     /** Reportes recibidos por un producto. */
     @Query("select r from ReporteProducto r where r.producto.id = :idProducto order by r.fecha desc")
     List<ReporteProducto> listarPorProducto(@Param("idProducto") Long idProducto);
+
+    /** Indica si el usuario ha hecho al menos un reporte. */
+    boolean existsByUsuarioId(Long idUsuario);
+
+    /** Reportes en alguno de los estados indicados, los más antiguos primero. */
+    @Query("select r from ReporteProducto r where r.estado in :estados order by r.fecha asc, r.id asc")
+    List<ReporteProducto> listarPorEstadosAntiguosPrimero(@Param("estados") Collection<EstadoReporte> estados);
+
+    /** Reportes en alguno de los estados indicados, los más recientes primero. */
+    @Query("select r from ReporteProducto r where r.estado in :estados order by r.fecha desc, r.id desc")
+    List<ReporteProducto> listarPorEstadosRecientesPrimero(@Param("estados") Collection<EstadoReporte> estados);
 }
