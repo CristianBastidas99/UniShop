@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Mis compras</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{comprasBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:panelGroup id="zonaCompras" layout="block">
+            <h1 class="titulo-inicio">Mis compras</h1>
+
+            <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{empty comprasBean.compras}">
+                Aún no has hecho compras
+                <p><h:link outcome="/index" value="Ir al inicio"/></p>
+            </h:panelGroup>
+
+            <ui:repeat value="#{comprasBean.compras}" var="compra">
+                <div class="compra-tarjeta">
+                    <div class="compra-cabecera">
+                        <span class="compra-numero">Compra N.° #{compra.id}</span>
+                        <span><i class="pi pi-fw pi-calendar"></i> #{compra.fecha}</span>
+                        <span><i class="pi pi-fw pi-credit-card"></i> #{compra.medioPago}</span>
+                        <h:panelGroup rendered="#{compra.conCupon}">
+                            <i class="pi pi-fw pi-tag"></i> Cupón #{compra.cupon} (#{compra.porcentajeCupon}%)
+                        </h:panelGroup>
+                    </div>
+                    <p:dataTable value="#{compra.lineas}" var="linea" reflow="true">
+                        <p:column headerText="Producto">
+                            <h:link outcome="/detalleProducto" value="#{linea.producto}">
+                                <f:param name="producto" value="#{linea.idProducto}"/>
+                            </h:link>
+                        </p:column>
+                        <p:column headerText="Cantidad">
+                            <h:outputText value="#{linea.cantidad}"/>
+                        </p:column>
+                        <p:column headerText="Precio unitario">
+                            <h:outputText value="#{linea.precioUnitario}"><f:convertNumber pattern="$#,##0.00"/></h:outputText>
+                        </p:column>
+                        <p:column headerText="Subtotal">
+                            <h:outputText value="#{linea.subtotal}"><f:convertNumber pattern="$#,##0.00"/></h:outputText>
+                        </p:column>
+                    </p:dataTable>
+                    <div class="compra-total">
+                        Total: <strong><h:outputText value="#{compra.total}"><f:convertNumber pattern="$#,##0.00"/></h:outputText></strong>
+                    </div>
+                </div>
+            </ui:repeat>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

@@ -5,9 +5,24 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:p="http://primefaces.org/ui"
                 template="/WEB-INF/template.xhtml">
-    <ui:define name="titulo">UniShop - Publicar producto</ui:define>
+    <ui:define name="titulo">UniShop - #{productoBean.edicion ? 'Editar producto' : 'Publicar producto'}</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="producto" value="#{productoBean.idProducto}"/>
+            <f:viewAction action="#{productoBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="contenido">
-        <p:panel header="Registrar producto" styleClass="formulario">
+        <h:panelGroup layout="block" styleClass="sin-productos"
+                      rendered="#{productoBean.edicion and !productoBean.formularioVisible}">
+            No puedes editar este producto: no existe o no es tuyo.
+            <p><h:link outcome="/usuario/misProductos" value="Ir a Mis productos"/></p>
+        </h:panelGroup>
+
+        <p:panel header="#{productoBean.edicion ? 'Editar producto' : 'Registrar producto'}" styleClass="formulario"
+                 rendered="#{productoBean.formularioVisible}">
             <h:form id="formProducto">
                 <f:event type="postValidate" listener="#{productoBean.validarImagenes}"/>
 
@@ -23,8 +38,8 @@
                     <p:inputText id="cantidad_producto" value="#{productoBean.producto.unidades}" label="Unidades"
                                  required="true" requiredMessage="Las unidades son obligatorias"
                                  converterMessage="Las unidades deben ser un número entero (por ejemplo 5)"
-                                 validatorMessage="Las unidades deben ser un número entero mayor que 0">
-                        <f:validateLongRange minimum="1"/>
+                                 validatorMessage="#{productoBean.edicion ? 'Las unidades no pueden ser negativas' : 'Las unidades deben ser un número entero mayor que 0'}">
+                        <f:validateLongRange minimum="#{productoBean.edicion ? 0 : 1}"/>
                     </p:inputText>
                     <p:message for="cantidad_producto"/>
                 </div>
@@ -50,7 +65,7 @@
                     <p:message for="precio_producto"/>
                 </div>
 
-                <div class="form-campo">
+                <h:panelGroup layout="block" styleClass="form-campo" rendered="#{!productoBean.edicion}">
                     <p:outputLabel for="descuento_producto" value="Descuento (0 a 1)"/>
                     <p:inputText id="descuento_producto" value="#{productoBean.producto.descuento}"
                                  label="Descuento"
@@ -60,7 +75,7 @@
                     </p:inputText>
                     <small>Opcional. Usa punto decimal: 0.25 equivale a 25 % de descuento.</small>
                     <p:message for="descuento_producto"/>
-                </div>
+                </h:panelGroup>
 
                 <div class="form-campo">
                     <p:outputLabel for="fecha_limite_producto" value="Fecha límite de la publicación"/>
@@ -99,6 +114,17 @@
 
                 <div class="form-campo">
                     <p:outputLabel for="imagenes_producto" value="Imágenes (al menos una)"/>
+                    <h:panelGroup id="zonaImagenes" layout="block" styleClass="miniaturas">
+                        <ui:repeat value="#{productoBean.imagenes}" var="ruta">
+                            <div class="miniatura">
+                                <img src="#{productoBean.rutaImagen(ruta)}" alt="Imagen del producto"/>
+                                <p:commandButton icon="pi pi-times" title="Quitar imagen" process="@this"
+                                                 update=":formProducto:zonaImagenes :mensajes"
+                                                 action="#{productoBean.quitarImagen(ruta)}"
+                                                 styleClass="ui-button-danger ui-button-rounded miniatura-quitar"/>
+                            </div>
+                        </ui:repeat>
+                    </h:panelGroup>
                     <p:fileUpload id="imagenes_producto"
                                   listener="#{productoBean.subirImagenes}" mode="advanced"
                                   multiple="true" sizeLimit="1000000" fileLimit="5"
@@ -106,14 +132,15 @@
                                   label="Elegir imágenes" uploadLabel="Subir" cancelLabel="Cancelar"
                                   invalidFileMessage="Solo se permiten imágenes gif, jpg o png"
                                   invalidSizeMessage="Cada imagen debe pesar máximo 1 MB"
-                                  fileLimitMessage="Máximo 5 imágenes" update=":mensajes"/>
+                                  fileLimitMessage="Máximo 5 imágenes" update=":mensajes :formProducto:zonaImagenes"/>
                     <p:message for="imagenes_producto"/>
                 </div>
 
                 <div class="form-acciones">
-                    <p:commandButton id="botonRegistrar" action="#{productoBean.registrarProducto}" value="Registrar"
+                    <p:commandButton id="botonRegistrar" action="#{productoBean.guardar}"
+                                     value="#{productoBean.edicion ? 'Guardar cambios' : 'Registrar'}"
                                      update="@form :mensajes"/>
-                    <p:button outcome="/index" value="Volver"/>
+                    <p:button outcome="#{productoBean.edicion ? '/usuario/misProductos' : '/index'}" value="Volver"/>
                 </div>
             </h:form>
         </p:panel>

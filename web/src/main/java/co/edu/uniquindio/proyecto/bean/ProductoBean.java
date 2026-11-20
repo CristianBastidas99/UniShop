@@ -60,6 +60,19 @@ public class ProductoBean implements Serializable {
 
     private List<Categoria> categoriasSeleccionadas;
 
+    // ---- Modo edición (registraProducto.xhtml?producto=ID) ----
+    /** Id recibido en la URL (f:viewParam); vacío al publicar un producto nuevo. */
+    private String idProducto;
+    private boolean edicion;
+    /** En edición: false si el producto no existe o no es del usuario (no se muestra el formulario). */
+    private boolean formularioVisible = true;
+    /** Fecha límite original, para conservar la hora si el usuario no cambia el día. */
+    private Date fechaLimiteOriginal;
+    /** Imágenes que tenía el producto al abrirlo y que el usuario quitó (se borran del disco al guardar). */
+    private final List<String> imagenesRetiradas = new ArrayList<>();
+    /** Imágenes subidas en esta pantalla que aún no se han guardado en el producto. */
+    private final List<String> imagenesNuevas = new ArrayList<>();
+
     public ProductoBean(ProductoServicio productoServicio, SeguridadBean seguridadBean) {
         this.productoServicio = productoServicio;
         this.seguridadBean = seguridadBean;
@@ -72,7 +85,125 @@ public class ProductoBean implements Serializable {
         this.categoriasSeleccionadas = new ArrayList<>();
     }
 
-    /** Publica el producto del usuario en sesión. Devuelve la navegación al inicio, o null si hay errores. */
+    /** Se ejecuta con f:viewAction: si la URL trae ?producto=ID, carga ese producto para editarlo. */
+    public void cargar() {
+        if (idProducto == null || idProducto.trim().isEmpty()) {
+            return;
+        }
+        edicion = true;
+        formularioVisible = false;
+        Long idUsuario = seguridadBean.getIdUsuario();
+        Producto actual;
+        try {
+            actual = productoServicio.obtenerProducto(Long.valueOf(idProducto.trim()));
+        } catch (NumberFormatException | NegocioException e) {
+            aviso(FacesMessage.SEVERITY_WARN, "El producto no existe");
+            return;
+        }
+        if (idUsuario == null || actual.getUsuario() == null || !idUsuario.equals(actual.getUsuario().getId())) {
+            aviso(FacesMessage.SEVERITY_WARN, "Solo el vendedor puede modificar el producto");
+            return;
+        }
+        // Copia de datos simples: la entidad cargada no se conserva entre peticiones
+        producto = new Producto();
+        producto.setId(actual.getId());
+        producto.setNombre(actual.getNombre());
+        producto.setDescripcion(actual.getDescripcion());
+        producto.setUnidades(actual.getUnidades());
+        producto.setPrecio(actual.getPrecio());
+        producto.setDescuento(actual.getDescuento());
+        producto.setFechaLimite(actual.getFechaLimite());
+        producto.setCiudad(actual.getCiudad());
+        fechaLimiteOriginal = actual.getFechaLimite();
+        imagenes = new ArrayList<>(actual.getMisImagenes());
+        categoriasSeleccionadas = actual.getMisCategorias() == null ? new ArrayList<>()
+                : new ArrayList<>(actual.getMisCategorias());
+        formularioVisible = true;
+    }
+
+    /** Guarda el formulario: publica un producto nuevo o actualiza el que se está editando. */
+    public String guardar() {
+        return edicion ? actualizarProducto() : registrarProducto();
+    }
+
+    private String actualizarProducto() {
+        FacesContext contexto = FacesContext.getCurrentInstance();
+        Long idUsuario = seguridadBean.getIdUsuario();
+        try {
+            producto.setMisImagenes(imagenes);
+            // El selector de fecha pierde la hora: si el día no cambió se conserva la original
+            if (fechaLimiteOriginal != null && producto.getFechaLimite() != null
+                    && mismoDia(producto.getFechaLimite(), fechaLimiteOriginal)) {
+                producto.setFechaLimite(fechaLimiteOriginal);
+            }
+            productoServicio.actualizarProducto(producto, idsCategorias(), idUsuario);
+            // Ya guardado: se borran del disco las imágenes que el usuario quitó
+            imagenesRetiradas.forEach(this::borrarArchivo);
+            imagenesRetiradas.clear();
+            imagenesNuevas.clear();
+            contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
+                    "Listo", "Producto actualizado"));
+            contexto.getExternalContext().getFlash().setKeepMessages(true);
+            return "/usuario/misProductos?faces-redirect=true";
+        } catch (NegocioException e) {
+            contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "No se pudo actualizar el producto", e.getMessage()));
+        } catch (Exception e) {
+            LOG.error("Error inesperado al actualizar el producto", e);
+            contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "No se pudo actualizar el producto", "Ocurrió un error inesperado. Inténtalo de nuevo más tarde."));
+        }
+        return null;
+    }
+
+    private List<Long> idsCategorias() {
+        List<Long> ids = new ArrayList<>();
+        for (Categoria categoria : categoriasSeleccionadas) {
+            ids.add(categoria.getId());
+        }
+        return ids;
+    }
+
+    private static boolean mismoDia(Date a, Date b) {
+        return a.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                .equals(b.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+    }
+
+    private void aviso(FacesMessage.Severity severidad, String texto) {
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(severidad, severidad == FacesMessage.SEVERITY_INFO ? "Listo" : "Atención", texto));
+    }
+
+    /** Quita una imagen de la lista. Si se subió en esta pantalla se borra ya; si era del producto, al guardar. */
+    public void quitarImagen(String ruta) {
+        if (!imagenes.remove(ruta)) {
+            return;
+        }
+        if (imagenesNuevas.remove(ruta)) {
+            borrarArchivo(ruta);
+        } else if (edicion) {
+            imagenesRetiradas.add(ruta);
+        } else {
+            borrarArchivo(ruta);
+        }
+    }
+
+    /** Borra un archivo de la carpeta de subidas; ignora las imágenes que no estén allí (p. ej. la de ejemplo). */
+    private void borrarArchivo(String ruta) {
+        if (ruta == null || !ruta.startsWith("uploads/")) {
+            return;
+        }
+        String nombre = ruta.substring("uploads/".length());
+        if (nombre.isEmpty() || nombre.contains("/") || nombre.contains("\\") || nombre.contains("..")) {
+            return;
+        }
+        File archivo = new File(urlImagenes, nombre);
+        if (archivo.isFile() && !archivo.delete()) {
+            LOG.warn("No se pudo borrar la imagen {}", archivo);
+        }
+    }
+
+    /** Publica el producto del usuario en sesión. Devuelve la navegación a Mis productos, o null si hay errores. */
     public String registrarProducto() {
         FacesContext contexto = FacesContext.getCurrentInstance();
         Long idUsuario = seguridadBean.getIdUsuario();
@@ -87,15 +218,11 @@ public class ProductoBean implements Serializable {
             vendedor.setId(idUsuario);
             producto.setUsuario(vendedor);
             producto.setMisImagenes(imagenes);
-            List<Long> idsCategorias = new ArrayList<>();
-            for (Categoria categoria : categoriasSeleccionadas) {
-                idsCategorias.add(categoria.getId());
-            }
-            productoServicio.publicarProducto(producto, idsCategorias);
+            productoServicio.publicarProducto(producto, idsCategorias());
             contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Producto publicado", "Tu producto se publicó correctamente."));
             contexto.getExternalContext().getFlash().setKeepMessages(true);
-            return "/index?faces-redirect=true";
+            return "/usuario/misProductos?faces-redirect=true";
         } catch (NegocioException e) {
             contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     "No se pudo publicar el producto", e.getMessage()));
@@ -133,6 +260,10 @@ public class ProductoBean implements Serializable {
     /** Valida que la fecha límite sea futura (a partir de mañana). */
     public void validarFechaLimite(FacesContext contexto, UIComponent componente, Object valor) {
         if (valor instanceof Date) {
+            // Al editar se acepta el mismo día que ya tenía el producto
+            if (edicion && fechaLimiteOriginal != null && mismoDia((Date) valor, fechaLimiteOriginal)) {
+                return;
+            }
             LocalDate fecha = ((Date) valor).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             if (!fecha.isAfter(LocalDate.now())) {
                 throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -146,6 +277,7 @@ public class ProductoBean implements Serializable {
         String nombreImagen = subirImagen(imagen);
         if (nombreImagen != null) {
             imagenes.add(nombreImagen);
+            imagenesNuevas.add(nombreImagen);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Imagen subida", imagen.getFileName()));
         }
@@ -175,6 +307,31 @@ public class ProductoBean implements Serializable {
                     "No se pudo subir la imagen", "No se pudo subir " + original + ". Inténtalo de nuevo."));
             return null;
         }
+    }
+
+    public String getIdProducto() {
+        return idProducto;
+    }
+
+    public void setIdProducto(String idProducto) {
+        this.idProducto = idProducto;
+    }
+
+    public boolean isEdicion() {
+        return edicion;
+    }
+
+    public boolean isFormularioVisible() {
+        return formularioVisible;
+    }
+
+    public List<String> getImagenes() {
+        return imagenes;
+    }
+
+    /** Ruta completa (con el contexto de la aplicación) de una imagen, para mostrar la miniatura. */
+    public String rutaImagen(String ruta) {
+        return FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath() + "/" + ruta;
     }
 
     public Producto getProducto() {

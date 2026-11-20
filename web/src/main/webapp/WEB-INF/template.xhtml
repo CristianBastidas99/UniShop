@@ -38,9 +38,14 @@
                  dentro del p:menubar (PrimeFaces 10 falla al pintarlos).</ui:remove>
             <p:menubar>
                 <p:menuitem value="Inicio" icon="pi pi-fw pi-home" outcome="/index"/>
+                <p:menuitem value="Subastas" icon="pi pi-fw pi-clock" outcome="/subastas"/>
                 <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="/usuario/registraProducto"
                             rendered="#{seguridadBean.usuario}"/>
                 <p:menuitem value="Mis favoritos" icon="pi pi-fw pi-heart" outcome="/usuario/favoritos"
+                            rendered="#{seguridadBean.usuario}"/>
+                <p:menuitem value="Mis productos" icon="pi pi-fw pi-list" outcome="/usuario/misProductos"
+                            rendered="#{seguridadBean.usuario}"/>
+                <p:menuitem value="Mis compras" icon="pi pi-fw pi-shopping-bag" outcome="/usuario/compras"
                             rendered="#{seguridadBean.usuario}"/>
                 <p:menuitem value="Panel" icon="pi pi-fw pi-cog" outcome="/admin/inicio"
                             rendered="#{seguridadBean.administrador}"/>

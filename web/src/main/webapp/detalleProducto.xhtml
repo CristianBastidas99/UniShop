@@ -28,6 +28,13 @@
                 Este producto ya no está disponible
             </h:panelGroup>
 
+            <h:panelGroup layout="block" styleClass="aviso-rebaja" rendered="#{detalleProductoBean.enSubasta}">
+                Este producto está en subasta:
+                <h:link outcome="/subasta" value="ver la subasta y pujar">
+                    <f:param name="subasta" value="#{detalleProductoBean.idSubastaActiva}"/>
+                </h:link>
+            </h:panelGroup>
+
             <div class="detalle-layout">
                 <!-- Galería: fuera de los formularios para que no cambie con las actualizaciones ajax -->
                 <div class="galeria">
@@ -93,7 +100,7 @@
                     </h:panelGroup>
 
                     <h:panelGroup id="zonaCompra" layout="block" styleClass="detalle-carrito"
-                                  rendered="#{detalleProductoBean.usuarioNoVendedor and detalleProductoBean.disponible}">
+                                  rendered="#{detalleProductoBean.usuarioNoVendedor and detalleProductoBean.disponible and not detalleProductoBean.enSubasta}">
                         <p:spinner id="cantidad" value="#{detalleProductoBean.cantidad}" min="1"
                                    max="#{detalleProductoBean.producto.unidades}" size="4" label="Cantidad"/>
                         <p:commandButton id="agregarCarrito" value="Agregar al carrito" icon="pi pi-fw pi-shopping-cart"

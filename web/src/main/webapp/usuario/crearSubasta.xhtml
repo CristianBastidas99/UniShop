@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Crear subasta</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="producto" value="#{crearSubastaBean.idProducto}"/>
+            <f:viewAction action="#{crearSubastaBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{not crearSubastaBean.formularioVisible}">
+            No puedes subastar este producto: no existe, no es tuyo o no está vigente.
+            <p><h:link outcome="/usuario/misProductos" value="Ir a Mis productos"/></p>
+        </h:panelGroup>
+
+        <p:panel header="Crear subasta" styleClass="formulario" rendered="#{crearSubastaBean.formularioVisible}">
+            <h:form id="formSubasta">
+                <p>Producto: <strong>#{crearSubastaBean.nombre}</strong></p>
+                <p class="subasta-dato">El producto está disponible hasta el
+                    <h:outputText value="#{crearSubastaBean.fechaLimite}">
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                    </h:outputText>;
+                    la subasta no puede terminar después.</p>
+                <div class="form-campo">
+                    <p:outputLabel for="horas" value="Duración en horas (1 a #{crearSubastaBean.maxHoras})"/>
+                    <p:spinner id="horas" value="#{crearSubastaBean.horas}" min="1" max="#{crearSubastaBean.maxHoras}"
+                               required="true" requiredMessage="Indica la duración en horas" label="Duración"
+                               converterMessage="Escribe un número entero de horas"/>
+                    <p:message for="horas"/>
+                </div>
+                <div class="form-acciones">
+                    <p:commandButton value="Crear subasta" icon="pi pi-fw pi-check"
+                                     action="#{crearSubastaBean.crear}" update="@form :mensajes"/>
+                    <p:button value="Cancelar" outcome="/usuario/misProductos" styleClass="ui-button-secondary"/>
+                </div>
+            </h:form>
+        </p:panel>
+    </ui:define>
+</ui:composition>

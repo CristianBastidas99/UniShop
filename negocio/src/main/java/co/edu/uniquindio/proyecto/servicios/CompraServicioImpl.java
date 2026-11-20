@@ -11,6 +11,7 @@ import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.CompraRepo;
 import co.edu.uniquindio.proyecto.repositorios.DetalleCompraRepo;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
+import co.edu.uniquindio.proyecto.repositorios.SubastaRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,16 +31,18 @@ public class CompraServicioImpl implements CompraServicio {
     private final DetalleCompraRepo detalleCompraRepo;
     private final UsuarioRepo usuarioRepo;
     private final ProductoRepo productoRepo;
+    private final SubastaRepo subastaRepo;
     private final ProductoServicio productoServicio;
     private final CuponServicio cuponServicio;
 
     public CompraServicioImpl(CompraRepo compraRepo, DetalleCompraRepo detalleCompraRepo, UsuarioRepo usuarioRepo,
                               ProductoRepo productoRepo, ProductoServicio productoServicio,
-                              CuponServicio cuponServicio) {
+                              CuponServicio cuponServicio, SubastaRepo subastaRepo) {
         this.compraRepo = compraRepo;
         this.detalleCompraRepo = detalleCompraRepo;
         this.usuarioRepo = usuarioRepo;
         this.productoRepo = productoRepo;
+        this.subastaRepo = subastaRepo;
         this.productoServicio = productoServicio;
         this.cuponServicio = cuponServicio;
     }
@@ -116,6 +119,10 @@ public class CompraServicioImpl implements CompraServicio {
             }
             if (idUsuario.equals(producto.getUsuario().getId())) {
                 throw new NegocioException("No puede comprar su propio producto");
+            }
+            // Un producto en subasta solo se vende al ganador (si no, el cierre podría quedarse sin unidades)
+            if (subastaRepo.existeActivaPorProducto(producto.getId(), ahora)) {
+                throw new NegocioException("El producto " + producto.getNombre() + " está en subasta");
             }
             if (pedido.getValue() > producto.getUnidades()) {
                 throw new NegocioException("No hay suficientes unidades de " + producto.getNombre()

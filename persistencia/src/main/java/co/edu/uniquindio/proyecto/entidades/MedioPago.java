@@ -5,6 +5,17 @@ package co.edu.uniquindio.proyecto.entidades;
  */
 public enum MedioPago {
 
-    TARJETA, PAYPAL, PSE, BALOTO
+    TARJETA("Tarjeta"), PAYPAL("PayPal"), PSE("PSE"), BALOTO("Baloto");
+
+    private final String etiqueta;
+
+    MedioPago(String etiqueta) {
+        this.etiqueta = etiqueta;
+    }
+
+    /** Nombre en español para mostrar en la interfaz. */
+    public String getEtiqueta() {
+        return etiqueta;
+    }
 
 }

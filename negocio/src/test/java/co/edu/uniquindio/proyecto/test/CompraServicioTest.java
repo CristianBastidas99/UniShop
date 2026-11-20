@@ -5,10 +5,13 @@ import co.edu.uniquindio.proyecto.entidades.Compra;
 import co.edu.uniquindio.proyecto.entidades.Cupon;
 import co.edu.uniquindio.proyecto.entidades.DetalleCompra;
 import co.edu.uniquindio.proyecto.entidades.MedioPago;
+import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.CuponRepo;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
+import co.edu.uniquindio.proyecto.repositorios.SubastaRepo;
 import co.edu.uniquindio.proyecto.servicios.CompraServicio;
+import co.edu.uniquindio.proyecto.servicios.SubastaServicio;
 import co.edu.uniquindio.proyecto.servicios.CuponServicio;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,6 +35,20 @@ public class CompraServicioTest extends BaseServicioTest {
 
     @Autowired
     private ProductoRepo productoRepo;
+
+    @Autowired
+    private SubastaServicio subastaServicio;
+
+    @Autowired
+    private SubastaRepo subastaRepo;
+
+    /** En los datos de prueba el producto 5 está en la subasta 1 (activa): se da por terminada para poder comprarlo. */
+    private void terminarSubastaDelProducto5() {
+        subastaRepo.findById(1L).ifPresent(s -> {
+            s.setFechaLimite(new Date(System.currentTimeMillis() - 60_000));
+            subastaRepo.save(s);
+        });
+    }
 
     private int unidades(Long idProducto) {
         return productoRepo.findById(idProducto).orElseThrow(AssertionError::new).getUnidades();
@@ -127,6 +144,7 @@ public class CompraServicioTest extends BaseServicioTest {
 
     @Test
     public void comprarMasUnidadesQueLasDisponiblesTest() throws NegocioException {
+        terminarSubastaDelProducto5();
         int comprasAntes = compraServicio.listarComprasUsuario(7L).size();
         NegocioException e = Assertions.assertThrows(NegocioException.class, () ->
                 compraServicio.comprar(7L,
@@ -144,6 +162,17 @@ public class CompraServicioTest extends BaseServicioTest {
                 compraServicio.comprar(7L, Collections.singletonList(new ItemCompraDTO(6L, 1)),
                         MedioPago.PSE, null));
         Assertions.assertTrue(e.getMessage().endsWith("no está disponible"));
+    }
+
+    @Test
+    public void comprarProductoEnSubastaTest() throws NegocioException {
+        Producto producto = productoRepo.findById(1L).orElseThrow(AssertionError::new);
+        subastaServicio.crearSubasta(1L, producto.getUsuario().getId(), 1);
+        NegocioException e = Assertions.assertThrows(NegocioException.class, () ->
+                compraServicio.comprar(7L, Collections.singletonList(new ItemCompraDTO(1L, 1)),
+                        MedioPago.PSE, null));
+        Assertions.assertTrue(e.getMessage().endsWith("está en subasta"));
+        Assertions.assertEquals(20, unidades(1L));
     }
 
     @Test
@@ -213,6 +242,7 @@ public class CompraServicioTest extends BaseServicioTest {
 
     @Test
     public void comprarTodasLasUnidadesTest() throws NegocioException {
+        terminarSubastaDelProducto5();
         compraServicio.comprar(7L, Collections.singletonList(new ItemCompraDTO(5L, 2)), MedioPago.PSE, null);
         sincronizar();
         Assertions.assertEquals(0, unidades(5L));

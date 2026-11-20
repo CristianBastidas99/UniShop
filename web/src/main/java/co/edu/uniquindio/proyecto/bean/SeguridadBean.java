@@ -96,6 +96,9 @@ public class SeguridadBean implements Serializable {
         if (destino != null && destino.matches("/detalleProducto\\.xhtml\\?producto=[0-9]{1,18}")) {
             return destino;
         }
+        if (destino != null && destino.matches("/subasta\\.xhtml\\?subasta=[0-9]{1,18}")) {
+            return destino;
+        }
         if (destino == null || !destino.matches("/(usuario|admin)/[A-Za-z0-9_-]+(/[A-Za-z0-9_-]+)*\\.xhtml")) {
             return null;
         }

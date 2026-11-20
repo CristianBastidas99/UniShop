@@ -246,7 +246,7 @@ public class CarritoBean implements Serializable {
         vaciar();
         aviso(FacesMessage.SEVERITY_INFO, "Compra realizada");
         FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
-        return "/index?faces-redirect=true";
+        return "/usuario/compras?faces-redirect=true";
     }
 
     // ---------- Consultas para la vista ----------
@@ -271,12 +271,7 @@ public class CarritoBean implements Serializable {
     public MedioPago[] getMediosPago() { return MedioPago.values(); }
 
     public String etiqueta(MedioPago m) {
-        switch (m) {
-            case TARJETA: return "Tarjeta";
-            case PAYPAL: return "PayPal";
-            case PSE: return "PSE";
-            default: return "Baloto";
-        }
+        return m.getEtiqueta();
     }
 
     /** Ruta (desde la raíz de la aplicación) de la imagen de una línea. */

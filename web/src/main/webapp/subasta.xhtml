@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Subasta</ui:define>
+
+    <!-- Subasta pública: subasta.xhtml?subasta=ID -->
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="subasta" value="#{subastaBean.idSubasta}"/>
+            <f:viewAction action="#{subastaBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{not subastaBean.existe}">
+            <h1>La subasta no existe</h1>
+            <p><h:link outcome="/subastas" value="Ver subastas activas"/></p>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" rendered="#{subastaBean.existe}">
+            <div class="detalle-layout">
+                <div class="galeria">
+                    <img class="galeria-principal" src="#{subastaBean.imagen}" alt="#{subastaBean.nombreProducto}"/>
+                </div>
+
+                <div class="detalle-datos">
+                    <h1 class="detalle-nombre">#{subastaBean.nombreProducto}</h1>
+                    <ul class="detalle-lista">
+                        <li><strong>Vendedor:</strong> #{subastaBean.vendedor}</li>
+                        <li><strong>Termina:</strong>&#160;
+                            <h:outputText value="#{subastaBean.fechaFin}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                            </h:outputText>
+                        </li>
+                    </ul>
+                    <h:panelGroup layout="block" styleClass="detalle-descripcion"
+                                  rendered="#{not empty subastaBean.descripcion}">
+                        <h:outputText value="#{subastaBean.descripcion}"/>
+                    </h:panelGroup>
+                    <p><h:link outcome="/detalleProducto" value="Ver el producto">
+                        <f:param name="producto" value="#{subastaBean.idProducto}"/>
+                    </h:link></p>
+
+                    <h:panelGroup id="zonaPujas" layout="block">
+                        <div class="subasta-estado #{subastaBean.activa ? 'subasta-activa' : 'subasta-terminada'}">
+                            <h:panelGroup rendered="#{subastaBean.activa}">
+                                Tiempo restante: <strong class="cuenta-regresiva"
+                                                         data-restante="#{subastaBean.restanteMs}"></strong>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{not subastaBean.activa}">
+                                <strong>Subasta terminada</strong>
+                                <h:outputText rendered="#{not subastaBean.cerrada}"
+                                              value=" (se está procesando el resultado)"/>
+                            </h:panelGroup>
+                        </div>
+
+                        <div class="subasta-maxima">
+                            <span>#{subastaBean.activa ? 'Puja más alta' : 'Monto ganador'}</span>
+                            <h:outputText styleClass="precio-final detalle-precio-final" value="#{subastaBean.pujaMasAlta}"
+                                          rendered="#{subastaBean.conPujas}">
+                                <f:convertNumber pattern="$#,##0"/>
+                            </h:outputText>
+                            <h:outputText styleClass="sin-calificaciones" value="Sin pujas"
+                                          rendered="#{not subastaBean.conPujas}"/>
+                        </div>
+
+                        <h:panelGroup layout="block" styleClass="aviso-rebaja"
+                                      rendered="#{not subastaBean.activa and subastaBean.conPujas}">
+                            Ganador: <strong>#{subastaBean.ganador}</strong>
+                            <h:outputText rendered="#{subastaBean.tieneCompra}"
+                                          value=" - la compra ya se generó (aparece en Mis compras del ganador)"/>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="subasta-dato"
+                                      rendered="#{not subastaBean.activa and not subastaBean.conPujas}">
+                            La subasta terminó sin pujas
+                        </h:panelGroup>
+
+                        <h:panelGroup layout="block" styleClass="subasta-dato" rendered="#{subastaBean.puedePujar}">
+                            Mínimo sugerido para pujar:
+                            <strong><h:outputText value="#{subastaBean.minimoSugerido}"><f:convertNumber pattern="$#,##0"/></h:outputText></strong>
+                        </h:panelGroup>
+
+                        <h3 class="subasta-subtitulo">Pujas (#{subastaBean.pujas.size()})</h3>
+                        <h:panelGroup layout="block" styleClass="subasta-dato" rendered="#{not subastaBean.conPujas}">
+                            Aún nadie ha pujado
+                        </h:panelGroup>
+                        <ol class="subasta-pujas">
+                            <ui:repeat value="#{subastaBean.pujas}" var="puja">
+                                <li>
+                                    <span class="subasta-puja-usuario">#{puja.usuario}</span>
+                                    <strong><h:outputText value="#{puja.valor}"><f:convertNumber pattern="$#,##0"/></h:outputText></strong>
+                                </li>
+                            </ui:repeat>
+                        </ol>
+                    </h:panelGroup>
+
+                    <h:form id="formRefresco" rendered="#{subastaBean.activa}">
+                        <p:poll interval="5" listener="#{subastaBean.refrescar}" update=":zonaPujas"
+                                process="@this" oncomplete="if (args.terminada) { window.location.reload(); }"/>
+                    </h:form>
+
+                    <h:panelGroup id="zonaPuja" layout="block" styleClass="subasta-puja">
+                        <h:form id="formPuja" rendered="#{subastaBean.puedePujar}">
+                            <div class="form-campo">
+                                <p:outputLabel for="monto" value="Tu puja"/>
+                                <p:inputNumber id="monto" value="#{subastaBean.monto}" symbol="$" decimalPlaces="0"
+                                               minValue="0" maxValue="999999999999" label="Monto"
+                                               placeholder="Mínimo sugerido: #{subastaBean.minimoSugerido}"
+                                               converterMessage="Escribe un monto válido"/>
+                                <p:message for="monto"/>
+                            </div>
+                            <p:commandButton id="pujar" value="Pujar" icon="pi pi-fw pi-dollar"
+                                             action="#{subastaBean.pujar}"
+                                             update="@form :zonaPujas :mensajes"/>
+                        </h:form>
+                        <h:panelGroup layout="block" styleClass="subasta-dato" rendered="#{subastaBean.esVendedor and subastaBean.activa}">
+                            Es tu subasta: no puedes pujar en ella.
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" styleClass="subasta-dato"
+                                      rendered="#{not seguridadBean.autenticado and subastaBean.activa}">
+                            <h:link outcome="/login" value="Inicia sesión para pujar">
+                                <f:param name="destino" value="/subasta.xhtml?subasta=#{subastaBean.id}"/>
+                            </h:link>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <h:outputScript library="js" name="subastas.js" target="body"/>
+    </ui:define>
+</ui:composition>

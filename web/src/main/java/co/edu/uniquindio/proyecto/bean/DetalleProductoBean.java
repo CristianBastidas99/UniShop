@@ -6,12 +6,14 @@ import co.edu.uniquindio.proyecto.entidades.HistorialPrecio;
 import co.edu.uniquindio.proyecto.entidades.MotivoReporte;
 import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.entidades.ReporteProducto;
+import co.edu.uniquindio.proyecto.entidades.Subasta;
 import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.ComentarioServicio;
 import co.edu.uniquindio.proyecto.servicios.HistorialPrecioServicio;
 import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
 import co.edu.uniquindio.proyecto.servicios.ReporteProductoServicio;
+import co.edu.uniquindio.proyecto.servicios.SubastaServicio;
 import org.primefaces.PrimeFaces;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +41,10 @@ public class DetalleProductoBean extends ListadoProductosBase {
     private final HistorialPrecioServicio historialServicio;
     private final SeguridadBean seguridadBean;
     private final CarritoBean carritoBean;
+    private final SubastaServicio subastaServicio;
+
+    /** Subasta activa del producto (null si no tiene). */
+    private Long idSubastaActiva;
 
     /** Valor crudo del parámetro {@code producto} (texto, para tolerar valores no numéricos). */
     private String idProducto;
@@ -78,13 +84,15 @@ public class DetalleProductoBean extends ListadoProductosBase {
 
     public DetalleProductoBean(ProductoServicio productoServicio, ComentarioServicio comentarioServicio,
                                ReporteProductoServicio reporteServicio, HistorialPrecioServicio historialServicio,
-                               SeguridadBean seguridadBean, CarritoBean carritoBean) {
+                               SeguridadBean seguridadBean, CarritoBean carritoBean,
+                               SubastaServicio subastaServicio) {
         super(productoServicio, comentarioServicio);
         this.comentarioServicio = comentarioServicio;
         this.reporteServicio = reporteServicio;
         this.historialServicio = historialServicio;
         this.seguridadBean = seguridadBean;
         this.carritoBean = carritoBean;
+        this.subastaServicio = subastaServicio;
     }
 
     /** Se ejecuta con f:viewAction: carga el producto o marca que no existe (sin lanzar error). */
@@ -106,10 +114,20 @@ public class DetalleProductoBean extends ListadoProductosBase {
         Usuario vendedor = producto.getUsuario();
         idVendedor = vendedor.getId();
         nombreVendedor = vendedor.getNombre();
+        idSubastaActiva = buscarSubastaActiva();
         calcularRebaja();
         recargarComentarios();
         recargarReporte();
         recargarFavorito();
+    }
+
+    private Long buscarSubastaActiva() {
+        for (Subasta s : subastaServicio.listarActivas()) {
+            if (s.getProducto().getId().equals(producto.getId())) {
+                return s.getId();
+            }
+        }
+        return null;
     }
 
     /** Aviso "Antes $X": el último cambio de precio final fue a la baja y el precio actual sigue por debajo. */
@@ -183,6 +201,10 @@ public class DetalleProductoBean extends ListadoProductosBase {
         }
         try {
             // Se vuelve a leer el producto: las unidades y la vigencia pudieron cambiar
+            if (buscarSubastaActiva() != null) {
+                aviso(FacesMessage.SEVERITY_WARN, "El producto está en subasta: puja en la subasta para comprarlo");
+                return;
+            }
             Producto actual = productoServicio.obtenerProducto(producto.getId());
             if (actual.getFechaLimite() == null || !actual.getFechaLimite().after(new Date())) {
                 aviso(FacesMessage.SEVERITY_WARN, "El producto ya no está disponible");
@@ -324,6 +346,8 @@ public class DetalleProductoBean extends ListadoProductosBase {
     public Producto getProducto() { return producto; }
     public boolean isExiste() { return existe; }
     public boolean isDisponible() { return disponible; }
+    public Long getIdSubastaActiva() { return idSubastaActiva; }
+    public boolean isEnSubasta() { return idSubastaActiva != null; }
     public List<String> getImagenes() { return imagenes; }
     public String getCategorias() { return categorias; }
     public String getCiudad() { return ciudad; }

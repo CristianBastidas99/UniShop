@@ -140,3 +140,37 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .resumen-total { font-size: 1.25rem; font-weight: 700; border-top: 1px solid #dde2e7; margin-bottom: 16px; }
 .carrito-resumen .ui-selectonemenu { width: 100%; box-sizing: border-box; }
 .detalle-carrito { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+/* Mis compras */
+.compra-tarjeta { background: #ffffff; border: 1px solid #dde2e7; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+.compra-cabecera { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-bottom: 12px; color: #445; }
+.compra-numero { font-weight: 700; font-size: 1.1rem; color: #222; }
+.compra-total { text-align: right; margin-top: 12px; font-size: 1.1rem; }
+/* PrimeIcons 5 no trae pi-shopping-bag: se reutiliza el glifo de la billetera */
+.pi-shopping-bag::before { content: "\e9c3"; }
+
+/* Mis productos */
+.acciones-producto { display: flex; flex-wrap: wrap; gap: 6px; }
+.estado-producto { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: .85rem; font-weight: 600; }
+.estado-vigente { background: #e8f5e9; border: 1px solid #81c784; color: #1b5e20; }
+.estado-inactivo { background: #fff3e0; border: 1px solid #ffb74d; color: #8a4b00; }
+.dialogo-producto { max-width: 95vw; }
+
+/* Miniaturas de imágenes del formulario de producto */
+.miniaturas { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.miniatura { position: relative; width: 96px; height: 96px; }
+.miniatura img { width: 96px; height: 96px; object-fit: cover; border-radius: 6px; background: #eef0f3; display: block; }
+.miniatura-quitar { position: absolute; top: -8px; right: -8px; width: 24px !important; height: 24px !important; padding: 0 !important; }
+
+/* Subastas */
+.subasta-dato { color: #667; font-size: .95rem; display: block; margin: 4px 0; }
+.subasta-estado { padding: 10px 12px; border-radius: 8px; margin: 12px 0; }
+.subasta-activa { background: #e3f2fd; border: 1px solid #90caf9; color: #0d47a1; }
+.subasta-terminada { background: #fff3e0; border: 1px solid #ffb74d; color: #8a4b00; }
+.subasta-maxima { display: flex; flex-direction: column; gap: 2px; margin: 8px 0; color: #667; }
+.subasta-subtitulo { margin: 16px 0 6px; font-size: 1.05rem; }
+.subasta-pujas { margin: 0; padding-left: 22px; }
+.subasta-pujas li { padding: 4px 0; }
+.subasta-pujas li strong { margin-left: 8px; color: #1565c0; }
+.subasta-puja { margin-top: 16px; }
+.subasta-puja .ui-inputnumber, .subasta-puja .ui-inputnumber input { width: 100%; box-sizing: border-box; }
