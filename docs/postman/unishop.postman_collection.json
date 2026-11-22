@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "UniShop API",
-    "description": "API REST de UniShop (Entrega 3). Ejecuta las carpetas en orden: la primera petición guarda ids reales de la base en las variables de la colección. Errores: JSON { \"mensaje\": \"...\" } con 400, 404, 405 o 500.",
+    "description": "API REST de UniShop (Entrega 3). Ejecuta las carpetas en orden: la primera petición guarda ids reales de la base en las variables de la colección. Errores: JSON { \"mensaje\": \"...\" } con 400, 403, 404, 405, 415 o 500 (406 sin cuerpo si el cliente no acepta JSON).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -465,7 +465,7 @@
           ]
         },
         {
-          "name": "Actualizar producto (otro usuario, 400)",
+          "name": "Actualizar producto (otro usuario, 403)",
           "request": {
             "method": "PUT",
             "header": [
@@ -503,7 +503,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Código 403\", () => pm.response.to.have.status(403));",
                   "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
                 ]
               }
@@ -652,7 +652,7 @@
           ]
         },
         {
-          "name": "Eliminar producto (otro usuario, 400)",
+          "name": "Eliminar producto (otro usuario, 403)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -681,7 +681,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Código 403\", () => pm.response.to.have.status(403));",
                   "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
                 ]
               }
@@ -779,6 +779,75 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Código 405\", () => pm.response.to.have.status(405));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tipo de contenido no soportado (415)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "hola"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 415\", () => pm.response.to.have.status(415));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ruta inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/nada",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "nada"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 404\", () => pm.response.to.have.status(404));",
                   "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
                 ]
               }

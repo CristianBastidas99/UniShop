@@ -5,6 +5,7 @@ import co.edu.uniquindio.proyecto.entidades.Ciudad;
 import co.edu.uniquindio.proyecto.entidades.HistorialPrecio;
 import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.entidades.Usuario;
+import co.edu.uniquindio.proyecto.excepciones.AccesoDenegadoException;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.excepciones.NoEncontradoException;
 import co.edu.uniquindio.proyecto.repositorios.CategoriaRepo;
@@ -336,9 +337,10 @@ public class ProductoServicioImpl implements ProductoServicio {
         return descuento;
     }
 
+    /** Lanza {@link AccesoDenegadoException} (403 en la API) si {@code idUsuario} no es el vendedor del producto. */
     private void validarDueno(Producto producto, Long idUsuario, String mensaje) throws NegocioException {
         if (idUsuario == null || !idUsuario.equals(producto.getUsuario().getId())) {
-            throw new NegocioException(mensaje);
+            throw new AccesoDenegadoException(mensaje);
         }
     }
 

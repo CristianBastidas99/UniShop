@@ -9,7 +9,6 @@ import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,6 +23,9 @@ import java.util.stream.Collectors;
  * <p>
  * Importante: la API no tiene autenticación; cualquiera que llegue al servidor puede usarla.
  * El correo va en la ruta (puede llevar puntos) y se normaliza a minúsculas.
+ * <p>
+ * No lleva {@code @Transactional}: el mapeo a DTO (teléfonos y ciudad, que son perezosos) funciona porque
+ * {@code spring.jpa.open-in-view=true} mantiene la sesión de JPA abierta durante la petición.
  */
 @RestController
 @RequestMapping("api/usuarios")
@@ -51,14 +53,12 @@ public class UsuarioRestController {
 
     /** {@code GET /api/usuarios}: lista todos los usuarios (200). */
     @GetMapping
-    @Transactional(readOnly = true)
     public List<UsuarioDTO> listarUsuarios() {
         return usuarioServicio.listarUsuarios().stream().map(UsuarioDTO::desde).collect(Collectors.toList());
     }
 
     /** {@code GET /api/usuarios/{email}}: 200 con el usuario, o 404 si no existe. */
     @GetMapping("/{email:.+}")
-    @Transactional(readOnly = true)
     public UsuarioDTO obtenerUsuario(@PathVariable("email") String email) throws NegocioException {
         return UsuarioDTO.desde(usuarioServicio.obtenerUsuario(normalizar(email)));
     }
@@ -68,7 +68,6 @@ public class UsuarioRestController {
      * obligatorios; 400 si hay datos inválidos, el correo ya existe o la ciudad no existe.
      */
     @PostMapping
-    @Transactional
     public ResponseEntity<UsuarioDTO> crearUsuario(@Valid @RequestBody UsuarioEntradaDTO dto) throws NegocioException {
         if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
             throw new NegocioException("email: no debe estar vacío");
@@ -85,7 +84,6 @@ public class UsuarioRestController {
      * 200 con el usuario actualizado, 404 si no existe, 400 si los datos no son válidos.
      */
     @PutMapping("/{email:.+}")
-    @Transactional
     public UsuarioDTO actualizarUsuario(@PathVariable("email") String email,
                                         @Valid @RequestBody UsuarioEntradaDTO dto) throws NegocioException {
         return UsuarioDTO.desde(usuarioServicio.actualizarUsuario(aEntidad(dto, normalizar(email))));
