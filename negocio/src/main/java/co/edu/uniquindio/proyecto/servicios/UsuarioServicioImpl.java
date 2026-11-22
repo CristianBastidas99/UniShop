@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyecto.servicios;
 import co.edu.uniquindio.proyecto.entidades.Ciudad;
 import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
+import co.edu.uniquindio.proyecto.excepciones.NoEncontradoException;
 import co.edu.uniquindio.proyecto.repositorios.*;
 import org.springframework.stereotype.Service;
 
@@ -111,7 +112,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
     @Override
     public Usuario obtenerUsuario(String email) throws NegocioException {
         return usuarioRepo.findByEmail(email)
-                .orElseThrow(() -> new NegocioException("El usuario con correo " + email + " no existe"));
+                .orElseThrow(() -> new NoEncontradoException("El usuario con correo " + email + " no existe"));
     }
 
     @Override

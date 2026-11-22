@@ -6,6 +6,7 @@ import co.edu.uniquindio.proyecto.entidades.HistorialPrecio;
 import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
+import co.edu.uniquindio.proyecto.excepciones.NoEncontradoException;
 import co.edu.uniquindio.proyecto.repositorios.CategoriaRepo;
 import co.edu.uniquindio.proyecto.repositorios.ChatRepo;
 import co.edu.uniquindio.proyecto.repositorios.CiudadRepo;
@@ -292,10 +293,10 @@ public class ProductoServicioImpl implements ProductoServicio {
     @Override
     public Producto obtenerProducto(Long id) throws NegocioException {
         if (id == null) {
-            throw new NegocioException("El producto no existe");
+            throw new NoEncontradoException("El producto no existe");
         }
         return productoRepo.findById(id)
-                .orElseThrow(() -> new NegocioException("El producto no existe"));
+                .orElseThrow(() -> new NoEncontradoException("El producto no existe"));
     }
 
     @Override

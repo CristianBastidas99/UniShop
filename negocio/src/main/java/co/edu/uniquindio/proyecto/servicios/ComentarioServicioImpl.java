@@ -4,6 +4,7 @@ import co.edu.uniquindio.proyecto.entidades.Comentario;
 import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
+import co.edu.uniquindio.proyecto.excepciones.NoEncontradoException;
 import co.edu.uniquindio.proyecto.repositorios.ComentarioRepo;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
@@ -143,7 +144,7 @@ public class ComentarioServicioImpl implements ComentarioServicio {
     @Transactional(readOnly = true)
     public double calcularCalificacion(Long idProducto) throws NegocioException {
         if (idProducto == null || !productoRepo.existsById(idProducto)) {
-            throw new NegocioException("El producto no existe");
+            throw new NoEncontradoException("El producto no existe");
         }
         Double promedio = comentarioRepo.calificacionPromedio(idProducto);
         if (promedio == null) {

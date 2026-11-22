@@ -1,0 +1,1151 @@
+{
+  "info": {
+    "name": "UniShop API",
+    "description": "API REST de UniShop (Entrega 3). Ejecuta las carpetas en orden: la primera petición guarda ids reales de la base en las variables de la colección. Errores: JSON { \"mensaje\": \"...\" } con 400, 404, 405 o 500.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Productos",
+      "description": "API REST de productos (Pasos 6.1 a 6.3). La API no tiene autenticación: el usuario que actúa llega en ?idUsuario.",
+      "item": [
+        {
+          "name": "Listar productos vigentes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "Devuelve los productos vigentes (fecha límite futura y con unidades). Guarda ids reales para las siguientes peticiones."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "const lista = pm.response.json();",
+                  "pm.test(\"Hay al menos un producto con categoría\", () => pm.expect(lista.find(p => p.categorias.length)).to.be.ok);",
+                  "const p = lista.find(x => x.categorias.length && x.idCiudad);",
+                  "pm.collectionVariables.set(\"idProducto\", p.id);",
+                  "pm.collectionVariables.set(\"idVendedor\", p.idVendedor);",
+                  "pm.collectionVariables.set(\"idCiudad\", p.idCiudad);",
+                  "pm.collectionVariables.set(\"idCategoria\", p.categorias[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener producto por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idProducto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idProducto}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es el producto pedido\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"idProducto\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener producto inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "999999"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener producto con id no numérico (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "abc"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por categoría, precio y ciudad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/buscar?categoria={{idCategoria}}&precioMin=0&precioMax=100000000&ciudad={{idCiudad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "categoria",
+                  "value": "{{idCategoria}}"
+                },
+                {
+                  "key": "precioMin",
+                  "value": "0"
+                },
+                {
+                  "key": "precioMax",
+                  "value": "100000000"
+                },
+                {
+                  "key": "ciudad",
+                  "value": "{{idCiudad}}"
+                }
+              ]
+            },
+            "description": "Todos los filtros son opcionales: texto, categoria, precioMin, precioMax, ciudad, calificacionMin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "const cat = Number(pm.collectionVariables.get(\"idCategoria\")), ciu = Number(pm.collectionVariables.get(\"idCiudad\"));",
+                  "pm.test(\"Todos cumplen los filtros\", () => pm.response.json().forEach(p => {",
+                  "  pm.expect(p.idCiudad).to.eql(ciu);",
+                  "  pm.expect(p.categorias.map(c => c.id)).to.include(cat);",
+                  "}));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por texto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/buscar?texto=a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "texto",
+                  "value": "a"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar con rango de precio inválido (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/buscar?precioMin=500&precioMax=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "precioMin",
+                  "value": "500"
+                },
+                {
+                  "key": "precioMax",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Calificación promedio (extra 1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idProducto}}/calificacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idProducto}}",
+                "calificacion"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Tiene promedio y cantidad\", () => { const c = pm.response.json(); pm.expect(c).to.have.property(\"promedio\"); pm.expect(c).to.have.property(\"cantidadComentarios\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto desde Postman\",\n  \"descripcion\": \"Creado por la colección de Postman\",\n  \"unidades\": 4,\n  \"precio\": 50000,\n  \"descuento\": 0,\n  \"fechaLimite\": \"2030-12-31T18:00:00\",\n  \"idVendedor\": {{idVendedor}},\n  \"idCiudad\": {{idCiudad}},\n  \"imagenes\": [\n    \"default.png\"\n  ],\n  \"idsCategorias\": [\n    {{idCategoria}}\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Trae Location\", () => pm.response.to.have.header(\"Location\"));",
+                  "pm.collectionVariables.set(\"idNuevo\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar producto inválido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"precio\": -1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con JSON mal formado (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": "
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar producto (dueño)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}?idUsuario={{idVendedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{idVendedor}}"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto desde Postman (editado)\",\n  \"descripcion\": \"Creado por la colección de Postman\",\n  \"unidades\": 6,\n  \"precio\": 60000,\n  \"descuento\": 0,\n  \"fechaLimite\": \"2030-12-31T18:00:00\",\n  \"idCiudad\": {{idCiudad}},\n  \"imagenes\": [\n    \"default.png\"\n  ],\n  \"idsCategorias\": [\n    {{idCategoria}}\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Cambió el precio\", () => pm.expect(pm.response.json().precio).to.eql(60000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar producto (otro usuario, 400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}?idUsuario=999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "999999"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto desde Postman (editado)\",\n  \"descripcion\": \"Creado por la colección de Postman\",\n  \"unidades\": 6,\n  \"precio\": 60000,\n  \"descuento\": 0,\n  \"fechaLimite\": \"2030-12-31T18:00:00\",\n  \"idCiudad\": {{idCiudad}},\n  \"imagenes\": [\n    \"default.png\"\n  ],\n  \"idsCategorias\": [\n    {{idCategoria}}\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Poner descuento (extra 2)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}/descuento?idUsuario={{idVendedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}",
+                "descuento"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{idVendedor}}"
+                }
+              ]
+            },
+            "description": "Cuerpo { \"descuento\": 0.25 }. Con 0 o null se quita el descuento. Cada cambio queda en el historial de precios.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descuento\": 0.25\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Precio con descuento\", () => pm.expect(pm.response.json().precioConDescuento).to.eql(45000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Poner descuento inválido (400)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}/descuento?idUsuario={{idVendedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}",
+                "descuento"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{idVendedor}}"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descuento\": 1.5\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quitar descuento (extra 2)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}/descuento?idUsuario={{idVendedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}",
+                "descuento"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{idVendedor}}"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descuento\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sin descuento\", () => pm.expect(pm.response.json().descuento).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar producto (otro usuario, 400)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}?idUsuario=999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "999999"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar producto (dueño)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}?idUsuario={{idVendedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{idVendedor}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener producto eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{idNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{idNuevo}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Método no permitido (405)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 405\", () => pm.response.to.have.status(405));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "description": "API REST de usuarios (Paso 6.4). Nunca devuelve la contraseña.",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sin contraseñas\", () => pm.response.json().forEach(u => pm.expect(u).to.not.have.property(\"password\")));",
+                  "const v = pm.response.json().find(u => u.id === Number(pm.collectionVariables.get(\"idVendedor\")));",
+                  "if (v) pm.collectionVariables.set(\"emailVendedor\", v.email);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario Postman\",\n  \"email\": \"{{emailNuevo}}\",\n  \"password\": \"clave123\",\n  \"idCiudad\": {{idCiudad}},\n  \"telefonos\": [\"3001234567\"]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"emailNuevo\", \"postman\" + Date.now() + \"@unishop.com\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Correo guardado\", () => pm.expect(pm.response.json().email).to.eql(pm.collectionVariables.get(\"emailNuevo\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar correo repetido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario Postman\",\n  \"email\": \"{{emailNuevo}}\",\n  \"password\": \"clave123\",\n  \"idCiudad\": {{idCiudad}},\n  \"telefonos\": [\"3001234567\"]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con teléfono inválido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Otro\",\n  \"email\": \"otro.postman@unishop.com\",\n  \"password\": \"clave123\",\n  \"idCiudad\": {{idCiudad}},\n  \"telefonos\": [\"12\"]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener usuario por correo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{emailNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{emailNuevo}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{emailNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{emailNuevo}}"
+              ]
+            },
+            "description": "La contraseña es opcional: si no viene, se conserva.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario Postman (editado)\",\n  \"idCiudad\": {{idCiudad}},\n  \"telefonos\": [\"3009999999\", \"3108888888\"]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Dos teléfonos\", () => pm.expect(pm.response.json().telefonos.length).to.eql(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar usuario con actividad (400)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{emailVendedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{emailVendedor}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{emailNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{emailNuevo}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener usuario eliminado (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/{{emailNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "{{emailNuevo}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Responde { mensaje }\", () => pm.expect(pm.response.json()).to.have.property(\"mensaje\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "idProducto",
+      "value": ""
+    },
+    {
+      "key": "idVendedor",
+      "value": ""
+    },
+    {
+      "key": "idCiudad",
+      "value": ""
+    },
+    {
+      "key": "idCategoria",
+      "value": ""
+    },
+    {
+      "key": "idNuevo",
+      "value": ""
+    },
+    {
+      "key": "emailNuevo",
+      "value": ""
+    },
+    {
+      "key": "emailVendedor",
+      "value": ""
+    }
+  ]
+}
