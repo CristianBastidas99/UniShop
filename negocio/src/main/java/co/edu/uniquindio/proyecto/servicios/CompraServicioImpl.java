@@ -13,6 +13,10 @@ import co.edu.uniquindio.proyecto.repositorios.DetalleCompraRepo;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import co.edu.uniquindio.proyecto.repositorios.SubastaRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
+import co.edu.uniquindio.proyecto.correo.CorreoCompraPlantilla;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +31,8 @@ import java.util.Map;
 @Service
 public class CompraServicioImpl implements CompraServicio {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CompraServicioImpl.class);
+
     private final CompraRepo compraRepo;
     private final DetalleCompraRepo detalleCompraRepo;
     private final UsuarioRepo usuarioRepo;
@@ -34,10 +40,13 @@ public class CompraServicioImpl implements CompraServicio {
     private final SubastaRepo subastaRepo;
     private final ProductoServicio productoServicio;
     private final CuponServicio cuponServicio;
+    private final CorreoCompraPlantilla correoPlantilla;
+    private final ApplicationEventPublisher publicador;
 
     public CompraServicioImpl(CompraRepo compraRepo, DetalleCompraRepo detalleCompraRepo, UsuarioRepo usuarioRepo,
                               ProductoRepo productoRepo, ProductoServicio productoServicio,
-                              CuponServicio cuponServicio, SubastaRepo subastaRepo) {
+                              CuponServicio cuponServicio, SubastaRepo subastaRepo,
+                              CorreoCompraPlantilla correoPlantilla, ApplicationEventPublisher publicador) {
         this.compraRepo = compraRepo;
         this.detalleCompraRepo = detalleCompraRepo;
         this.usuarioRepo = usuarioRepo;
@@ -45,6 +54,8 @@ public class CompraServicioImpl implements CompraServicio {
         this.subastaRepo = subastaRepo;
         this.productoServicio = productoServicio;
         this.cuponServicio = cuponServicio;
+        this.correoPlantilla = correoPlantilla;
+        this.publicador = publicador;
     }
 
     @Override
@@ -157,6 +168,7 @@ public class CompraServicioImpl implements CompraServicio {
         if (cupon != null) {
             cupon.setUsosRealizados(cupon.getUsosRealizados() + 1);
         }
+        publicarCorreoCompra(compra, detalles, false);
         return compra;
     }
 
@@ -191,6 +203,7 @@ public class CompraServicioImpl implements CompraServicio {
 
         producto.setUnidades(producto.getUnidades() - 1);
         productoRepo.save(producto);
+        publicarCorreoCompra(compra, detalles, true);
         return compra;
     }
 
@@ -217,6 +230,19 @@ public class CompraServicioImpl implements CompraServicio {
     }
 
     // ===== Utilidades privadas =====
+
+    /**
+     * Arma el correo de la compra y lo publica como evento: se envía en segundo plano solo si la transacción se
+     * confirma. Si armarlo falla, solo se registra: nunca debe deshacer la compra.
+     */
+    private void publicarCorreoCompra(Compra compra, List<DetalleCompra> detalles, boolean subasta) {
+        try {
+            double total = calcularTotal(compra.getId());
+            publicador.publishEvent(correoPlantilla.armar(compra, detalles, total, subasta));
+        } catch (Exception e) {
+            LOG.error("No se pudo preparar el correo de la compra {}: {}", compra.getId(), e.getMessage());
+        }
+    }
 
     private Usuario cargarUsuario(Long idUsuario) throws NegocioException {
         if (idUsuario == null) {

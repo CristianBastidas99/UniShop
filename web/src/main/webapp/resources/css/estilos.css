@@ -16,8 +16,13 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .login-caja { max-width: 420px; margin: 40px auto; }
 .login-campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .login-campo .ui-inputtext { width: 100%; box-sizing: border-box; }
+.login-campo .ui-password, .login-campo .ui-password input { width: 100%; box-sizing: border-box; }
+/* El contenedor del p:password debe ser bloque y relativo para que el ojo de toggleMask quede dentro del campo */
+.login-campo .ui-password { display: block; position: relative; }
+.login-campo small { color: #667; }
 .login-boton { width: 100%; }
 .login-enlace { text-align: center; margin: 16px 0 0; }
+.login-olvido { text-align: right; margin: -6px 0 16px; }
 
 /* Formularios: cada campo en su bloque (etiqueta, campo y mensaje de error) */
 .formulario { max-width: 640px; }

@@ -51,4 +51,13 @@ public interface AdministradorServicio {
 
     /** Lista todos los administradores. */
     List<Administrador> listarAdministrador();
+
+    /**
+     * Cambia la contraseña del administrador con ese correo. Es el ÚNICO lugar donde se cambia la contraseña de
+     * un administrador por la recuperación por correo. Hoy se guarda en texto plano; en el Paso 10.1
+     * aquí se encriptará.
+     *
+     * @throws NegocioException si no existe un administrador con ese correo o la contraseña viene vacía
+     */
+    void cambiarPassword(String email, String nueva) throws NegocioException;
 }

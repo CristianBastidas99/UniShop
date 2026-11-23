@@ -69,4 +69,15 @@ public class AdministradorServicioImpl implements AdministradorServicio {
     public List<Administrador> listarAdministrador() {
         return administradorRepo.findAll();
     }
+
+    @Override
+    public void cambiarPassword(String email, String nueva) throws NegocioException {
+        if (nueva == null || nueva.trim().isEmpty()) {
+            throw new NegocioException("La contraseña es obligatoria");
+        }
+        Administrador administrador = administradorRepo.findByEmail(normalizarEmail(email))
+                .orElseThrow(() -> new NegocioException("El administrador con correo " + email + " no existe"));
+        administrador.setPassword(nueva);
+        administradorRepo.save(administrador);
+    }
 }

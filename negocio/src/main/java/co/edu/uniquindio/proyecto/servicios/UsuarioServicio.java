@@ -80,4 +80,13 @@ public interface UsuarioServicio {
      * Un texto nulo o vacío devuelve todos los usuarios. El resultado va ordenado por nombre.
      */
     List<Usuario> buscarUsuarios(String texto);
+
+    /**
+     * Cambia la contraseña del usuario con ese correo. Es el ÚNICO lugar donde se cambia la contraseña de un
+     * usuario por la recuperación por correo. Hoy se guarda en texto plano; en el Paso 10.1 aquí se
+     * encriptará. No exige que la cuenta esté activa.
+     *
+     * @throws NegocioException si no existe un usuario con ese correo o la contraseña viene vacía
+     */
+    void cambiarPassword(String email, String nueva) throws NegocioException;
 }

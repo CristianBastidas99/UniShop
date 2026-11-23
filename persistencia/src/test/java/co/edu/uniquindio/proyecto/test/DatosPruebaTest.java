@@ -28,7 +28,8 @@ public class DatosPruebaTest {
     private static final List<String> TABLAS = List.of(
             "administrador", "ciudad", "usuario", "telefono", "categoria", "producto", "imagen",
             "producto_categoria", "favorito", "comentario", "cupon", "compra", "detalle_compra",
-            "chat", "mensaje", "subasta", "subasta_usuario", "reporte_producto", "historial_precio");
+            "chat", "mensaje", "subasta", "subasta_usuario", "reporte_producto", "historial_precio",
+            "token_recuperacion");
 
     @Autowired private EntityManager entityManager;
     @Autowired private ProductoRepo productoRepo;

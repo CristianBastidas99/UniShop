@@ -158,4 +158,15 @@ public class UsuarioServicioImpl implements UsuarioServicio {
     public List<Usuario> listarUsuarios() {
         return usuarioRepo.findAll();
     }
+
+    @Override
+    public void cambiarPassword(String email, String nueva) throws NegocioException {
+        if (nueva == null || nueva.trim().isEmpty()) {
+            throw new NegocioException("La contraseña es obligatoria");
+        }
+        Usuario usuario = usuarioRepo.findByEmail(normalizarEmail(email))
+                .orElseThrow(() -> new NegocioException("El usuario con correo " + email + " no existe"));
+        usuario.setPassword(nueva);
+        usuarioRepo.save(usuario);
+    }
 }

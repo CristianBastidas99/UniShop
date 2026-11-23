@@ -29,6 +29,7 @@
                                     required="true" requiredMessage="La contraseña es obligatoria"/>
                         <p:message for="password"/>
                     </div>
+                    <p class="login-olvido"><h:link outcome="/recuperarPassword" value="¿Olvidaste tu contraseña?"/></p>
                     <p:commandButton value="Iniciar sesión" icon="pi pi-fw pi-sign-in"
                                      action="#{seguridadBean.iniciarSesion}" update="@form :mensajes"
                                      styleClass="login-boton"/>

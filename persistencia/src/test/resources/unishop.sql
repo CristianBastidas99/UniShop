@@ -151,3 +151,11 @@ INSERT INTO historial_precio (id, precio_anterior, precio_nuevo, descuento_anter
 VALUES (2, 320000, 300000, 0.1, 0.1, '2026-01-20 08:00:00', 2);
 INSERT INTO historial_precio (id, precio_anterior, precio_nuevo, descuento_anterior, descuento_nuevo, fecha, id_producto)
 VALUES (3, 2600000, 2500000, 0, 0.05, '2026-02-15 08:00:00', 5);
+
+-- ===== Tokens de recuperacion de contrasena (Paso 7.3): solo el hash SHA-256, nunca el token =====
+INSERT INTO token_recuperacion (id, token_hash, email, fecha_creacion, fecha_expiracion, usado, fecha_uso)
+VALUES (1, 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90', 'lorena@email.com', '2030-01-01 10:00:00', '2030-01-01 10:30:00', 0, NULL);
+INSERT INTO token_recuperacion (id, token_hash, email, fecha_creacion, fecha_expiracion, usado, fecha_uso)
+VALUES (2, 'b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1', 'profesor@uniquindio.com', '2026-02-01 08:00:00', '2026-02-01 08:30:00', 1, '2026-02-01 08:10:00');
+INSERT INTO token_recuperacion (id, token_hash, email, fecha_creacion, fecha_expiracion, usado, fecha_uso)
+VALUES (3, 'c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2', 'lorena@email.com', '2026-01-01 09:00:00', '2026-01-01 09:30:00', 0, NULL);
