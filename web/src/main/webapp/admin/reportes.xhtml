@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Reportes</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{reportesAdminBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <!-- Debe cargarse antes de que PrimeFaces cree los gráficos (sus scripts van al final de la página) -->
+        <script src="#{request.contextPath}/resources/js/reportes.js?v=#{recursosBean.version}"></script>
+        <h1 class="titulo-inicio">Reportes</h1>
+        <p>Estadísticas de ventas y actividad de UniShop con los datos actuales.</p>
+
+        <div class="panel-grid">
+            <div class="panel-tarjeta">
+                <span class="panel-tarjeta-titulo">Total vendido</span>
+                <span class="panel-numero">
+                    <h:outputText value="#{reportesAdminBean.totalVendido}"><f:convertNumber pattern="$#,##0"/></h:outputText>
+                </span>
+                <span class="panel-detalle">suma de las ventas por mes</span>
+            </div>
+            <div class="panel-tarjeta">
+                <span class="panel-tarjeta-titulo">Compras realizadas</span>
+                <span class="panel-numero">#{reportesAdminBean.totalCompras}</span>
+                <span class="panel-detalle">en todos los medios de pago</span>
+            </div>
+            <div class="panel-tarjeta">
+                <span class="panel-tarjeta-titulo">Categorías con productos</span>
+                <span class="panel-numero">#{reportesAdminBean.categoriasConProductos}</span>
+                <span class="panel-detalle">con al menos un producto</span>
+            </div>
+        </div>
+
+        <div class="reporte-grid">
+            <div class="reporte-tarjeta">
+                <h2>Productos por categoría</h2>
+                <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{!reportesAdminBean.hayCategorias}">
+                    Aún no hay productos en categorías
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="reporte-grafico" rendered="#{reportesAdminBean.hayCategorias}">
+                    <p:pieChart model="#{reportesAdminBean.categoriasModel}"/>
+                </h:panelGroup>
+                <p:dataTable value="#{reportesAdminBean.categorias}" var="fila"
+                             rendered="#{not empty reportesAdminBean.categorias}">
+                    <p:column headerText="Categoría"><h:outputText value="#{fila.nombre}"/></p:column>
+                    <p:column headerText="Productos"><h:outputText value="#{fila.cantidad}"/></p:column>
+                </p:dataTable>
+            </div>
+
+            <div class="reporte-tarjeta">
+                <h2>Compras por medio de pago</h2>
+                <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{!reportesAdminBean.hayMediosPago}">
+                    Aún no hay compras registradas
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="reporte-grafico" rendered="#{reportesAdminBean.hayMediosPago}">
+                    <p:donutChart model="#{reportesAdminBean.medioPagoModel}"/>
+                </h:panelGroup>
+                <p:dataTable value="#{reportesAdminBean.mediosPago}" var="fila"
+                             rendered="#{reportesAdminBean.hayMediosPago}">
+                    <p:column headerText="Medio de pago"><h:outputText value="#{fila.nombre}"/></p:column>
+                    <p:column headerText="Compras"><h:outputText value="#{fila.cantidad}"/></p:column>
+                </p:dataTable>
+            </div>
+
+            <div class="reporte-tarjeta reporte-ancho">
+                <h2>Ventas por mes</h2>
+                <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{!reportesAdminBean.hayVentas}">
+                    Aún no hay compras registradas
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="reporte-grafico" rendered="#{reportesAdminBean.hayVentas}">
+                    <p:lineChart model="#{reportesAdminBean.ventasModel}"/>
+                </h:panelGroup>
+                <p:dataTable value="#{reportesAdminBean.ventas}" var="fila"
+                             rendered="#{reportesAdminBean.hayVentas}">
+                    <p:column headerText="Mes"><h:outputText value="#{fila.mes}"/></p:column>
+                    <p:column headerText="Total vendido">
+                        <h:outputText value="#{fila.total}"><f:convertNumber pattern="$#,##0"/></h:outputText>
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <div class="reporte-tarjeta">
+                <h2>Mejores vendedores</h2>
+                <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{!reportesAdminBean.hayVendedores}">
+                    Aún no hay ventas por vendedor
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="reporte-grafico" rendered="#{reportesAdminBean.hayVendedores}">
+                    <p:barChart model="#{reportesAdminBean.vendedoresModel}"/>
+                </h:panelGroup>
+                <p:dataTable value="#{reportesAdminBean.vendedores}" var="fila"
+                             rendered="#{reportesAdminBean.hayVendedores}">
+                    <p:column headerText="Vendedor"><h:outputText value="#{fila.nombre}"/></p:column>
+                    <p:column headerText="Unidades vendidas"><h:outputText value="#{fila.cantidad}"/></p:column>
+                </p:dataTable>
+            </div>
+
+            <div class="reporte-tarjeta">
+                <h2>Productos mejor calificados</h2>
+                <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{!reportesAdminBean.hayCalificados}">
+                    Aún no hay productos calificados
+                </h:panelGroup>
+                <h:panelGroup layout="block" styleClass="reporte-grafico" rendered="#{reportesAdminBean.hayCalificados}">
+                    <p:barChart model="#{reportesAdminBean.calificadosModel}"/>
+                </h:panelGroup>
+                <p:dataTable value="#{reportesAdminBean.calificados}" var="fila"
+                             rendered="#{reportesAdminBean.hayCalificados}">
+                    <p:column headerText="Producto"><h:outputText value="#{fila.nombre}"/></p:column>
+                    <p:column headerText="Promedio">
+                        <h:outputText value="#{fila.promedio}"><f:convertNumber pattern="0.0"/></h:outputText>
+                    </p:column>
+                </p:dataTable>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

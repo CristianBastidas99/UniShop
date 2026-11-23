@@ -260,3 +260,16 @@ a.panel-tarjeta:hover { border-color: #1565c0; box-shadow: 0 2px 8px rgba(21, 10
     .chat-cabecera-volver { display: none; }
     .chat-mensajes { height: 50vh; }
 }
+
+/* Administrador: reportes estadísticos */
+.reporte-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+.reporte-tarjeta { min-width: 0; padding: 20px; background: #ffffff; border: 1px solid #dde2e7; border-radius: 8px; }
+.reporte-tarjeta h2 { margin: 0 0 12px; font-size: 1.1rem; color: #222; }
+.reporte-grafico { position: relative; width: 100%; height: 300px; margin-bottom: 16px; }
+/* El div del gráfico (.ui-chart) ocupa todo el contenedor; Chart.js ajusta el lienzo a él (maintainAspectRatio=false en reportes.js) */
+.reporte-grafico > .ui-chart { position: relative; width: 100%; height: 100%; }
+.reporte-tarjeta .ui-datatable { margin-top: 8px; }
+@media (min-width: 900px) {
+    .reporte-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .reporte-ancho { grid-column: 1 / -1; }
+}

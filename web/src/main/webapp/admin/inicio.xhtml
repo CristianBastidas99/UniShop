@@ -35,11 +35,11 @@
                 <span class="panel-numero">#{panelAdminBean.cuponesVigentes} / #{panelAdminBean.totalCupones}</span>
                 <span class="panel-detalle">vigentes con usos disponibles / total</span>
             </h:link>
-            <div class="panel-tarjeta panel-deshabilitada">
+            <h:link outcome="/admin/reportes" styleClass="panel-tarjeta">
                 <i class="pi pi-chart-bar"></i>
                 <span class="panel-tarjeta-titulo">Reportes estadísticos</span>
-                <span class="panel-detalle">Disponible en la siguiente entrega</span>
-            </div>
+                <span class="panel-detalle">5 gráficos de ventas y actividad</span>
+            </h:link>
         </div>
     </ui:define>
 </ui:composition>
