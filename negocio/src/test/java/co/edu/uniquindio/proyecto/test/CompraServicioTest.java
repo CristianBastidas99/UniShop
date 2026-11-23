@@ -260,7 +260,7 @@ public class CompraServicioTest extends BaseServicioTest {
     @Test
     public void listarDetallesYTotalTest() throws NegocioException {
         Assertions.assertEquals(2, compraServicio.listarDetalles(1L).size());
-        Assertions.assertEquals(45000.0, compraServicio.calcularTotal(1L));
+        Assertions.assertEquals(40500.0, compraServicio.calcularTotal(1L));
         Assertions.assertThrows(NegocioException.class, () -> compraServicio.listarDetalles(999L));
         Assertions.assertThrows(NegocioException.class, () -> compraServicio.calcularTotal(999L));
     }

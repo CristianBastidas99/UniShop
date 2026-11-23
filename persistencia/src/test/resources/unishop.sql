@@ -109,11 +109,11 @@ INSERT INTO compra (id, fecha_compra, medio_pago, id_usuario, id_cupon) VALUES (
 INSERT INTO compra (id, fecha_compra, medio_pago, id_usuario, id_cupon) VALUES (3, '2026-03-05 18:15:00', 'PAYPAL', 5, NULL);
 INSERT INTO compra (id, fecha_compra, medio_pago, id_usuario, id_cupon) VALUES (4, '2026-03-20 14:00:00', 'BALOTO', 9, 1);
 
-INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (1, 2, 21000, 1, 1);
-INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (2, 1, 3000, 1, 3);
+INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (1, 2, 18900, 1, 1);
+INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (2, 1, 2700, 1, 3);
 INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (3, 1, 270000, 2, 2);
 INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (4, 1, 2375000, 3, 5);
-INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (5, 1, 150000, 4, 4);
+INSERT INTO detalle_compra (id, unidades, precio_producto, id_compra, id_producto) VALUES (5, 1, 135000, 4, 4);
 
 -- ===== Chats (id_usuario = comprador) y mensajes =====
 INSERT INTO chat (id, id_usuario, id_producto) VALUES (1, 5, 3);
