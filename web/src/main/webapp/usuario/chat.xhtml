@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Chat</ui:define>
+
+    <!-- usuario/chat.xhtml?id=ID: solo participantes; el envío y la recepción en vivo los hace chat.js por STOMP -->
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{chatBean.id}"/>
+            <f:viewAction action="#{chatBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{not chatBean.acceso}">
+            <h1>#{chatBean.mensajeSinAcceso}</h1>
+            <p><h:link outcome="/usuario/chats" value="Ir a mis chats"/></p>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" rendered="#{chatBean.acceso}">
+            <div class="chat-cabecera">
+                <img class="chat-cabecera-imagen" src="#{chatBean.imagen}" alt=""/>
+                <div class="chat-cabecera-datos">
+                    <h:link outcome="/detalleProducto" styleClass="chat-cabecera-producto"
+                            value="#{chatBean.resumen.nombreProducto}">
+                        <f:param name="producto" value="#{chatBean.resumen.idProducto}"/>
+                    </h:link>
+                    <div class="chat-cabecera-persona">Conversación con <strong>#{chatBean.resumen.nombreOtraPersona}</strong></div>
+                </div>
+                <h:link outcome="/usuario/chats" value="Mis chats" styleClass="chat-cabecera-volver"/>
+            </div>
+
+            <div id="chat" class="chat-caja" data-chat="#{chatBean.idChat}" data-usuario="#{chatBean.idUsuario}"
+                 data-contexto="#{request.contextPath}">
+                <div id="chat-estado" class="chat-estado chat-estado-conectando" role="status">Conectando…</div>
+
+                <div id="chat-mensajes" class="chat-mensajes" aria-live="polite">
+                    <h:panelGroup layout="block" styleClass="chat-vacio"
+                                  rendered="#{empty chatBean.mensajes}">Aún no hay mensajes. ¡Escribe el primero!</h:panelGroup>
+                    <ui:repeat value="#{chatBean.mensajes}" var="m">
+                        <div class="chat-fila #{m.propio ? 'chat-propio' : 'chat-ajeno'}" data-id="#{m.id}">
+                            <div class="chat-burbuja">
+                                <div class="chat-texto"><h:outputText value="#{m.texto}"/></div>
+                                <div class="chat-meta"><h:outputText value="#{m.propio ? '' : m.autor.concat(' · ')}"/><h:outputText value="#{m.fecha}"/></div>
+                            </div>
+                        </div>
+                    </ui:repeat>
+                </div>
+
+                <div id="chat-error" class="chat-error" role="alert" hidden="hidden"></div>
+
+                <!-- No es un formulario JSF: chat.js envía el texto por STOMP -->
+                <div class="chat-entrada">
+                    <textarea id="chat-texto" class="chat-texto-entrada ui-inputfield ui-inputtextarea ui-widget ui-state-default ui-corner-all"
+                              rows="2" maxlength="1000" placeholder="Escribe un mensaje (Enter envía, Shift+Enter salto de línea)"
+                              aria-label="Mensaje"></textarea>
+                    <button id="chat-enviar" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-left chat-enviar"
+                            disabled="disabled">
+                        <span class="ui-button-icon-left ui-icon ui-c pi pi-fw pi-send"></span>
+                        <span class="ui-button-text ui-c">Enviar</span>
+                    </button>
+                </div>
+                <small class="chat-contador"><span id="chat-contador">1000</span> caracteres restantes</small>
+            </div>
+
+            <script src="#{request.contextPath}/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+            <script src="#{request.contextPath}/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/chat.js?v=#{recursosBean.version}"></script>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

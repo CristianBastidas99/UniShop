@@ -1,12 +1,17 @@
 package co.edu.uniquindio.proyecto.test;
 
+import co.edu.uniquindio.proyecto.dto.chat.ChatResumenDTO;
+import co.edu.uniquindio.proyecto.dto.chat.RolChat;
 import co.edu.uniquindio.proyecto.entidades.Chat;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.ChatServicio;
+import co.edu.uniquindio.proyecto.servicios.MensajeServicio;
 import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
 import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +19,8 @@ public class ChatServicioTest extends BaseServicioTest {
 
     @Autowired
     private ChatServicio chatServicio;
+    @Autowired
+    private MensajeServicio mensajeServicio;
     @Autowired
     private UsuarioServicio usuarioServicio;
     @Autowired
@@ -84,6 +91,100 @@ public class ChatServicioTest extends BaseServicioTest {
         assertEquals(2, chatServicio.listarChatsUsuario(5L).size());
         assertEquals(2, chatServicio.listarChatsUsuario(7L).size());
         assertThrows(NegocioException.class, () -> chatServicio.listarChatsUsuario(9999L));
+    }
+
+    @Test
+    public void resumenChatsComoCompradorYVendedorTest() throws Exception {
+        // lorena (5): compradora en el chat 1 (producto 3) y vendedora en el chat 3 (producto 1)
+        List<ChatResumenDTO> resumen = chatServicio.listarResumenChats(5L);
+        assertEquals(2, resumen.size());
+
+        ChatResumenDTO comoComprador = resumen.get(0);
+        assertEquals(1L, comoComprador.getIdChat());
+        assertEquals(RolChat.COMPRADOR, comoComprador.getRol());
+        assertEquals(7L, comoComprador.getIdOtraPersona());
+        assertEquals("Pepe Perez", comoComprador.getNombreOtraPersona());
+        assertEquals(3L, comoComprador.getIdProducto());
+        assertEquals("Juguete Perro", comoComprador.getNombreProducto());
+        assertEquals("juguete-perro.png", comoComprador.getImagenProducto());
+        assertEquals("Si, quedan 50 unidades", comoComprador.getUltimoMensaje());
+        assertNotNull(comoComprador.getFechaUltimoMensaje());
+        assertFalse(comoComprador.isUltimoMensajePropio());
+
+        ChatResumenDTO comoVendedor = resumen.get(1);
+        assertEquals(3L, comoVendedor.getIdChat());
+        assertEquals(RolChat.VENDEDOR, comoVendedor.getRol());
+        assertEquals("Marta Wayne", comoVendedor.getNombreOtraPersona());
+        assertEquals("Cepillo Electrico", comoVendedor.getNombreProducto());
+        assertEquals("Hace envios a Cartagena?", comoVendedor.getUltimoMensaje());
+        assertFalse(comoVendedor.isUltimoMensajePropio());
+    }
+
+    @Test
+    public void resumenChatsMensajePropioTest() throws Exception {
+        // pepe (7): vendedor en el chat 1 y comprador en el chat 2; en ambos escribió él el último mensaje
+        List<ChatResumenDTO> resumen = chatServicio.listarResumenChats(7L);
+        assertEquals(2, resumen.size());
+        assertEquals(1L, resumen.get(0).getIdChat());
+        assertEquals(RolChat.VENDEDOR, resumen.get(0).getRol());
+        assertEquals("Lorena Lopez", resumen.get(0).getNombreOtraPersona());
+        assertTrue(resumen.get(0).isUltimoMensajePropio());
+        assertEquals(2L, resumen.get(1).getIdChat());
+        assertEquals(RolChat.COMPRADOR, resumen.get(1).getRol());
+        assertEquals("Marta Wayne", resumen.get(1).getNombreOtraPersona());
+        assertTrue(resumen.get(1).isUltimoMensajePropio());
+    }
+
+    @Test
+    public void resumenChatsOrdenPorActividadTest() throws Exception {
+        // un mensaje nuevo en el chat 3 lo pasa al primer lugar de lorena (5)
+        mensajeServicio.enviarMensaje(3L, 5L, "Si, hacemos envios");
+        sincronizar();
+        List<ChatResumenDTO> resumen = chatServicio.listarResumenChats(5L);
+        assertEquals(3L, resumen.get(0).getIdChat());
+        assertEquals("Si, hacemos envios", resumen.get(0).getUltimoMensaje());
+        assertTrue(resumen.get(0).isUltimoMensajePropio());
+        assertEquals(1L, resumen.get(1).getIdChat());
+    }
+
+    @Test
+    public void resumenChatSinMensajesAlFinalTest() throws Exception {
+        // pedro (8) es el vendedor del chat 4, que no tiene mensajes
+        List<ChatResumenDTO> soloVacio = chatServicio.listarResumenChats(8L);
+        assertEquals(1, soloVacio.size());
+        assertEquals(RolChat.VENDEDOR, soloVacio.get(0).getRol());
+        assertEquals("Sofia Ramirez", soloVacio.get(0).getNombreOtraPersona());
+        assertEquals("portatil.png", soloVacio.get(0).getImagenProducto());
+        assertNull(soloVacio.get(0).getUltimoMensaje());
+        assertNull(soloVacio.get(0).getFechaUltimoMensaje());
+        assertFalse(soloVacio.get(0).isUltimoMensajePropio());
+
+        // marta (6) abre un chat nuevo sobre el producto 5: sin mensajes, va después de los que sí tienen
+        Chat nuevo = chatServicio.obtenerOCrearChat(6L, 5L);
+        sincronizar();
+        List<ChatResumenDTO> resumen = chatServicio.listarResumenChats(6L);
+        assertEquals(3, resumen.size());
+        assertEquals(nuevo.getId(), resumen.get(2).getIdChat());
+        assertNull(resumen.get(2).getUltimoMensaje());
+        assertNotNull(resumen.get(0).getFechaUltimoMensaje());
+        assertNotNull(resumen.get(1).getFechaUltimoMensaje());
+    }
+
+    @Test
+    public void resumenChatsMensajeLargoSeRecortaTest() throws Exception {
+        mensajeServicio.enviarMensaje(1L, 5L, "a".repeat(300));
+        sincronizar();
+        ChatResumenDTO primero = chatServicio.listarResumenChats(5L).get(0);
+        assertEquals(1L, primero.getIdChat());
+        assertEquals(80, primero.getUltimoMensaje().length());
+        assertTrue(primero.getUltimoMensaje().endsWith("…"));
+        assertTrue(primero.isUltimoMensajePropio());
+    }
+
+    @Test
+    public void resumenChatsUsuarioInexistenteTest() {
+        assertThrows(NegocioException.class, () -> chatServicio.listarResumenChats(9999L));
+        assertThrows(NegocioException.class, () -> chatServicio.listarResumenChats(null));
     }
 
     @Test

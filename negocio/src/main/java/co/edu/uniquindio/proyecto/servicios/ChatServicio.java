@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyecto.servicios;
 
+import co.edu.uniquindio.proyecto.dto.chat.ChatResumenDTO;
 import co.edu.uniquindio.proyecto.entidades.Chat;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 
@@ -61,6 +62,15 @@ public interface ChatServicio {
      * @throws NegocioException si el usuario no existe
      */
     List<Chat> listarChatsUsuario(Long idUsuario) throws NegocioException;
+
+    /**
+     * Resumen de los chats de un usuario (como comprador y como vendedor) para la lista "Mis chats":
+     * producto, otra persona y último mensaje (recortado). Va ordenado por la última actividad, del más
+     * reciente al más antiguo, y los chats sin mensajes quedan al final.
+     *
+     * @throws NegocioException si el usuario no existe
+     */
+    List<ChatResumenDTO> listarResumenChats(Long idUsuario) throws NegocioException;
 
     /**
      * Indica si el usuario es el comprador del chat o el vendedor del producto.

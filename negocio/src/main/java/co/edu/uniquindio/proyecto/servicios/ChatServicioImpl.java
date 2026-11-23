@@ -1,17 +1,25 @@
 package co.edu.uniquindio.proyecto.servicios;
 
+import co.edu.uniquindio.proyecto.dto.chat.ChatResumenDTO;
+import co.edu.uniquindio.proyecto.dto.chat.RolChat;
 import co.edu.uniquindio.proyecto.entidades.Chat;
+import co.edu.uniquindio.proyecto.entidades.Mensaje;
 import co.edu.uniquindio.proyecto.entidades.Producto;
 import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.ChatRepo;
+import co.edu.uniquindio.proyecto.repositorios.MensajeRepo;
 import co.edu.uniquindio.proyecto.repositorios.ProductoRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -20,8 +28,14 @@ public class ChatServicioImpl implements ChatServicio {
     private final ChatRepo chatRepo;
     private final UsuarioRepo usuarioRepo;
     private final ProductoRepo productoRepo;
+    private final MensajeRepo mensajeRepo;
 
-    public ChatServicioImpl(ChatRepo chatRepo, UsuarioRepo usuarioRepo, ProductoRepo productoRepo) {
+    /** Largo máximo del último mensaje en el resumen (con los puntos suspensivos incluidos). */
+    static final int LARGO_RESUMEN = 80;
+
+    public ChatServicioImpl(ChatRepo chatRepo, UsuarioRepo usuarioRepo, ProductoRepo productoRepo,
+                            MensajeRepo mensajeRepo) {
+        this.mensajeRepo = mensajeRepo;
         this.chatRepo = chatRepo;
         this.usuarioRepo = usuarioRepo;
         this.productoRepo = productoRepo;
@@ -80,6 +94,66 @@ public class ChatServicioImpl implements ChatServicio {
             throw new NegocioException("El usuario no existe");
         }
         return chatRepo.listarPorUsuario(idUsuario);
+    }
+
+    @Override
+    @Transactional(readOnly = true, rollbackFor = NegocioException.class)
+    public List<ChatResumenDTO> listarResumenChats(Long idUsuario) throws NegocioException {
+        if (idUsuario == null || !usuarioRepo.existsById(idUsuario)) {
+            throw new NegocioException("El usuario no existe");
+        }
+        List<Chat> chats = chatRepo.listarPorUsuario(idUsuario);
+        if (chats.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // Una sola consulta para los últimos mensajes de todos los chats
+        List<Long> ids = new ArrayList<>();
+        chats.forEach(c -> ids.add(c.getId()));
+        Map<Long, Mensaje> ultimos = new HashMap<>();
+        for (Mensaje m : mensajeRepo.listarUltimosPorChats(ids)) {
+            Mensaje actual = ultimos.get(m.getChat().getId());
+            if (actual == null || m.getId() > actual.getId()) {
+                ultimos.put(m.getChat().getId(), m);
+            }
+        }
+        List<ChatResumenDTO> resumen = new ArrayList<>();
+        for (Chat c : chats) {
+            resumen.add(resumir(c, idUsuario, ultimos.get(c.getId())));
+        }
+        // Más reciente primero; sin mensajes al final (y entre ellos, el chat más nuevo primero)
+        resumen.sort(Comparator
+                .comparing(ChatResumenDTO::getFechaUltimoMensaje, Comparator.nullsLast(Comparator.<Date>reverseOrder()))
+                .thenComparing(ChatResumenDTO::getIdChat, Comparator.reverseOrder()));
+        return resumen;
+    }
+
+    private ChatResumenDTO resumir(Chat chat, Long idUsuario, Mensaje ultimo) {
+        boolean comprador = idUsuario.equals(chat.getUsuario().getId());
+        Usuario otra = comprador ? chat.getProducto().getUsuario() : chat.getUsuario();
+        ChatResumenDTO dto = new ChatResumenDTO();
+        dto.setIdChat(chat.getId());
+        dto.setRol(comprador ? RolChat.COMPRADOR : RolChat.VENDEDOR);
+        dto.setIdOtraPersona(otra.getId());
+        dto.setNombreOtraPersona(otra.getNombre());
+        dto.setIdProducto(chat.getProducto().getId());
+        dto.setNombreProducto(chat.getProducto().getNombre());
+        List<String> imagenes = chat.getProducto().getMisImagenes();
+        dto.setImagenProducto(imagenes == null || imagenes.isEmpty() ? null : imagenes.get(0));
+        if (ultimo != null) {
+            dto.setUltimoMensaje(recortar(ultimo.getMensaje()));
+            dto.setFechaUltimoMensaje(ultimo.getFecha());
+            dto.setUltimoMensajePropio(ultimo.getRemitente() != null
+                    && idUsuario.equals(ultimo.getRemitente().getId()));
+        }
+        return dto;
+    }
+
+    private static String recortar(String texto) {
+        if (texto == null) {
+            return null;
+        }
+        String limpio = texto.trim();
+        return limpio.length() <= LARGO_RESUMEN ? limpio : limpio.substring(0, LARGO_RESUMEN - 1).trim() + "…";
     }
 
     @Override

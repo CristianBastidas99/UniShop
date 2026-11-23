@@ -1,6 +1,8 @@
 package co.edu.uniquindio.proyecto.bean;
 
 import co.edu.uniquindio.proyecto.entidades.Categoria;
+import co.edu.uniquindio.proyecto.entidades.Chat;
+import co.edu.uniquindio.proyecto.servicios.ChatServicio;
 import co.edu.uniquindio.proyecto.entidades.Comentario;
 import co.edu.uniquindio.proyecto.entidades.HistorialPrecio;
 import co.edu.uniquindio.proyecto.entidades.MotivoReporte;
@@ -42,6 +44,7 @@ public class DetalleProductoBean extends ListadoProductosBase {
     private final SeguridadBean seguridadBean;
     private final CarritoBean carritoBean;
     private final SubastaServicio subastaServicio;
+    private final ChatServicio chatServicio;
 
     /** Subasta activa del producto (null si no tiene). */
     private Long idSubastaActiva;
@@ -85,8 +88,9 @@ public class DetalleProductoBean extends ListadoProductosBase {
     public DetalleProductoBean(ProductoServicio productoServicio, ComentarioServicio comentarioServicio,
                                ReporteProductoServicio reporteServicio, HistorialPrecioServicio historialServicio,
                                SeguridadBean seguridadBean, CarritoBean carritoBean,
-                               SubastaServicio subastaServicio) {
+                               SubastaServicio subastaServicio, ChatServicio chatServicio) {
         super(productoServicio, comentarioServicio);
+        this.chatServicio = chatServicio;
         this.comentarioServicio = comentarioServicio;
         this.reporteServicio = reporteServicio;
         this.historialServicio = historialServicio;
@@ -214,6 +218,24 @@ public class DetalleProductoBean extends ListadoProductosBase {
             aviso(FacesMessage.SEVERITY_INFO, "Agregado al carrito (en tu carrito: " + total + ")");
         } catch (NegocioException e) {
             aviso(FacesMessage.SEVERITY_WARN, e.getMessage());
+        }
+    }
+
+    /**
+     * Abre (o crea) el chat del usuario en sesión con el vendedor y lo muestra. Si el negocio no lo permite
+     * (por ejemplo, el producto ya no está disponible y no había chat previo), muestra el motivo y se queda aquí.
+     */
+    public String contactarVendedor() {
+        if (!esUsuarioNoVendedor()) {
+            aviso(FacesMessage.SEVERITY_WARN, "No puede contactar al vendedor de este producto");
+            return null;
+        }
+        try {
+            Chat chat = chatServicio.obtenerOCrearChat(seguridadBean.getIdUsuario(), producto.getId());
+            return "/usuario/chat?faces-redirect=true&id=" + chat.getId();
+        } catch (NegocioException e) {
+            aviso(FacesMessage.SEVERITY_WARN, e.getMessage());
+            return null;
         }
     }
 

@@ -18,6 +18,14 @@ public interface MensajeRepo extends JpaRepository<Mensaje, Long> {
     @Query("select m from Mensaje m where m.chat.id = :idChat order by m.fecha asc")
     List<Mensaje> listarPorChat(@Param("idChat") Long idChat);
 
+    /**
+     * Mensajes más recientes de varios chats en una sola consulta: los de la fecha máxima de cada chat
+     * (si hay empate de fecha pueden venir varios por chat; quien llama se queda con el de mayor id).
+     */
+    @Query("select m from Mensaje m where m.chat.id in :idsChat and m.fecha = "
+            + "(select max(m2.fecha) from Mensaje m2 where m2.chat.id = m.chat.id)")
+    List<Mensaje> listarUltimosPorChats(@Param("idsChat") java.util.Collection<Long> idsChat);
+
     /** Indica si el usuario ha enviado al menos un mensaje. */
     boolean existsByRemitenteId(Long idUsuario);
 }

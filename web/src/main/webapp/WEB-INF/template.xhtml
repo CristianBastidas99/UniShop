@@ -10,7 +10,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title><ui:insert name="titulo">UniShop</ui:insert></title>
-    <h:outputStylesheet library="css" name="estilos.css"/>
+    <!-- Con versión en la URL para que el navegador no use una copia vieja tras un cambio (ver RecursosBean) -->
+    <link rel="stylesheet" href="#{request.contextPath}/resources/css/estilos.css?v=#{recursosBean.version}"/>
 </h:head>
 <h:body>
     <!-- Mensajes globales: se actualizan solos en cada petición ajax -->
@@ -42,6 +43,8 @@
                 <p:menuitem value="Publicar producto" icon="pi pi-fw pi-plus" outcome="/usuario/registraProducto"
                             rendered="#{seguridadBean.usuario}"/>
                 <p:menuitem value="Mis favoritos" icon="pi pi-fw pi-heart" outcome="/usuario/favoritos"
+                            rendered="#{seguridadBean.usuario}"/>
+                <p:menuitem value="Mis chats" icon="pi pi-fw pi-comments" outcome="/usuario/chats"
                             rendered="#{seguridadBean.usuario}"/>
                 <p:menuitem value="Mis productos" icon="pi pi-fw pi-list" outcome="/usuario/misProductos"
                             rendered="#{seguridadBean.usuario}"/>

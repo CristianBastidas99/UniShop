@@ -120,6 +120,17 @@
                         </h:link>
                     </h:panelGroup>
 
+                    <h:panelGroup id="zonaContactar" layout="block" styleClass="detalle-reporte">
+                        <p:commandButton value="Contactar al vendedor" icon="pi pi-fw pi-comments"
+                                         action="#{detalleProductoBean.contactarVendedor}"
+                                         update=":mensajes"
+                                         rendered="#{detalleProductoBean.usuarioNoVendedor}"/>
+                        <h:link outcome="/login" value="Inicia sesión para contactar al vendedor"
+                                rendered="#{not seguridadBean.autenticado}">
+                            <f:param name="destino" value="/detalleProducto.xhtml?producto=#{detalleProductoBean.producto.id}"/>
+                        </h:link>
+                    </h:panelGroup>
+
                     <h:panelGroup id="zonaReporte" layout="block" styleClass="detalle-reporte">
                         <p:commandButton value="Reportar producto" icon="pi pi-fw pi-flag" type="button"
                                          styleClass="ui-button-secondary"

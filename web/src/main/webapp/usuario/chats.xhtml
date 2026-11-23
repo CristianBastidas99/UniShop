@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="titulo">UniShop - Mis chats</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{chatsBean.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h1 class="titulo-inicio">Mis chats (#{chatsBean.chats.size()})</h1>
+
+        <h:panelGroup layout="block" styleClass="sin-productos" rendered="#{empty chatsBean.chats}">
+            Aún no tienes conversaciones. Para escribirle a un vendedor, abre un producto y pulsa
+            "Contactar al vendedor"; cuando alguien te escriba por uno de tus productos, el chat aparecerá aquí.
+            <p><h:link outcome="/index" value="Ir al inicio"/></p>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="chats-lista" rendered="#{not empty chatsBean.chats}">
+            <ui:repeat value="#{chatsBean.chats}" var="chat">
+                <h:link outcome="/usuario/chat" styleClass="chat-item">
+                    <f:param name="id" value="#{chat.idChat}"/>
+                    <img class="chat-item-imagen" src="#{chatsBean.imagen(chat)}" alt=""/>
+                    <span class="chat-item-datos">
+                        <span class="chat-item-titulo">
+                            <span class="chat-item-producto">#{chat.nombreProducto}</span>
+                            <span class="#{chatsBean.claseRol(chat)}">#{chatsBean.etiquetaRol(chat)}</span>
+                        </span>
+                        <span class="chat-item-persona">Con #{chat.nombreOtraPersona}</span>
+                        <h:panelGroup styleClass="chat-item-ultimo" rendered="#{not empty chat.ultimoMensaje}">
+                            <h:outputText styleClass="chat-item-yo" value="Tú: " rendered="#{chat.ultimoMensajePropio}"/><h:outputText value="#{chat.ultimoMensaje}"/>
+                        </h:panelGroup>
+                        <h:outputText styleClass="chat-item-ultimo chat-item-vacio" value="Aún no hay mensajes"
+                                      rendered="#{empty chat.ultimoMensaje}"/>
+                    </span>
+                    <h:outputText styleClass="chat-item-fecha" value="#{chat.fechaUltimoMensaje}"
+                                  rendered="#{not empty chat.fechaUltimoMensaje}">
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Bogota"/>
+                    </h:outputText>
+                </h:link>
+            </ui:repeat>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
