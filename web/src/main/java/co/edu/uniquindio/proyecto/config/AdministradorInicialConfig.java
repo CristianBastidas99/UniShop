@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * Los datos salen de application.properties (unishop.admin.*) o de las variables ADMIN_NOMBRE, ADMIN_EMAIL y ADMIN_PASSWORD.
  */
 @Component
-@Order(10)
+@Order(20)
 public class AdministradorInicialConfig implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(AdministradorInicialConfig.class);

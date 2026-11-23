@@ -7,6 +7,7 @@ import co.edu.uniquindio.proyecto.servicios.CiudadServicio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * Carga las ciudades y categorías iniciales al arrancar, solo si las tablas están vacías.
  */
 @Component
+@Order(10)
 public class DatosInicialesConfig implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatosInicialesConfig.class);
