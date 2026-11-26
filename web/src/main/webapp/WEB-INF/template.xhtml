@@ -9,6 +9,7 @@
 <h:head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <ui:insert name="metaExtra"/>
     <title><ui:insert name="titulo">UniShop</ui:insert></title>
     <!-- Con versión en la URL para que el navegador no use una copia vieja tras un cambio (ver RecursosBean) -->
     <link rel="stylesheet" href="#{request.contextPath}/resources/css/estilos.css?v=#{recursosBean.version}"/>

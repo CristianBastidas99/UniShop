@@ -4,6 +4,7 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
                 template="/WEB-INF/template.xhtml">
     <ui:define name="titulo">UniShop - Detalle del producto</ui:define>
 
@@ -13,6 +14,21 @@
             <f:viewParam name="producto" value="#{detalleProductoBean.idProducto}"/>
             <f:viewAction action="#{detalleProductoBean.cargar}"/>
         </f:metadata>
+    </ui:define>
+
+    <!-- Vista previa al compartir (Open Graph y Twitter Card); EL escapa los valores dentro de los atributos -->
+    <ui:define name="metaExtra">
+        <ui:fragment rendered="#{detalleProductoBean.existe}">
+            <meta property="og:title" content="#{detalleProductoBean.producto.nombre}"/>
+            <meta property="og:description" content="#{detalleProductoBean.descripcionMeta}"/>
+            <meta property="og:url" content="#{detalleProductoBean.urlProducto}"/>
+            <meta property="og:type" content="product"/>
+            <meta property="og:site_name" content="UniShop"/>
+            <meta name="twitter:card" content="summary_large_image"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{detalleProductoBean.existe and detalleProductoBean.urlImagenMeta != null}">
+            <meta property="og:image" content="#{detalleProductoBean.urlImagenMeta}"/>
+        </ui:fragment>
     </ui:define>
 
     <ui:define name="contenido">
@@ -138,6 +154,24 @@
                                          rendered="#{detalleProductoBean.usuarioNoVendedor and not detalleProductoBean.yaReporto}"/>
                         <h:outputText styleClass="sin-calificaciones" value="Ya reportaste este producto"
                                       rendered="#{detalleProductoBean.usuarioNoVendedor and detalleProductoBean.yaReporto}"/>
+                    </h:panelGroup>
+
+                    <h:panelGroup id="zonaCompartir" layout="block" styleClass="detalle-compartir">
+                        <span class="detalle-compartir-etiqueta">Compartir:</span>
+                        <h:outputLink value="#{detalleProductoBean.urlCompartirFacebook}" target="_blank"
+                                      styleClass="ui-button ui-widget ui-corner-all compartir-facebook"
+                                      pt:rel="noopener noreferrer" pt:aria-label="Compartir en Facebook"
+                                      onclick="window.open(this.href, 'compartir', 'width=600,height=500,noopener'); return false;">
+                            <span class="ui-button-icon-left ui-icon pi pi-facebook"></span>
+                            <span class="ui-button-text ui-c">Facebook</span>
+                        </h:outputLink>
+                        <h:outputLink value="#{detalleProductoBean.urlCompartirTwitter}" target="_blank"
+                                      styleClass="ui-button ui-widget ui-corner-all compartir-twitter"
+                                      pt:rel="noopener noreferrer" pt:aria-label="Compartir en Twitter o X"
+                                      onclick="window.open(this.href, 'compartir', 'width=600,height=500,noopener'); return false;">
+                            <span class="ui-button-icon-left ui-icon pi pi-twitter"></span>
+                            <span class="ui-button-text ui-c">Twitter / X</span>
+                        </h:outputLink>
                     </h:panelGroup>
                 </h:form>
             </div>

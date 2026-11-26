@@ -17,11 +17,14 @@ import co.edu.uniquindio.proyecto.servicios.ProductoServicio;
 import co.edu.uniquindio.proyecto.servicios.ReporteProductoServicio;
 import co.edu.uniquindio.proyecto.servicios.SubastaServicio;
 import org.primefaces.PrimeFaces;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +48,9 @@ public class DetalleProductoBean extends ListadoProductosBase {
     private final CarritoBean carritoBean;
     private final SubastaServicio subastaServicio;
     private final ChatServicio chatServicio;
+
+    /** URL pública de la aplicación (sin barra final), para los enlaces de compartir. */
+    private final String urlBase;
 
     /** Subasta activa del producto (null si no tiene). */
     private Long idSubastaActiva;
@@ -88,8 +94,10 @@ public class DetalleProductoBean extends ListadoProductosBase {
     public DetalleProductoBean(ProductoServicio productoServicio, ComentarioServicio comentarioServicio,
                                ReporteProductoServicio reporteServicio, HistorialPrecioServicio historialServicio,
                                SeguridadBean seguridadBean, CarritoBean carritoBean,
-                               SubastaServicio subastaServicio, ChatServicio chatServicio) {
+                               SubastaServicio subastaServicio, ChatServicio chatServicio,
+                               @Value("${unishop.url-base:http://localhost:8080}") String urlBase) {
         super(productoServicio, comentarioServicio);
+        this.urlBase = quitarBarraFinal(urlBase);
         this.chatServicio = chatServicio;
         this.comentarioServicio = comentarioServicio;
         this.reporteServicio = reporteServicio;
@@ -359,6 +367,82 @@ public class DetalleProductoBean extends ListadoProductosBase {
     private static void aviso(FacesMessage.Severity severidad, String texto) {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severidad,
                 severidad == FacesMessage.SEVERITY_INFO ? "Listo" : "Atención", texto));
+    }
+
+    // ---------- Compartir ----------
+
+    private static final int LARGO_DESCRIPCION_META = 150;
+
+    /** Enlace para compartir en Facebook (null si no hay producto). */
+    public String getUrlCompartirFacebook() {
+        return producto == null ? null : urlFacebook(urlBase, producto.getId());
+    }
+
+    /** Enlace para compartir en Twitter/X con el nombre del producto (null si no hay producto). */
+    public String getUrlCompartirTwitter() {
+        return producto == null ? null : urlTwitter(urlBase, producto.getId(), producto.getNombre());
+    }
+
+    /** URL pública del producto (null si no hay producto). */
+    public String getUrlProducto() {
+        return producto == null ? null : urlProducto(urlBase, producto.getId());
+    }
+
+    /** Descripción recortada para la vista previa (Open Graph); si no hay, el nombre. */
+    public String getDescripcionMeta() {
+        if (producto == null) {
+            return null;
+        }
+        String d = recortar(producto.getDescripcion(), LARGO_DESCRIPCION_META);
+        return d.isEmpty() ? producto.getNombre() : d;
+    }
+
+    /** URL absoluta de la imagen principal, o null si el producto no tiene imágenes. */
+    public String getUrlImagenMeta() {
+        return imagenes.isEmpty() ? null : urlImagen(urlBase, imagenes.get(0));
+    }
+
+    static String quitarBarraFinal(String url) {
+        String u = url == null ? "" : url.trim();
+        while (u.endsWith("/")) {
+            u = u.substring(0, u.length() - 1);
+        }
+        return u;
+    }
+
+    static String urlProducto(String urlBase, Long id) {
+        return quitarBarraFinal(urlBase) + "/detalleProducto.xhtml?producto=" + id;
+    }
+
+    static String urlImagen(String urlBase, String ruta) {
+        return quitarBarraFinal(urlBase) + "/" + (ruta.startsWith("/") ? ruta.substring(1) : ruta);
+    }
+
+    static String urlFacebook(String urlBase, Long id) {
+        return "https://www.facebook.com/sharer/sharer.php?u=" + codificar(urlProducto(urlBase, id));
+    }
+
+    static String urlTwitter(String urlBase, Long id, String nombre) {
+        return "https://twitter.com/intent/tweet?url=" + codificar(urlProducto(urlBase, id))
+                + "&text=" + codificar("Mira «" + nombre + "» en UniShop");
+    }
+
+    /** Codifica un valor de parámetro de URL (UTF-8, espacios como %20). */
+    static String codificar(String valor) {
+        try {
+            return URLEncoder.encode(valor, "UTF-8").replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /** Texto en una sola línea y de a lo sumo {@code max} caracteres (con "…" si se recorta). */
+    static String recortar(String texto, int max) {
+        if (texto == null) {
+            return "";
+        }
+        String t = texto.replaceAll("\\s+", " ").trim();
+        return t.length() <= max ? t : t.substring(0, max - 1).trim() + "…";
     }
 
     // ---------- Getters y setters ----------

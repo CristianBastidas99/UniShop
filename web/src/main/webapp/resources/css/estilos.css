@@ -105,6 +105,19 @@ body { margin: 0; background: #f4f6f8; font-family: "Segoe UI", Arial, sans-seri
 .detalle-lista { list-style: none; padding: 0; margin: 12px 0; display: flex; flex-direction: column; gap: 4px; }
 .detalle-descripcion { white-space: pre-line; overflow-wrap: anywhere; color: #333; margin: 12px 0; }
 .detalle-reporte { margin-top: 12px; }
+
+/* Compartir en redes: los botones bajan de línea en pantallas angostas */
+.detalle-compartir { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.detalle-compartir-etiqueta { font-weight: 600; margin-right: 4px; }
+.detalle-compartir a.ui-button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+    color: #fff; text-decoration: none; border: 1px solid transparent; }
+.detalle-compartir a.ui-button .ui-button-icon-left { position: static; margin: 0; }
+.detalle-compartir a.ui-button .ui-button-text { padding: 0; }
+.detalle-compartir a.compartir-facebook { background: #1877f2; border-color: #1877f2; }
+.detalle-compartir a.compartir-facebook:hover { background: #0f5fc9; border-color: #0f5fc9; }
+.detalle-compartir a.compartir-twitter { background: #14171a; border-color: #14171a; }
+.detalle-compartir a.compartir-twitter:hover { background: #000; border-color: #000; }
+.detalle-compartir a.ui-button:focus-visible { outline: 3px solid #f5a623; outline-offset: 2px; }
 .dialogo-reporte { width: min(480px, 95vw); }
 .dialogo-reporte .ui-selectonemenu, .dialogo-reporte textarea { width: 100%; box-sizing: border-box; }
 
