@@ -469,4 +469,46 @@ public class ProductoServicioTest extends BaseServicioTest {
         NegocioException e = assertThrows(NegocioException.class, () -> productoServicio.eliminarProducto(99999L, 5L));
         assertEquals("El producto no existe", e.getMessage());
     }
+
+    // ===== Vendedores desactivados (Marta, id 6, vende los productos 2 y 6) =====
+
+    private Set<String> nombres(List<Producto> productos) {
+        return productos.stream().map(Producto::getNombre).collect(Collectors.toSet());
+    }
+
+    @Test
+    public void productosDeVendedorDesactivadoSeOcultanTest() throws Exception {
+        assertTrue(nombres(productoServicio.listarVigentes()).contains("SmartPhone"));
+        usuarioServicio.cambiarActivo("marta@email.com", false);
+        sincronizar();
+
+        assertFalse(nombres(productoServicio.listarVigentes()).contains("SmartPhone"));
+        assertFalse(nombres(productoServicio.buscar("smart", null, null, null, null, null)).contains("SmartPhone"));
+        assertTrue(productoServicio.buscar("smart", null, null, null, null, null).isEmpty());
+        // Lorena (id 5) tenía de favoritos el 2 (de Marta) y el 5 (de Pedro)
+        assertEquals(Collections.singleton("Portatil"), nombres(productoServicio.listarFavoritos(5L)));
+        assertEquals(Collections.singleton("Portatil"), nombres(productoServicio.listarFavoritos("lorena@email.com")));
+        for (Categoria c : categoriaRepo.findAll()) {
+            assertFalse(nombres(productoServicio.listarVigentesPorCategoria(c.getId())).contains("SmartPhone"));
+        }
+
+        // Al reactivarlo todo vuelve
+        usuarioServicio.cambiarActivo("marta@email.com", true);
+        sincronizar();
+        assertTrue(nombres(productoServicio.listarVigentes()).contains("SmartPhone"));
+        assertEquals(2, productoServicio.listarFavoritos(5L).size());
+    }
+
+    @Test
+    public void obtenerProductoVisibleDeVendedorDesactivadoNoExisteTest() throws Exception {
+        assertEquals("SmartPhone", productoServicio.obtenerProductoVisible(2L).getNombre());
+        usuarioServicio.cambiarActivo("marta@email.com", false);
+        sincronizar();
+        NegocioException e = assertThrows(NegocioException.class, () -> productoServicio.obtenerProductoVisible(2L));
+        assertEquals("El producto no existe", e.getMessage());
+        assertThrows(NegocioException.class, () -> productoServicio.obtenerProductoVisible(null));
+        // La lectura interna (para el dueño o el administrador) sigue funcionando
+        assertEquals("SmartPhone", productoServicio.obtenerProducto(2L).getNombre());
+        assertTrue(nombres(productoServicio.listarTodos()).contains("SmartPhone"));
+    }
 }

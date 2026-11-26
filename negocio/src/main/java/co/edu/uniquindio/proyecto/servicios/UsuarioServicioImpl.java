@@ -5,6 +5,8 @@ import co.edu.uniquindio.proyecto.entidades.Usuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.excepciones.NoEncontradoException;
 import co.edu.uniquindio.proyecto.repositorios.*;
+import co.edu.uniquindio.proyecto.seguridad.Contrasenas;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,11 +27,12 @@ public class UsuarioServicioImpl implements UsuarioServicio {
     private final MensajeRepo mensajeRepo;
     private final SubastaUsuarioRepo subastaUsuarioRepo;
     private final ReporteProductoRepo reporteProductoRepo;
+    private final PasswordEncoder passwordEncoder;
 
     public UsuarioServicioImpl(UsuarioRepo usuarioRepo, AdministradorRepo administradorRepo, CiudadRepo ciudadRepo,
                                ProductoRepo productoRepo, CompraRepo compraRepo, ComentarioRepo comentarioRepo,
                                ChatRepo chatRepo, MensajeRepo mensajeRepo, SubastaUsuarioRepo subastaUsuarioRepo,
-                               ReporteProductoRepo reporteProductoRepo) {
+                               ReporteProductoRepo reporteProductoRepo, PasswordEncoder passwordEncoder) {
         this.usuarioRepo = usuarioRepo;
         this.administradorRepo = administradorRepo;
         this.ciudadRepo = ciudadRepo;
@@ -40,6 +43,16 @@ public class UsuarioServicioImpl implements UsuarioServicio {
         this.mensajeRepo = mensajeRepo;
         this.subastaUsuarioRepo = subastaUsuarioRepo;
         this.reporteProductoRepo = reporteProductoRepo;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    /** Valida la contraseña (obligatoria y de máximo 72 bytes) y devuelve su hash BCrypt. */
+    private String encriptar(String password) throws NegocioException {
+        if (password == null || password.trim().isEmpty()) {
+            throw new NegocioException("La contraseña es obligatoria");
+        }
+        Contrasenas.validarLongitud(password);
+        return passwordEncoder.encode(password);
     }
 
     private static String normalizarEmail(String email) {
@@ -68,12 +81,18 @@ public class UsuarioServicioImpl implements UsuarioServicio {
         u.setNumeroTelefono(new ArrayList<>(telefonos));
     }
 
+    /** Compara la contraseña escrita con el hash guardado; un hash que no sea BCrypt válido simplemente no coincide. */
+    private boolean coincide(String password, String hash) {
+        return hash != null && passwordEncoder.matches(password, hash);
+    }
+
     @Override
     public Usuario iniciarSesion(String email, String password) throws NegocioException {
         if (email == null || email.trim().isEmpty() || password == null || password.isEmpty()) {
             throw new NegocioException("El correo y la contraseña son obligatorios");
         }
-        Usuario usuario = usuarioRepo.buscarPorEmailYPassword(normalizarEmail(email), password)
+        Usuario usuario = usuarioRepo.findByEmail(normalizarEmail(email))
+                .filter(u -> coincide(password, u.getPassword()))
                 .orElseThrow(() -> new NegocioException("Correo o contraseña incorrectos"));
         if (!usuario.isActivo()) {
             throw new NegocioException("Tu cuenta está desactivada. Comunícate con el administrador");
@@ -92,6 +111,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
             throw new NegocioException("El correo " + u.getEmail() + " ya se encuentra registrado");
         }
         validarCiudadYTelefonos(u);
+        u.setPassword(encriptar(u.getPassword()));
         return usuarioRepo.save(u);
     }
 
@@ -104,7 +124,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
         buscado.setCiudad(u.getCiudad());
         buscado.setNumeroTelefono(u.getNumeroTelefono());
         if (u.getPassword() != null && !u.getPassword().trim().isEmpty()) {
-            buscado.setPassword(u.getPassword());
+            buscado.setPassword(encriptar(u.getPassword()));
         }
         return usuarioRepo.save(buscado);
     }
@@ -130,6 +150,11 @@ public class UsuarioServicioImpl implements UsuarioServicio {
         Usuario usuario = obtenerUsuario(normalizarEmail(email));
         usuario.setActivo(activo);
         usuarioRepo.save(usuario);
+    }
+
+    @Override
+    public boolean estaActivo(Long id) {
+        return id != null && usuarioRepo.existsByIdAndActivoTrue(id);
     }
 
     @Override
@@ -166,7 +191,7 @@ public class UsuarioServicioImpl implements UsuarioServicio {
         }
         Usuario usuario = usuarioRepo.findByEmail(normalizarEmail(email))
                 .orElseThrow(() -> new NegocioException("El usuario con correo " + email + " no existe"));
-        usuario.setPassword(nueva);
+        usuario.setPassword(encriptar(nueva));
         usuarioRepo.save(usuario);
     }
 }

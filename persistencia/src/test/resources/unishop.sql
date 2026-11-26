@@ -14,11 +14,12 @@
 --   chocar con estos ids si es de las primeras en ejecutarse.
 -- =====================================================================
 
+-- Las contrasenas son el hash BCrypt de "12345" (asi se guardan ahora; el login compara con BCrypt)
 -- ===== Administradores (ids 1 a 4) =====
-INSERT INTO administrador (id, nombre, email, password) VALUES (1, 'Cristian Bastidas', 'cfbastidaso@uqvirtual.edu.co', '12345');
-INSERT INTO administrador (id, nombre, email, password) VALUES (2, 'Juanito Grandez', 'juanito@uniquindio.com', '12345');
-INSERT INTO administrador (id, nombre, email, password) VALUES (3, 'La Roca', 'laroca@uniquindio.com', '12345');
-INSERT INTO administrador (id, nombre, email, password) VALUES (4, 'Profesor', 'profesor@uniquindio.com', '12345');
+INSERT INTO administrador (id, nombre, email, password) VALUES (1, 'Cristian Bastidas', 'cfbastidaso@uqvirtual.edu.co', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC');
+INSERT INTO administrador (id, nombre, email, password) VALUES (2, 'Juanito Grandez', 'juanito@uniquindio.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC');
+INSERT INTO administrador (id, nombre, email, password) VALUES (3, 'La Roca', 'laroca@uniquindio.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC');
+INSERT INTO administrador (id, nombre, email, password) VALUES (4, 'Profesor', 'profesor@uniquindio.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC');
 
 -- ===== Ciudades =====
 INSERT INTO ciudad (id, nombre) VALUES (1, 'Armenia');
@@ -27,11 +28,11 @@ INSERT INTO ciudad (id, nombre) VALUES (3, 'Bogota');
 INSERT INTO ciudad (id, nombre) VALUES (4, 'Cartagena');
 
 -- ===== Usuarios (ids 5 a 9) =====
-INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (5, 'Lorena Lopez', 'lorena@email.com', '12345', 1);
-INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (6, 'Marta Wayne', 'marta@email.com', '12345', 4);
-INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (7, 'Pepe Perez', 'pepe@email.com', '12345', 2);
-INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (8, 'Pedro Martinez', 'pedro@email.com', '12345', 3);
-INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (9, 'Sofia Ramirez', 'sofia@email.com', '12345', 1);
+INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (5, 'Lorena Lopez', 'lorena@email.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC', 1);
+INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (6, 'Marta Wayne', 'marta@email.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC', 4);
+INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (7, 'Pepe Perez', 'pepe@email.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC', 2);
+INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (8, 'Pedro Martinez', 'pedro@email.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC', 3);
+INSERT INTO usuario (id, nombre, email, password, id_ciudad) VALUES (9, 'Sofia Ramirez', 'sofia@email.com', '$2a$10$pKybWP5cYgpHovmTBNk7DuKZPRVOr81xyR7f/ZBLLmJtBbz.IhKhC', 1);
 
 INSERT INTO telefono (id_usuario, num_telefono) VALUES (5, '3101234567');
 INSERT INTO telefono (id_usuario, num_telefono) VALUES (5, '3157654321');

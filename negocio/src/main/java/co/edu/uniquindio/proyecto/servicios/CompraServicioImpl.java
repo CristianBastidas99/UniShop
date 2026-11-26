@@ -131,6 +131,9 @@ public class CompraServicioImpl implements CompraServicio {
             if (idUsuario.equals(producto.getUsuario().getId())) {
                 throw new NegocioException("No puede comprar su propio producto");
             }
+            if (!producto.getUsuario().isActivo()) {
+                throw new NegocioException("El producto " + producto.getNombre() + " no está disponible");
+            }
             // Un producto en subasta solo se vende al ganador (si no, el cierre podría quedarse sin unidades)
             if (subastaRepo.existeActivaPorProducto(producto.getId(), ahora)) {
                 throw new NegocioException("El producto " + producto.getNombre() + " está en subasta");

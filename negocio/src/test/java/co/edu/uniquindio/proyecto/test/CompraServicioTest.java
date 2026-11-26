@@ -13,6 +13,7 @@ import co.edu.uniquindio.proyecto.repositorios.SubastaRepo;
 import co.edu.uniquindio.proyecto.servicios.CompraServicio;
 import co.edu.uniquindio.proyecto.servicios.SubastaServicio;
 import co.edu.uniquindio.proyecto.servicios.CuponServicio;
+import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class CompraServicioTest extends BaseServicioTest {
 
     @Autowired
     private CompraServicio compraServicio;
+
+    @Autowired
+    private UsuarioServicio usuarioServicio;
 
     @Autowired
     private CuponServicio cuponServicio;
@@ -263,5 +267,20 @@ public class CompraServicioTest extends BaseServicioTest {
         Assertions.assertEquals(40500.0, compraServicio.calcularTotal(1L));
         Assertions.assertThrows(NegocioException.class, () -> compraServicio.listarDetalles(999L));
         Assertions.assertThrows(NegocioException.class, () -> compraServicio.calcularTotal(999L));
+    }
+
+    @Test
+    public void comprarProductoDeVendedorDesactivadoTest() throws NegocioException {
+        // El producto 2 es de Marta (id 6); se desactiva a Marta
+        usuarioServicio.cambiarActivo("marta@email.com", false);
+        sincronizar();
+        int antes = compraServicio.listarComprasUsuario(7L).size();
+        NegocioException e = Assertions.assertThrows(NegocioException.class, () ->
+                compraServicio.comprar(7L, Collections.singletonList(new ItemCompraDTO(2L, 1)),
+                        MedioPago.PSE, null));
+        assertMensaje("El producto SmartPhone no está disponible", e);
+        sincronizar();
+        Assertions.assertEquals(antes, compraServicio.listarComprasUsuario(7L).size());
+        Assertions.assertEquals(3, unidades(2L));
     }
 }

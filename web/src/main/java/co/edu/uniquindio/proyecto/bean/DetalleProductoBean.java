@@ -103,7 +103,7 @@ public class DetalleProductoBean extends ListadoProductosBase {
     public void cargar() {
         existe = false;
         try {
-            producto = productoServicio.obtenerProducto(Long.valueOf(idProducto == null ? "" : idProducto.trim()));
+            producto = productoServicio.obtenerProductoVisible(Long.valueOf(idProducto == null ? "" : idProducto.trim()));
         } catch (NumberFormatException | NegocioException e) {
             aviso(FacesMessage.SEVERITY_WARN, "El producto no existe");
             return;
@@ -209,7 +209,7 @@ public class DetalleProductoBean extends ListadoProductosBase {
                 aviso(FacesMessage.SEVERITY_WARN, "El producto está en subasta: puja en la subasta para comprarlo");
                 return;
             }
-            Producto actual = productoServicio.obtenerProducto(producto.getId());
+            Producto actual = productoServicio.obtenerProductoVisible(producto.getId());
             if (actual.getFechaLimite() == null || !actual.getFechaLimite().after(new Date())) {
                 aviso(FacesMessage.SEVERITY_WARN, "El producto ya no está disponible");
                 return;

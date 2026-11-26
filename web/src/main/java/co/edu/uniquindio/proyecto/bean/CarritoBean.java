@@ -155,7 +155,7 @@ public class CarritoBean implements Serializable {
         for (Iterator<Linea> it = lineas.iterator(); it.hasNext(); ) {
             Linea linea = it.next();
             try {
-                Producto p = productoServicio.obtenerProducto(linea.idProducto);
+                Producto p = productoServicio.obtenerProductoVisible(linea.idProducto);
                 boolean vigente = p.getFechaLimite() != null && p.getFechaLimite().after(new Date());
                 linea.disponibles = vigente ? p.getUnidades() : 0;
                 // El vendedor pudo cambiar el precio o el descuento: el total debe coincidir con el de la compra

@@ -4,7 +4,9 @@ import co.edu.uniquindio.proyecto.entidades.SubastaUsuario;
 import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.repositorios.SubastaRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
+import co.edu.uniquindio.proyecto.servicios.SubastaServicio;
 import co.edu.uniquindio.proyecto.servicios.SubastaUsuarioServicio;
+import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,6 +22,12 @@ public class SubastaUsuarioServicioTest extends BaseServicioTest {
 
     @Autowired
     private SubastaRepo subastaRepo;
+
+    @Autowired
+    private SubastaServicio subastaServicio;
+
+    @Autowired
+    private UsuarioServicio usuarioServicio;
 
     @Autowired
     private UsuarioRepo usuarioRepo;
@@ -128,5 +136,19 @@ public class SubastaUsuarioServicioTest extends BaseServicioTest {
     @Test
     public void obtenerNuloTest() {
         assertThrows(NegocioException.class, () -> pujaServicio.obtenerPuja(null));
+    }
+
+    @Test
+    public void pujarEnSubastaDeVendedorDesactivadoTest() throws Exception {
+        // La subasta 2 es del producto 2, de Marta (id 6)
+        assertTrue(subastaServicio.listarActivas().stream().anyMatch(s -> s.getId().equals(2L)));
+        usuarioServicio.cambiarActivo("marta@email.com", false);
+        sincronizar();
+        assertFalse(subastaServicio.listarActivas().stream().anyMatch(s -> s.getId().equals(2L)));
+        NegocioException e = assertThrows(NegocioException.class, () -> pujaServicio.pujar(2L, 8L, 9_000_000));
+        assertEquals("La subasta no está disponible", e.getMessage());
+        usuarioServicio.cambiarActivo("marta@email.com", true);
+        sincronizar();
+        assertTrue(subastaServicio.listarActivas().stream().anyMatch(s -> s.getId().equals(2L)));
     }
 }

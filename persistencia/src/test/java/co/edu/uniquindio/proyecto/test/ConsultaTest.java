@@ -251,20 +251,59 @@ public class ConsultaTest {
                         .map(Mensaje::getMensaje).collect(Collectors.toList()));
     }
 
-    // ===== Login =====
+    // ===== Búsqueda por email (el login compara la contraseña encriptada en el servicio) =====
 
     @Test
-    public void loginUsuarioTest() {
-        Assertions.assertTrue(usuarioRepo.buscarPorEmailYPassword("ana@mail.com", "12345").isPresent());
-        Assertions.assertTrue(usuarioRepo.buscarPorEmailYPassword("ana@mail.com", "otra").isEmpty());
-        Assertions.assertTrue(usuarioRepo.buscarPorEmailYPassword("admin@unishop.com", "admin123").isEmpty());
+    public void buscarUsuarioPorEmailTest() {
+        Assertions.assertTrue(usuarioRepo.findByEmail("ana@mail.com").isPresent());
+        Assertions.assertTrue(usuarioRepo.findByEmail("noexiste@mail.com").isEmpty());
+        Assertions.assertTrue(usuarioRepo.findByEmail("admin@unishop.com").isEmpty());
     }
 
     @Test
-    public void loginAdministradorTest() {
-        Assertions.assertTrue(administradorRepo.buscarPorEmailYPassword("admin@unishop.com", "admin123").isPresent());
-        Assertions.assertTrue(administradorRepo.buscarPorEmailYPassword("admin@unishop.com", "12345").isEmpty());
-        Assertions.assertTrue(administradorRepo.buscarPorEmailYPassword("ana@mail.com", "12345").isEmpty());
+    public void buscarAdministradorPorEmailTest() {
+        Assertions.assertTrue(administradorRepo.findByEmail("admin@unishop.com").isPresent());
+        Assertions.assertTrue(administradorRepo.findByEmail("noexiste@unishop.com").isEmpty());
+        Assertions.assertTrue(administradorRepo.findByEmail("ana@mail.com").isEmpty());
+    }
+
+    @Test
+    public void estaActivoPorIdTest() {
+        Assertions.assertTrue(usuarioRepo.existsByIdAndActivoTrue(ana.getId()));
+        ana.setActivo(false);
+        usuarioRepo.saveAndFlush(ana);
+        Assertions.assertFalse(usuarioRepo.existsByIdAndActivoTrue(ana.getId()));
+        Assertions.assertFalse(usuarioRepo.existsByIdAndActivoTrue(-1L));
+    }
+
+    @Test
+    public void toStringNoIncluyeLaContrasenaTest() {
+        Assertions.assertFalse(ana.toString().contains(ana.getPassword()));
+        Assertions.assertFalse(administradorRepo.findByEmail("admin@unishop.com").get().toString().contains("admin123"));
+    }
+
+    // ===== Productos de vendedores desactivados =====
+
+    @Test
+    public void vendedorDesactivadoOcultaSusProductosTest() {
+        beto.setActivo(false);
+        usuarioRepo.saveAndFlush(beto);
+
+        // El cepillo es de Beto: desaparece de vigentes, categoría, búsqueda, favoritos y subastas activas
+        Assertions.assertEquals(Set.of("Celular"), nombres(productoRepo.listarVigentes(hoy)));
+        Assertions.assertTrue(productoRepo.listarVigentesPorCategoria(hogar.getId(), hoy).isEmpty());
+        Assertions.assertEquals(Set.of("Celular"), nombres(buscar(null, null, null, null, null, null)));
+        Assertions.assertTrue(buscar("cepillo", null, null, null, null, null).isEmpty());
+        Assertions.assertEquals(Set.of("Celular"), nombres(productoRepo.listarFavoritos("carla@mail.com")));
+        Assertions.assertEquals(Set.of("Celular"),
+                nombres(productoRepo.listarFavoritosPorUsuario(carla.getId())));
+        Assertions.assertTrue(subastaRepo.listarActivas(hoy).isEmpty());
+
+        // Al reactivarlo vuelven a aparecer
+        beto.setActivo(true);
+        usuarioRepo.saveAndFlush(beto);
+        Assertions.assertEquals(Set.of("Celular", "Cepillo Electrico"), nombres(productoRepo.listarVigentes(hoy)));
+        Assertions.assertEquals(1, subastaRepo.listarActivas(hoy).size());
     }
 
     // ===== Subastas =====

@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyecto.entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,8 +37,11 @@ public abstract class Persona implements Serializable {
     @Column(name = "email", unique = true, nullable = false, length = 100)
     protected String email;
 
+    /** Hash BCrypt de la contraseña (nunca el texto plano). Se excluye de toString y de la serialización JSON. */
     @NotBlank
     @Column(name = "password", nullable = false)
+    @ToString.Exclude
+    @JsonIgnore
     protected String password;
 
 }

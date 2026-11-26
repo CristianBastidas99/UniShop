@@ -14,6 +14,11 @@
         </f:metadata>
 
         <div class="login-caja">
+            <!-- La sesión se cerró porque el administrador desactivó la cuenta (lo pone SeguridadFiltro) -->
+            <h:panelGroup layout="block" styleClass="login-aviso" rendered="#{param.motivo == 'desactivado'}">
+                <i class="pi pi-exclamation-triangle"></i>
+                Tu cuenta fue desactivada. Comunícate con el administrador
+            </h:panelGroup>
             <p:panel header="Iniciar sesión">
                 <h:form id="formLogin">
                     <h:inputHidden value="#{seguridadBean.destino}"/>

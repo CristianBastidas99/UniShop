@@ -9,6 +9,9 @@
     var MAX_CARACTERES = 1000;
     var ESPERA_INICIAL = 1000;
     var ESPERA_MAXIMA = 30000;
+    // Texto con el que el servidor avisa que la sesión terminó o la cuenta fue desactivada (AutorizacionChatInterceptor)
+    var MENSAJE_SESION_TERMINADA = 'Tu sesión terminó';
+    var ESPERA_REDIRECCION = 2500;
 
     function iniciar() {
         var raiz = document.getElementById('chat');
@@ -135,6 +138,35 @@
             }, espera);
         }
 
+        // El servidor cerró la conexión porque la sesión terminó: se avisa, no se reconecta y se va al login
+        function sesionTerminada() {
+            cerrando = true;
+            conectado = false;
+            clearTimeout(temporizador);
+            temporizador = null;
+            estado.className = 'chat-estado chat-estado-conectando';
+            estado.textContent = 'Sesión terminada';
+            boton.disabled = true;
+            texto.disabled = true;
+            zonaError.textContent = 'Tu sesión terminó. Vuelve a iniciar sesión';
+            zonaError.hidden = false;
+            clearTimeout(temporizadorError);
+            setTimeout(function () {
+                window.location.href = contexto + '/login.xhtml';
+            }, ESPERA_REDIRECCION);
+        }
+
+        function esSesionTerminada(error) {
+            var mensaje = '';
+            if (error && error.headers && error.headers.message) {
+                mensaje = error.headers.message;
+            }
+            if (error && error.body) {
+                mensaje += ' ' + error.body;
+            }
+            return mensaje.indexOf(MENSAJE_SESION_TERMINADA) !== -1;
+        }
+
         function conectar() {
             var socket = new SockJS(contexto + '/ws');
             var stomp = Stomp.over(socket);
@@ -158,11 +190,15 @@
                     }
                 });
                 mostrarEstado();
-            }, function () {
+            }, function (error) {
                 if (cliente !== stomp) {
                     return;
                 }
                 conectado = false;
+                if (esSesionTerminada(error)) {
+                    sesionTerminada();
+                    return;
+                }
                 programarReconexion();
             });
         }

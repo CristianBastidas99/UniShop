@@ -133,6 +133,14 @@ public interface ProductoServicio {
      */
     Producto obtenerProducto(Long id) throws NegocioException;
 
+    /**
+     * Obtiene el producto para mostrarlo al público: igual que {@link #obtenerProducto(Long)}, pero un producto
+     * cuyo vendedor está desactivado se trata como inexistente.
+     *
+     * @throws NegocioException si el id es nulo, el producto no existe o su vendedor está desactivado
+     */
+    Producto obtenerProductoVisible(Long id) throws NegocioException;
+
     /** Lista todos los productos, vigentes o no (uso del administrador). */
     List<Producto> listarTodos();
 }

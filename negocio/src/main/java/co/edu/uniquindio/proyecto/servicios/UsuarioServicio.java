@@ -76,6 +76,13 @@ public interface UsuarioServicio {
     boolean tieneActividad(String email) throws NegocioException;
 
     /**
+     * Indica si existe un usuario con ese id y su cuenta está activa. Es una consulta liviana (no carga la
+     * entidad) que se usa en cada petición para cerrar la sesión de un usuario desactivado. Un id nulo o
+     * inexistente devuelve {@code false}.
+     */
+    boolean estaActivo(Long id);
+
+    /**
      * Busca usuarios cuyo nombre o correo contenga el texto (parcial, sin distinguir mayúsculas).
      * Un texto nulo o vacío devuelve todos los usuarios. El resultado va ordenado por nombre.
      */
@@ -83,10 +90,10 @@ public interface UsuarioServicio {
 
     /**
      * Cambia la contraseña del usuario con ese correo. Es el ÚNICO lugar donde se cambia la contraseña de un
-     * usuario por la recuperación por correo. Hoy se guarda en texto plano; en el Paso 10.1 aquí se
-     * encriptará. No exige que la cuenta esté activa.
+     * usuario por la recuperación por correo. Se guarda encriptada (BCrypt) y no puede superar
+     * 72 bytes en UTF-8. No exige que la cuenta esté activa.
      *
-     * @throws NegocioException si no existe un usuario con ese correo o la contraseña viene vacía
+     * @throws NegocioException si no existe un usuario con ese correo, o la contraseña viene vacía o es demasiado larga
      */
     void cambiarPassword(String email, String nueva) throws NegocioException;
 }

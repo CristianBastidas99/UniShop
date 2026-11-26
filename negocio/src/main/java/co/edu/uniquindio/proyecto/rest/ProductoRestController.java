@@ -84,11 +84,11 @@ public class ProductoRestController {
      * Obtiene un producto por su id.
      *
      * @param id id del producto
-     * @return 200 con el producto; 404 si no existe
+     * @return 200 con el producto; 404 si no existe o su vendedor está desactivado
      */
     @GetMapping("/{id}")
     public ResponseEntity<ProductoDTO> obtenerProducto(@PathVariable Long id) throws NegocioException {
-        Producto producto = productoServicio.obtenerProducto(id);
+        Producto producto = productoServicio.obtenerProductoVisible(id);
         return ResponseEntity.ok(mapper.aDTO(producto, comentarioServicio.calcularCalificacion(id)));
     }
 

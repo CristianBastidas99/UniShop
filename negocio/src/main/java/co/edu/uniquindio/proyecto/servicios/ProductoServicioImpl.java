@@ -301,6 +301,15 @@ public class ProductoServicioImpl implements ProductoServicio {
     }
 
     @Override
+    public Producto obtenerProductoVisible(Long id) throws NegocioException {
+        Producto producto = obtenerProducto(id);
+        if (producto.getUsuario() == null || !producto.getUsuario().isActivo()) {
+            throw new NoEncontradoException("El producto no existe");
+        }
+        return producto;
+    }
+
+    @Override
     public List<Producto> listarTodos() {
         return productoRepo.findAll();
     }

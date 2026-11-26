@@ -6,6 +6,7 @@ import co.edu.uniquindio.proyecto.excepciones.NegocioException;
 import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,9 @@ public class UsuarioServicioTest extends BaseServicioTest {
 
     @Autowired
     private UsuarioServicio usuarioServicio;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private Usuario nuevoUsuario(String email) {
         Usuario u = new Usuario();
@@ -309,7 +313,7 @@ public class UsuarioServicioTest extends BaseServicioTest {
         usuarioServicio.actualizarUsuario(datosEdicion("Lorena Nueva", "   "));
         sincronizar();
         Usuario leido = usuarioServicio.obtenerUsuario("lorena@email.com");
-        assertEquals("12345", leido.getPassword());
+        assertTrue(passwordEncoder.matches("12345", leido.getPassword()));
         assertEquals("Lorena Nueva", leido.getNombre());
         assertEquals(2L, leido.getCiudad().getId());
         assertEquals(Arrays.asList("3000000001"), leido.getNumeroTelefono());
@@ -321,7 +325,9 @@ public class UsuarioServicioTest extends BaseServicioTest {
     public void actualizarConPasswordLaCambiaTest() throws Exception {
         usuarioServicio.actualizarUsuario(datosEdicion("Lorena Lopez", "nueva123"));
         sincronizar();
-        assertEquals("nueva123", usuarioServicio.obtenerUsuario("lorena@email.com").getPassword());
+        String guardada = usuarioServicio.obtenerUsuario("lorena@email.com").getPassword();
+        assertNotEquals("nueva123", guardada);
+        assertTrue(passwordEncoder.matches("nueva123", guardada));
         assertEquals(5L, usuarioServicio.iniciarSesion("lorena@email.com", "nueva123").getId());
     }
 
@@ -333,5 +339,85 @@ public class UsuarioServicioTest extends BaseServicioTest {
         sincronizar();
         assertFalse(usuarioServicio.obtenerUsuario("lorena@email.com").isActivo());
         assertTrue(usuarioServicio.tieneActividad("lorena@email.com"));
+    }
+
+    @Test
+    public void registrarGuardaLaPasswordEncriptadaTest() throws Exception {
+        usuarioServicio.registrarUsuario(nuevoUsuario("juana@mail.com"));
+        sincronizar();
+        String guardada = usuarioServicio.obtenerUsuario("juana@mail.com").getPassword();
+        assertNotEquals("12345", guardada);
+        assertTrue(guardada.startsWith("$2a$"));
+        assertEquals("juana@mail.com", usuarioServicio.iniciarSesion("juana@mail.com", "12345").getEmail());
+        assertThrows(NegocioException.class, () -> usuarioServicio.iniciarSesion("juana@mail.com", guardada));
+    }
+
+    @Test
+    public void registrarSinPasswordTest() {
+        Usuario u = nuevoUsuario("juana@mail.com");
+        u.setPassword("  ");
+        assertRegistroFalla(u, "La contraseña es obligatoria");
+    }
+
+    @Test
+    public void passwordDeMasDe72BytesSeRechazaTest() throws Exception {
+        String larga = "a".repeat(73);
+        String mensaje = "La contraseña es demasiado larga: no puede superar 72 bytes "
+                + "(con tildes o símbolos especiales ocupa menos caracteres)";
+        Usuario u = nuevoUsuario("juana@mail.com");
+        u.setPassword(larga);
+        assertRegistroFalla(u, mensaje);
+        // 40 letras "ñ" son 40 caracteres pero 80 bytes en UTF-8
+        u.setPassword("ñ".repeat(40));
+        assertRegistroFalla(u, mensaje);
+        assertEquals(mensaje, assertThrows(NegocioException.class,
+                () -> usuarioServicio.actualizarUsuario(datosEdicion("Lorena", larga))).getMessage());
+        assertEquals(mensaje, assertThrows(NegocioException.class,
+                () -> usuarioServicio.cambiarPassword("lorena@email.com", larga)).getMessage());
+        // 72 bytes exactos sí se aceptan
+        usuarioServicio.cambiarPassword("lorena@email.com", "a".repeat(72));
+        assertNotNull(usuarioServicio.iniciarSesion("lorena@email.com", "a".repeat(72)));
+    }
+
+    @Test
+    public void cambiarPasswordEncriptaTest() throws Exception {
+        usuarioServicio.cambiarPassword("lorena@email.com", "otraClave1");
+        sincronizar();
+        String guardada = usuarioServicio.obtenerUsuario("lorena@email.com").getPassword();
+        assertTrue(passwordEncoder.matches("otraClave1", guardada));
+        assertThrows(NegocioException.class, () -> usuarioServicio.iniciarSesion("lorena@email.com", "12345"));
+        assertEquals(5L, usuarioServicio.iniciarSesion("lorena@email.com", "otraClave1").getId());
+    }
+
+    @Test
+    public void loginConHashEnTextoPlanoNoFuncionaTest() throws Exception {
+        // El hash guardado no sirve como contraseña
+        String hash = usuarioServicio.obtenerUsuario("lorena@email.com").getPassword();
+        assertThrows(NegocioException.class, () -> usuarioServicio.iniciarSesion("lorena@email.com", hash));
+    }
+
+    @Test
+    public void estaActivoTest() throws Exception {
+        assertTrue(usuarioServicio.estaActivo(5L));
+        usuarioServicio.cambiarActivo("lorena@email.com", false);
+        sincronizar();
+        assertFalse(usuarioServicio.estaActivo(5L));
+        usuarioServicio.cambiarActivo("lorena@email.com", true);
+        sincronizar();
+        assertTrue(usuarioServicio.estaActivo(5L));
+        assertFalse(usuarioServicio.estaActivo(null));
+        assertFalse(usuarioServicio.estaActivo(999999L));
+        // Un administrador no es un usuario
+        assertFalse(usuarioServicio.estaActivo(1L));
+    }
+
+    @Test
+    public void usuarioDesactivadoConPasswordIncorrectaRecibeMensajeGenericoTest() throws Exception {
+        usuarioServicio.cambiarActivo("lorena@email.com", false);
+        sincronizar();
+        assertEquals("Correo o contraseña incorrectos", assertThrows(NegocioException.class,
+                () -> usuarioServicio.iniciarSesion("lorena@email.com", "mala")).getMessage());
+        assertEquals("Tu cuenta está desactivada. Comunícate con el administrador", assertThrows(NegocioException.class,
+                () -> usuarioServicio.iniciarSesion("lorena@email.com", "12345")).getMessage());
     }
 }

@@ -29,7 +29,8 @@ public interface AdministradorServicio {
     Administrador registrarAdministrador(Administrador a) throws NegocioException;
 
     /**
-     * Actualiza un administrador buscándolo por su correo.
+     * Actualiza el nombre de un administrador buscándolo por su correo. Si la contraseña viene vacía se conserva
+     * la actual; si viene, se encripta.
      *
      * @throws NegocioException si no existe un administrador con ese correo
      */
@@ -54,10 +55,10 @@ public interface AdministradorServicio {
 
     /**
      * Cambia la contraseña del administrador con ese correo. Es el ÚNICO lugar donde se cambia la contraseña de
-     * un administrador por la recuperación por correo. Hoy se guarda en texto plano; en el Paso 10.1
-     * aquí se encriptará.
+     * un administrador por la recuperación por correo. Se guarda encriptada (BCrypt)
+     * y no puede superar 72 bytes en UTF-8.
      *
-     * @throws NegocioException si no existe un administrador con ese correo o la contraseña viene vacía
+     * @throws NegocioException si no existe un administrador con ese correo, o la contraseña viene vacía o es demasiado larga
      */
     void cambiarPassword(String email, String nueva) throws NegocioException;
 }

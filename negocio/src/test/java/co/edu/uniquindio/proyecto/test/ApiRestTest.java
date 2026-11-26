@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyecto.test;
 
+import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -146,5 +147,24 @@ class ApiRestTest extends BaseServicioTest {
         mvc.perform(get("/api/usuarios"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.email == 'lorena@email.com')]", hasSize(1)));
+    }
+
+    @Autowired
+    private UsuarioServicio usuarioServicio;
+
+    @Test
+    void productosDeVendedorDesactivadoNoSeExponen() throws Exception {
+        mvc.perform(get("/api/productos/2")).andExpect(status().isOk());
+        usuarioServicio.cambiarActivo("marta@email.com", false);
+        sincronizar();
+        mvc.perform(get("/api/productos/2"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensaje").value("El producto no existe"));
+        mvc.perform(get("/api/productos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == 2)]", hasSize(0)));
+        mvc.perform(get("/api/productos/buscar").param("texto", "smart"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 }

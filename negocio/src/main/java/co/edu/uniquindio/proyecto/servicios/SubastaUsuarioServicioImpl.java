@@ -40,6 +40,9 @@ public class SubastaUsuarioServicioImpl implements SubastaUsuarioServicio {
         if (subasta.isCerrada() || !subasta.getFechaLimite().after(ahora)) {
             throw new NegocioException("La subasta no está activa");
         }
+        if (!subasta.getProducto().getUsuario().isActivo()) {
+            throw new NegocioException("La subasta no está disponible");
+        }
         if (idUsuario == null) {
             throw new NegocioException("El usuario no existe");
         }

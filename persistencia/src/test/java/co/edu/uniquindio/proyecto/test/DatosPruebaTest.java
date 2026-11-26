@@ -72,9 +72,11 @@ public class DatosPruebaTest {
         Assertions.assertEquals(5, productoRepo.listarVigentes(hoy).size());
         // Cepillo Electrico: calificaciones 5 y 4
         Assertions.assertEquals(4.5, comentarioRepo.calificacionPromedio(1L));
-        // Login con los datos del SQL
-        Assertions.assertTrue(usuarioRepo.buscarPorEmailYPassword("lorena@email.com", "12345").isPresent());
-        Assertions.assertTrue(administradorRepo.buscarPorEmailYPassword("profesor@uniquindio.com", "12345").isPresent());
+        // Los usuarios y administradores del SQL existen y su contraseña está guardada como hash BCrypt
+        Assertions.assertTrue(usuarioRepo.findByEmail("lorena@email.com").isPresent());
+        Assertions.assertTrue(administradorRepo.findByEmail("profesor@uniquindio.com").isPresent());
+        Assertions.assertTrue(usuarioRepo.findByEmail("lorena@email.com").get().getPassword().startsWith("$2a$"));
+        Assertions.assertTrue(administradorRepo.findByEmail("profesor@uniquindio.com").get().getPassword().startsWith("$2a$"));
         // 2 subastas activas; la puja más alta del Portatil es 2.100.000
         Assertions.assertEquals(2, subastaRepo.listarActivas(hoy).size());
         Assertions.assertEquals(2100000.0, subastaUsuarioRepo.pujaMasAlta(1L));

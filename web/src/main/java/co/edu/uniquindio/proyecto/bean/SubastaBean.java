@@ -101,6 +101,10 @@ public class SubastaBean implements Serializable {
 
     private void recargar(Long idNumerico) throws NegocioException {
         Subasta s = subastaServicio.obtenerSubasta(idNumerico);
+        if (!s.getProducto().getUsuario().isActivo()) {
+            // El vendedor está desactivado: la subasta se trata como inexistente
+            throw new NegocioException("La subasta no existe");
+        }
         id = s.getId();
         Producto p = s.getProducto();
         idProducto = p.getId();

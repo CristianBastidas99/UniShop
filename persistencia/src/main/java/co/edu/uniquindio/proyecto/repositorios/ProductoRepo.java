@@ -18,21 +18,25 @@ import java.util.List;
 @Repository
 public interface ProductoRepo extends JpaRepository<Producto, Long> {
 
-    /** Productos vigentes: fecha límite posterior a {@code hoy} y con unidades disponibles. */
-    @Query("select p from Producto p where p.fechaLimite > :hoy and p.unidades > 0")
+    /**
+     * Productos vigentes: fecha límite posterior a {@code hoy} y con unidades disponibles. Se excluyen los de
+     * vendedores desactivados.
+     */
+    @Query("select p from Producto p where p.fechaLimite > :hoy and p.unidades > 0 and p.usuario.activo = true")
     List<Producto> listarVigentes(@Param("hoy") Date hoy);
 
-    /** Productos vigentes de una categoría. */
+    /** Productos vigentes de una categoría (sin los de vendedores desactivados). */
     @Query("select p from Categoria c join c.misProductos p " +
-            "where c.id = :idCategoria and p.fechaLimite > :hoy and p.unidades > 0")
+            "where c.id = :idCategoria and p.fechaLimite > :hoy and p.unidades > 0 and p.usuario.activo = true")
     List<Producto> listarVigentesPorCategoria(@Param("idCategoria") Long idCategoria, @Param("hoy") Date hoy);
 
     /**
      * Búsqueda de productos vigentes. Todos los filtros son opcionales (si llegan en {@code null} no se aplican):
      * texto contenido en el nombre (sin distinguir mayúsculas), categoría, rango de precio, ciudad y
-     * calificación promedio mínima (un producto sin comentarios tiene promedio 0).
+     * calificación promedio mínima (un producto sin comentarios tiene promedio 0). No incluye los productos de
+     * vendedores desactivados.
      */
-    @Query("select p from Producto p where p.fechaLimite > :hoy and p.unidades > 0 " +
+    @Query("select p from Producto p where p.fechaLimite > :hoy and p.unidades > 0 and p.usuario.activo = true " +
             "and (:texto is null or lower(p.nombre) like lower(concat('%', :texto, '%'))) " +
             "and (:idCategoria is null or p in (select cp from Categoria cat join cat.misProductos cp where cat.id = :idCategoria)) " +
             "and (:precioMin is null or p.precio >= :precioMin) " +
@@ -48,12 +52,13 @@ public interface ProductoRepo extends JpaRepository<Producto, Long> {
                           @Param("calificacionMin") Double calificacionMin,
                           @Param("hoy") Date hoy);
 
-    /** Productos favoritos del usuario con ese email. */
-    @Query("select f from Usuario u join u.misProductosFavoritos f where u.email = :email")
+    /** Productos favoritos del usuario con ese email (sin los de vendedores desactivados). */
+    @Query("select f from Usuario u join u.misProductosFavoritos f where u.email = :email and f.usuario.activo = true")
     List<Producto> listarFavoritos(@Param("email") String email);
 
-    /** Productos favoritos del usuario con ese id (incluye los vencidos). */
-    @Query("select f from Usuario u join u.misProductosFavoritos f where u.id = :idUsuario order by f.id")
+    /** Productos favoritos del usuario con ese id (incluye los vencidos, no los de vendedores desactivados). */
+    @Query("select f from Usuario u join u.misProductosFavoritos f " +
+            "where u.id = :idUsuario and f.usuario.activo = true order by f.id")
     List<Producto> listarFavoritosPorUsuario(@Param("idUsuario") Long idUsuario);
 
     /** Indica si el producto está en los favoritos del usuario. */

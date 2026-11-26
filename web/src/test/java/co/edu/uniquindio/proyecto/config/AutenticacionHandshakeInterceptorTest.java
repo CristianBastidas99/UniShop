@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyecto.config;
 
 import co.edu.uniquindio.proyecto.bean.SeguridadBean;
+import co.edu.uniquindio.proyecto.servicios.UsuarioServicio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -19,13 +20,17 @@ import static org.mockito.Mockito.when;
 /** Pruebas unitarias del handshake: sin base de datos ni contexto de Spring. */
 class AutenticacionHandshakeInterceptorTest {
 
-    private final AutenticacionHandshakeInterceptor interceptor = new AutenticacionHandshakeInterceptor();
+    private UsuarioServicio usuarioServicio;
+    private AutenticacionHandshakeInterceptor interceptor;
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
     private Map<String, Object> atributos;
 
     @BeforeEach
     void preparar() {
+        usuarioServicio = mock(UsuarioServicio.class);
+        when(usuarioServicio.estaActivo(7L)).thenReturn(true);
+        interceptor = new AutenticacionHandshakeInterceptor(usuarioServicio);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
         atributos = new HashMap<>();
@@ -79,6 +84,22 @@ class AutenticacionHandshakeInterceptorTest {
 
         assertTrue(handshake());
         assertEquals(7L, atributos.get(AutenticacionHandshakeInterceptor.ATRIBUTO_ID_USUARIO));
+        // También guarda la sesión HTTP, para que AutorizacionChatInterceptor compruebe que siga vigente
+        assertSame(request.getSession(false), atributos.get(AutenticacionHandshakeInterceptor.ATRIBUTO_SESION_HTTP));
+    }
+
+    @Test
+    void usuarioDesactivadoSeRechaza() {
+        SeguridadBean seguridad = mock(SeguridadBean.class);
+        when(seguridad.isAutenticado()).thenReturn(true);
+        when(seguridad.isUsuario()).thenReturn(true);
+        when(seguridad.getIdUsuario()).thenReturn(7L);
+        when(usuarioServicio.estaActivo(7L)).thenReturn(false);
+        request.getSession(true).setAttribute(SeguridadFiltro.ATRIBUTO_SEGURIDAD, seguridad);
+
+        assertFalse(handshake());
+        assertEquals(HttpStatus.FORBIDDEN.value(), response.getStatus());
+        assertTrue(atributos.isEmpty());
     }
 
     @Test
